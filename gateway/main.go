@@ -68,6 +68,7 @@ func main() {
 		// It fetches the name (Student Service) ??
 		// (We haven't implemented GetGrades yet, so we'll just proxy GetStudent for now)
 		api.GET("/students/:id", gw.GetStudentDetails)
+		api.GET("/students/:id/report-card", gw.GetStudentReportCard)
 	}
 
 	log.Println("API Gateway running on port 3000")
@@ -173,6 +174,36 @@ func (gw *Gateway) AssignGrade(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) GetStudentReportCard(c *gin.Context) {
+	studentID := c.Param("id")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	studentResp, err := gw.studentClient.GetStudent(ctx, &studentpb.GetStudentRequest{Id: studentID})
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+
+	gradesResp, err := gw.teacherClient.GetStudentGrades(ctx, &teacherpb.GetStudentGradesRequest{StudentId: studentID})
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch grades"})
+		return
+	}
+
+	response := gin.H{
+		"student_info": gin.H{
+			"name":           studentResp.FullName,
+			"email":          studentResp.Email,
+			"student_number": studentResp.StudentNumber,
+		},
+		"academic_record": gradesResp.Grades, // The list from Teacher Service
+		"generated_at":    time.Now(),
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (gw *Gateway) GetStudentDetails(c *gin.Context) {
