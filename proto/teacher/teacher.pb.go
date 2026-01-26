@@ -253,6 +253,146 @@ func (x *GradeResponse) GetSuccess() bool {
 	return false
 }
 
+type GetStudentGradesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StudentId     string                 `protobuf:"bytes,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStudentGradesRequest) Reset() {
+	*x = GetStudentGradesRequest{}
+	mi := &file_proto_teacher_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStudentGradesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStudentGradesRequest) ProtoMessage() {}
+
+func (x *GetStudentGradesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_teacher_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStudentGradesRequest.ProtoReflect.Descriptor instead.
+func (*GetStudentGradesRequest) Descriptor() ([]byte, []int) {
+	return file_proto_teacher_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetStudentGradesRequest) GetStudentId() string {
+	if x != nil {
+		return x.StudentId
+	}
+	return ""
+}
+
+type GradeItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CourseTitle   string                 `protobuf:"bytes,1,opt,name=course_title,json=courseTitle,proto3" json:"course_title,omitempty"`
+	Score         int32                  `protobuf:"varint,2,opt,name=score,proto3" json:"score,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GradeItem) Reset() {
+	*x = GradeItem{}
+	mi := &file_proto_teacher_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GradeItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GradeItem) ProtoMessage() {}
+
+func (x *GradeItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_teacher_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GradeItem.ProtoReflect.Descriptor instead.
+func (*GradeItem) Descriptor() ([]byte, []int) {
+	return file_proto_teacher_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GradeItem) GetCourseTitle() string {
+	if x != nil {
+		return x.CourseTitle
+	}
+	return ""
+}
+
+func (x *GradeItem) GetScore() int32 {
+	if x != nil {
+		return x.Score
+	}
+	return 0
+}
+
+type StudentGradesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Grades        []*GradeItem           `protobuf:"bytes,1,rep,name=grades,proto3" json:"grades,omitempty"` // array in proto
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StudentGradesResponse) Reset() {
+	*x = StudentGradesResponse{}
+	mi := &file_proto_teacher_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StudentGradesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StudentGradesResponse) ProtoMessage() {}
+
+func (x *StudentGradesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_teacher_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StudentGradesResponse.ProtoReflect.Descriptor instead.
+func (*StudentGradesResponse) Descriptor() ([]byte, []int) {
+	return file_proto_teacher_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *StudentGradesResponse) GetGrades() []*GradeItem {
+	if x != nil {
+		return x.Grades
+	}
+	return nil
+}
+
 var File_proto_teacher_proto protoreflect.FileDescriptor
 
 const file_proto_teacher_proto_rawDesc = "" +
@@ -275,10 +415,19 @@ const file_proto_teacher_proto_rawDesc = "" +
 	"\x05score\x18\x04 \x01(\x05R\x05score\"9\n" +
 	"\rGradeResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess2\x9b\x01\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"8\n" +
+	"\x17GetStudentGradesRequest\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x01 \x01(\tR\tstudentId\"D\n" +
+	"\tGradeItem\x12!\n" +
+	"\fcourse_title\x18\x01 \x01(\tR\vcourseTitle\x12\x14\n" +
+	"\x05score\x18\x02 \x01(\x05R\x05score\"C\n" +
+	"\x15StudentGradesResponse\x12*\n" +
+	"\x06grades\x18\x01 \x03(\v2\x12.teacher.GradeItemR\x06grades2\xf1\x01\n" +
 	"\x0eTeacherService\x12E\n" +
 	"\fCreateCourse\x12\x1c.teacher.CreateCourseRequest\x1a\x17.teacher.CourseResponse\x12B\n" +
-	"\vAssignGrade\x12\x1b.teacher.AssignGradeRequest\x1a\x16.teacher.GradeResponseBCZAgithub.com/noxturnedev/lms-monorepo/teacher-service/proto/teacherb\x06proto3"
+	"\vAssignGrade\x12\x1b.teacher.AssignGradeRequest\x1a\x16.teacher.GradeResponse\x12T\n" +
+	"\x10GetStudentGrades\x12 .teacher.GetStudentGradesRequest\x1a\x1e.teacher.StudentGradesResponseBCZAgithub.com/noxturnedev/lms-monorepo/teacher-service/proto/teacherb\x06proto3"
 
 var (
 	file_proto_teacher_proto_rawDescOnce sync.Once
@@ -292,23 +441,29 @@ func file_proto_teacher_proto_rawDescGZIP() []byte {
 	return file_proto_teacher_proto_rawDescData
 }
 
-var file_proto_teacher_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_teacher_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_teacher_proto_goTypes = []any{
-	(*CreateCourseRequest)(nil), // 0: teacher.CreateCourseRequest
-	(*CourseResponse)(nil),      // 1: teacher.CourseResponse
-	(*AssignGradeRequest)(nil),  // 2: teacher.AssignGradeRequest
-	(*GradeResponse)(nil),       // 3: teacher.GradeResponse
+	(*CreateCourseRequest)(nil),     // 0: teacher.CreateCourseRequest
+	(*CourseResponse)(nil),          // 1: teacher.CourseResponse
+	(*AssignGradeRequest)(nil),      // 2: teacher.AssignGradeRequest
+	(*GradeResponse)(nil),           // 3: teacher.GradeResponse
+	(*GetStudentGradesRequest)(nil), // 4: teacher.GetStudentGradesRequest
+	(*GradeItem)(nil),               // 5: teacher.GradeItem
+	(*StudentGradesResponse)(nil),   // 6: teacher.StudentGradesResponse
 }
 var file_proto_teacher_proto_depIdxs = []int32{
-	0, // 0: teacher.TeacherService.CreateCourse:input_type -> teacher.CreateCourseRequest
-	2, // 1: teacher.TeacherService.AssignGrade:input_type -> teacher.AssignGradeRequest
-	1, // 2: teacher.TeacherService.CreateCourse:output_type -> teacher.CourseResponse
-	3, // 3: teacher.TeacherService.AssignGrade:output_type -> teacher.GradeResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	5, // 0: teacher.StudentGradesResponse.grades:type_name -> teacher.GradeItem
+	0, // 1: teacher.TeacherService.CreateCourse:input_type -> teacher.CreateCourseRequest
+	2, // 2: teacher.TeacherService.AssignGrade:input_type -> teacher.AssignGradeRequest
+	4, // 3: teacher.TeacherService.GetStudentGrades:input_type -> teacher.GetStudentGradesRequest
+	1, // 4: teacher.TeacherService.CreateCourse:output_type -> teacher.CourseResponse
+	3, // 5: teacher.TeacherService.AssignGrade:output_type -> teacher.GradeResponse
+	6, // 6: teacher.TeacherService.GetStudentGrades:output_type -> teacher.StudentGradesResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_teacher_proto_init() }
@@ -322,7 +477,7 @@ func file_proto_teacher_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_teacher_proto_rawDesc), len(file_proto_teacher_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

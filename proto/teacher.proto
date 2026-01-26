@@ -7,6 +7,7 @@ option go_package = "github.com/noxturnedev/lms-monorepo/teacher-service/proto/t
 service TeacherService {
   rpc CreateCourse (CreateCourseRequest) returns (CourseResponse);
   rpc AssignGrade (AssignGradeRequest) returns (GradeResponse);
+  rpc GetStudentGrades (GetStudentGradesRequest) returns (StudentGradesResponse);
 }
 
 message CreateCourseRequest {
@@ -30,4 +31,17 @@ message AssignGradeRequest {
 message GradeResponse {
   string id = 1;
   bool success = 2;
+}
+
+message GetStudentGradesRequest {
+  string student_id = 1;
+}
+
+message GradeItem {
+  string course_title = 1;
+  int32 score = 2;
+}
+
+message StudentGradesResponse {
+  repeated GradeItem grades = 1; // array in proto
 }

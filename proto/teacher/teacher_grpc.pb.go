@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TeacherService_CreateCourse_FullMethodName = "/teacher.TeacherService/CreateCourse"
-	TeacherService_AssignGrade_FullMethodName  = "/teacher.TeacherService/AssignGrade"
+	TeacherService_CreateCourse_FullMethodName     = "/teacher.TeacherService/CreateCourse"
+	TeacherService_AssignGrade_FullMethodName      = "/teacher.TeacherService/AssignGrade"
+	TeacherService_GetStudentGrades_FullMethodName = "/teacher.TeacherService/GetStudentGrades"
 )
 
 // TeacherServiceClient is the client API for TeacherService service.
@@ -29,6 +30,7 @@ const (
 type TeacherServiceClient interface {
 	CreateCourse(ctx context.Context, in *CreateCourseRequest, opts ...grpc.CallOption) (*CourseResponse, error)
 	AssignGrade(ctx context.Context, in *AssignGradeRequest, opts ...grpc.CallOption) (*GradeResponse, error)
+	GetStudentGrades(ctx context.Context, in *GetStudentGradesRequest, opts ...grpc.CallOption) (*StudentGradesResponse, error)
 }
 
 type teacherServiceClient struct {
@@ -59,12 +61,23 @@ func (c *teacherServiceClient) AssignGrade(ctx context.Context, in *AssignGradeR
 	return out, nil
 }
 
+func (c *teacherServiceClient) GetStudentGrades(ctx context.Context, in *GetStudentGradesRequest, opts ...grpc.CallOption) (*StudentGradesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StudentGradesResponse)
+	err := c.cc.Invoke(ctx, TeacherService_GetStudentGrades_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TeacherServiceServer is the server API for TeacherService service.
 // All implementations must embed UnimplementedTeacherServiceServer
 // for forward compatibility.
 type TeacherServiceServer interface {
 	CreateCourse(context.Context, *CreateCourseRequest) (*CourseResponse, error)
 	AssignGrade(context.Context, *AssignGradeRequest) (*GradeResponse, error)
+	GetStudentGrades(context.Context, *GetStudentGradesRequest) (*StudentGradesResponse, error)
 	mustEmbedUnimplementedTeacherServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedTeacherServiceServer) CreateCourse(context.Context, *CreateCo
 }
 func (UnimplementedTeacherServiceServer) AssignGrade(context.Context, *AssignGradeRequest) (*GradeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AssignGrade not implemented")
+}
+func (UnimplementedTeacherServiceServer) GetStudentGrades(context.Context, *GetStudentGradesRequest) (*StudentGradesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetStudentGrades not implemented")
 }
 func (UnimplementedTeacherServiceServer) mustEmbedUnimplementedTeacherServiceServer() {}
 func (UnimplementedTeacherServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +154,24 @@ func _TeacherService_AssignGrade_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TeacherService_GetStudentGrades_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentGradesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).GetStudentGrades(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_GetStudentGrades_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).GetStudentGrades(ctx, req.(*GetStudentGradesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TeacherService_ServiceDesc is the grpc.ServiceDesc for TeacherService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var TeacherService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AssignGrade",
 			Handler:    _TeacherService_AssignGrade_Handler,
+		},
+		{
+			MethodName: "GetStudentGrades",
+			Handler:    _TeacherService_GetStudentGrades_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
