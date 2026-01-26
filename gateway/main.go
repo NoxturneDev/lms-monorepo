@@ -1,0 +1,204 @@
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
+	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
+)
+
+type Gateway struct {
+	studentClient studentpb.StudentServiceClient
+	teacherClient teacherpb.TeacherServiceClient
+}
+
+func main() {
+	// 1. Connect to Student Service
+	studentConn, err := grpc.NewClient(
+		getEnv("STUDENT_SERVICE_URL", "localhost:8082"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to Student Service: %v", err)
+	}
+	defer studentConn.Close()
+
+	// 2. Connect to Teacher Service
+	teacherConn, err := grpc.NewClient(
+		getEnv("TEACHER_SERVICE_URL", "localhost:8081"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to Teacher Service: %v", err)
+	}
+	defer teacherConn.Close()
+
+	// 3. Setup Gateway
+	gw := &Gateway{
+		studentClient: studentpb.NewStudentServiceClient(studentConn),
+		teacherClient: teacherpb.NewTeacherServiceClient(teacherConn),
+	}
+
+	// 4. Setup Gin Router
+	r := gin.Default()
+
+	// === API ROUTES ===
+	api := r.Group("/api/v1")
+	{
+		// Simple Proxy: Create Student (JSON -> gRPC)
+		api.POST("/students", gw.CreateStudent)
+		api.DELETE("/students/:id", gw.DeleteStudent)
+
+		// Simple Proxy: Create Course
+		api.POST("/courses", gw.CreateCourse)
+
+		// Simple Proxy: Grade a Student
+		api.POST("/grades", gw.AssignGrade)
+
+		// === THE AGGREGATOR (The Real Power) ===
+		// This endpoint calls BOTH services to show a "Student Card"
+		// It fetches the name (Student Service) ??
+		// (We haven't implemented GetGrades yet, so we'll just proxy GetStudent for now)
+		api.GET("/students/:id", gw.GetStudentDetails)
+	}
+
+	log.Println("API Gateway running on port 3000")
+	r.Run(":3000")
+}
+
+// --- HANDLERS ---
+
+func (gw *Gateway) CreateStudent(c *gin.Context) {
+	var req struct {
+		Email         string `json:"email"`
+		FullName      string `json:"full_name"`
+		Password      string `json:"password"`
+		StudentNumber string `json:"student_number"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Call gRPC
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.studentClient.CreateStudent(ctx, &studentpb.CreateStudentRequest{
+		Email:         req.Email,
+		FullName:      req.FullName,
+		Password:      req.Password,
+		StudentNumber: req.StudentNumber,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, resp)
+}
+
+func (gw *Gateway) DeleteStudent(c *gin.Context) {
+	id := c.Param("id")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := gw.studentClient.DeleteStudent(ctx, &studentpb.DeleteStudentRequest{Id: id})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Student deleted and cleanup scheduled"})
+}
+
+func (gw *Gateway) CreateCourse(c *gin.Context) {
+	var req struct {
+		TeacherID   string `json:"teacher_id"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.teacherClient.CreateCourse(ctx, &teacherpb.CreateCourseRequest{
+		TeacherId:   req.TeacherID,
+		Title:       req.Title,
+		Description: req.Description,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, resp)
+}
+
+func (gw *Gateway) AssignGrade(c *gin.Context) {
+	var req struct {
+		TeacherID string `json:"teacher_id"`
+		CourseID  string `json:"course_id"`
+		StudentID string `json:"student_id"`
+		Score     int32  `json:"score"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.teacherClient.AssignGrade(ctx, &teacherpb.AssignGradeRequest{
+		TeacherId: req.TeacherID,
+		CourseId:  req.CourseID,
+		StudentId: req.StudentID,
+		Score:     req.Score,
+	})
+	if err != nil {
+		// This will catch the "Student Not Found" error we added earlier!
+		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) GetStudentDetails(c *gin.Context) {
+	id := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Call Student Service
+	student, err := gw.studentClient.GetStudent(ctx, &studentpb.GetStudentRequest{Id: id})
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+
+	// In the future, we would ALSO call TeacherService.GetGrades(id) here
+	// and merge the JSON. For now, we return the student info.
+	c.JSON(http.StatusOK, gin.H{
+		"student_profile": student,
+		"source":          "Aggregation Gateway",
+	})
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
