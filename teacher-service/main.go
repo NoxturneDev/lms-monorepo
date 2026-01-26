@@ -127,6 +127,40 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 	return &teacherpb.GradeResponse{Id: id, Success: true}, nil
 }
 
+func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudentGradesRequest) (*teacherpb.StudentGradesResponse, error) {
+	log.Printf("Fetching grades for student: %v", req.StudentId)
+
+	// A simple JOIN to get the course title along with the score
+	query := `
+        SELECT c.title, g.score 
+        FROM grades g
+        JOIN courses c ON g.course_id = c.id
+        WHERE g.student_id = $1
+    `
+
+	rows, err := s.db.Query(query, req.StudentId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch grades: %v", err)
+	}
+	defer rows.Close()
+
+	var gradeList []*teacherpb.GradeItem
+
+	for rows.Next() {
+		var title string
+		var score int32
+		if err := rows.Scan(&title, &score); err != nil {
+			continue
+		}
+		gradeList = append(gradeList, &teacherpb.GradeItem{
+			CourseTitle: title,
+			Score:       score,
+		})
+	}
+
+	return &teacherpb.StudentGradesResponse{Grades: gradeList}, nil
+}
+
 func main() {
 	// 1. DB Connection
 	dbHost := os.Getenv("DATABASE_URL")
