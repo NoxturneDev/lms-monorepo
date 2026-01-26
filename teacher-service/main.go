@@ -18,6 +18,7 @@ import (
 	// Alias the imports so they don't conflict
 	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 )
 
 type server struct {
@@ -162,7 +163,9 @@ func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudent
 }
 
 func main() {
-	// 1. DB Connection
+	shutdown := initTracer()
+	defer shutdown(context.Background())
+
 	dbHost := os.Getenv("DATABASE_URL")
 	db, err := sql.Open("postgres", dbHost)
 	if err != nil {
@@ -170,34 +173,35 @@ func main() {
 	}
 	defer db.Close()
 
-	// 2. NEW: Connect to Student Service
 	studentServiceUrl := os.Getenv("STUDENT_SERVICE_URL")
 	if studentServiceUrl == "" {
 		studentServiceUrl = "localhost:8082" // Fallback for local dev without Docker
 	}
 
-	// We use "WithTransportCredentials(insecure.NewCredentials())" because we don't have SSL certs
-	conn, err := grpc.NewClient(studentServiceUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		studentServiceUrl,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
 	if err != nil {
 		log.Fatalf("did not connect to student service: %v", err)
 	}
 	defer conn.Close()
 
-	// Create the Client
 	studentClient := studentpb.NewStudentServiceClient(conn)
 
-	// 3. Listener
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+	)
 
-	// Register Server with the Client injected
 	teacherpb.RegisterTeacherServiceServer(s, &server{
 		db:            db,
-		studentClient: studentClient, // Inject client here
+		studentClient: studentClient,
 	})
 
 	startEventConsumer(db)

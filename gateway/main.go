@@ -13,6 +13,8 @@ import (
 
 	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 )
 
 type Gateway struct {
@@ -22,51 +24,46 @@ type Gateway struct {
 
 func main() {
 	// 1. Connect to Student Service
+	shutdown := initTracer()
+	defer shutdown(context.Background())
+
 	studentConn, err := grpc.NewClient(
 		getEnv("STUDENT_SERVICE_URL", "localhost:8082"),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()), // <--- NEW
 	)
 	if err != nil {
 		log.Fatalf("Failed to connect to Student Service: %v", err)
 	}
 	defer studentConn.Close()
 
-	// 2. Connect to Teacher Service
 	teacherConn, err := grpc.NewClient(
 		getEnv("TEACHER_SERVICE_URL", "localhost:8081"),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()), // <--- NEW
 	)
 	if err != nil {
 		log.Fatalf("Failed to connect to Teacher Service: %v", err)
 	}
 	defer teacherConn.Close()
 
-	// 3. Setup Gateway
 	gw := &Gateway{
 		studentClient: studentpb.NewStudentServiceClient(studentConn),
 		teacherClient: teacherpb.NewTeacherServiceClient(teacherConn),
 	}
 
-	// 4. Setup Gin Router
 	r := gin.Default()
+	r.Use(otelgin.Middleware("gateway")) // <--- NEW
 
-	// === API ROUTES ===
 	api := r.Group("/api/v1")
 	{
-		// Simple Proxy: Create Student (JSON -> gRPC)
 		api.POST("/students", gw.CreateStudent)
 		api.DELETE("/students/:id", gw.DeleteStudent)
 
-		// Simple Proxy: Create Course
 		api.POST("/courses", gw.CreateCourse)
 
-		// Simple Proxy: Grade a Student
 		api.POST("/grades", gw.AssignGrade)
 
-		// === THE AGGREGATOR (The Real Power) ===
-		// This endpoint calls BOTH services to show a "Student Card"
-		// It fetches the name (Student Service) ??
-		// (We haven't implemented GetGrades yet, so we'll just proxy GetStudent for now)
 		api.GET("/students/:id", gw.GetStudentDetails)
 		api.GET("/students/:id/report-card", gw.GetStudentReportCard)
 	}

@@ -10,13 +10,14 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/lib/pq" // Postgres Driver
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 
-	"google.golang.org/grpc/reflection"
-	// Import our generated Proto code
 	pb "github.com/noxturnedev/lms-monorepo/proto/student"
 	amqp "github.com/rabbitmq/amqp091-go"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // server controls the Student service logic
@@ -111,7 +112,9 @@ func (s *server) DeleteStudent(ctx context.Context, req *pb.DeleteStudentRequest
 }
 
 func main() {
-	// 1. Setup Database Connection
+	shutdown := initTracer()
+	defer shutdown(context.Background())
+
 	dbHost := os.Getenv("DATABASE_URL") // We set this in Docker Compose!
 	if dbHost == "" {
 		// Fallback for local testing (optional)
@@ -124,7 +127,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// 2. Setup gRPC Listener
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -133,7 +135,6 @@ func main() {
 	var rabbitConn *amqp.Connection
 	var rabbitErr error
 
-	// Simple retry loop
 	for i := 0; i < 10; i++ {
 		rabbitConn, rabbitErr = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 		if rabbitErr == nil {
@@ -153,7 +154,6 @@ func main() {
 	}
 	defer ch.Close()
 
-	// Declare the Queue (Idempotent)
 	_, err = ch.QueueDeclare(
 		"student_events", // name
 		true,             // durable
@@ -163,8 +163,9 @@ func main() {
 		nil,              // arguments
 	)
 
-	// 3. Register Service
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
+	)
 	pb.RegisterStudentServiceServer(s, &server{db: db, rabbitChannel: ch})
 
 	reflection.Register(s)

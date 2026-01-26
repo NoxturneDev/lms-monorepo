@@ -16,12 +16,13 @@ services:
     container_name: teacher_app
     restart: on-failure
     ports:
-      - "8081:8080" # Host Port 8081 -> Container Port 8080
+      - "8081:8080"
     environment:
-      # THE MAGIC: Connects to 'postgres-teacher' service on internal port 5432
       DATABASE_URL: "postgres://teacher_admin:teacher_password@postgres-teacher:5432/teacher_db?sslmode=disable"
       STUDENT_SERVICE_URL: "student-service:8080"
       PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "teacher-service"
     depends_on:
       - postgres-teacher
       - rabbitmq
@@ -39,11 +40,12 @@ services:
     container_name: student_app
     restart: on-failure
     ports:
-      - "8082:8080" # Host Port 8082 -> Container Port 8080
+      - "8082:8080"
     environment:
-      # THE MAGIC: Connects to 'postgres-student' service
       DATABASE_URL: "postgres://student_admin:student_password@postgres-student:5432/student_db?sslmode=disable"
       PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "teacher-service"
     depends_on:
       - postgres-student
       - rabbitmq
@@ -56,7 +58,7 @@ services:
       dockerfile: gateway/Dockerfile
       target: development
     ports:
-      - "3000:3000" # Open to your host machine
+      - "3000:3000"
     environment:
       STUDENT_SERVICE_URL: "student-service:8080"
       TEACHER_SERVICE_URL: "teacher-service:8080"
@@ -113,6 +115,17 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - lms-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # The UI (Open this in browser)
+      - "4317:4317" # OTLP gRPC Receiver (Apps send traces here)
     networks:
       - lms-net
 
