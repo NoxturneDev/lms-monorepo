@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Just build the main.go file
+  cmd = "go build -o ./tmp/main ."
+  # Location of the binary
+  bin = "./tmp/main"
+  # Clean up on exit
+  clean_on_exit = true
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = true
