@@ -3,6 +3,8 @@ FROM golang:1.25-alpine AS development
 
 RUN apk add --no-cache git gcc musl-dev
 
+RUN go install github.com/air-verse/air@latest
+
 # Setup Monorepo Root
 WORKDIR /app
 
@@ -16,7 +18,6 @@ WORKDIR /app/teacher-service
 ENV GOWORK=off
 
 RUN go mod download
-RUN go install github.com/air-verse/air@latest
 
 COPY student-service/.air.toml .
 COPY student-service/entrypoint.sh .

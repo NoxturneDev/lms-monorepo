@@ -150,6 +150,43 @@ func (s *server) DeleteStudent(ctx context.Context, req *pb.DeleteStudentRequest
 	return &pb.DeleteStudentResponse{Success: true}, nil
 }
 
+// ============================================
+// AUTHENTICATION
+// ============================================
+
+func (s *server) LoginStudent(ctx context.Context, req *pb.LoginStudentRequest) (*pb.LoginStudentResponse, error) {
+	log.Printf("Login attempt for student: %v", req.Email)
+
+	query := `SELECT id, email, full_name, student_number, password_hash FROM students WHERE email = $1`
+	var id, email, fullName, studentNumber, passwordHash string
+	err := s.db.QueryRow(query, req.Email).Scan(&id, &email, &fullName, &studentNumber, &passwordHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &pb.LoginStudentResponse{
+				Success: false,
+				Message: "Invalid email or password",
+			}, nil
+		}
+		return nil, err
+	}
+
+	if passwordHash != req.Password {
+		return &pb.LoginStudentResponse{
+			Success: false,
+			Message: "Invalid email or password",
+		}, nil
+	}
+
+	return &pb.LoginStudentResponse{
+		Success:       true,
+		Message:       "Login successful",
+		StudentId:     id,
+		Email:         email,
+		FullName:      fullName,
+		StudentNumber: studentNumber,
+	}, nil
+}
+
 func (s *server) UpdateStudent(ctx context.Context, req *pb.UpdateStudentRequest) (*pb.StudentResponse, error) {
 	log.Printf("Updating Student: %v", req.Id)
 

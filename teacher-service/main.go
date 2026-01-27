@@ -163,6 +163,42 @@ func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudent
 }
 
 // ============================================
+// AUTHENTICATION
+// ============================================
+
+func (s *server) LoginTeacher(ctx context.Context, req *teacherpb.LoginTeacherRequest) (*teacherpb.LoginTeacherResponse, error) {
+	log.Printf("Login attempt for teacher: %v", req.Email)
+
+	query := `SELECT id, email, full_name, password_hash FROM teachers WHERE email = $1`
+	var id, email, fullName, passwordHash string
+	err := s.db.QueryRow(query, req.Email).Scan(&id, &email, &fullName, &passwordHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &teacherpb.LoginTeacherResponse{
+				Success: false,
+				Message: "Invalid email or password",
+			}, nil
+		}
+		return nil, err
+	}
+
+	if passwordHash != req.Password {
+		return &teacherpb.LoginTeacherResponse{
+			Success: false,
+			Message: "Invalid email or password",
+		}, nil
+	}
+
+	return &teacherpb.LoginTeacherResponse{
+		Success:   true,
+		Message:   "Login successful",
+		TeacherId: id,
+		Email:     email,
+		FullName:  fullName,
+	}, nil
+}
+
+// ============================================
 // TEACHER CRUD
 // ============================================
 
