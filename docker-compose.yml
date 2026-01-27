@@ -55,9 +55,10 @@ services:
 
   gateway:
     build:
-      context: .
+      context: ./
       dockerfile: gateway/Dockerfile
       target: development
+    container_name: gateway_app
     ports:
       - "3000:3000"
     environment:
