@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sony/gobreaker"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -26,6 +28,8 @@ func main() {
 	// 1. Connect to Student Service
 	shutdown := initTracer()
 	defer shutdown(context.Background())
+
+	initBreakers()
 
 	studentConn, err := grpc.NewClient(
 		getEnv("STUDENT_SERVICE_URL", "localhost:8082"),
@@ -64,6 +68,7 @@ func main() {
 
 		api.POST("/grades", gw.AssignGrade)
 
+		api.GET("/students", gw.GetAllStudents)
 		api.GET("/students/:id", gw.GetStudentDetails)
 		api.GET("/students/:id/report-card", gw.GetStudentReportCard)
 	}
@@ -73,6 +78,29 @@ func main() {
 }
 
 // --- HANDLERS ---
+func (gw *Gateway) GetAllStudents(c *gin.Context) {
+	var req struct {
+		ClassID string `json:"class_id"`
+	}
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.studentClient.GetAllStudents(ctx, &studentpb.ListStudentRequest{
+		ClassId: req.ClassID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
 
 func (gw *Gateway) CreateStudent(c *gin.Context) {
 	var req struct {
@@ -175,18 +203,45 @@ func (gw *Gateway) AssignGrade(c *gin.Context) {
 
 func (gw *Gateway) GetStudentReportCard(c *gin.Context) {
 	studentID := c.Param("id")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	g, ctx := errgroup.WithContext(c.Request.Context())
 
-	studentResp, err := gw.studentClient.GetStudent(ctx, &studentpb.GetStudentRequest{Id: studentID})
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
-		return
-	}
+	var (
+		studentResp *studentpb.StudentResponse
+		gradesResp  *teacherpb.StudentGradesResponse
+	)
 
-	gradesResp, err := gw.teacherClient.GetStudentGrades(ctx, &teacherpb.GetStudentGradesRequest{StudentId: studentID})
-	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch grades"})
+	// --- Routine 1: Fetch Student (PROTECTED) ---
+	g.Go(func() error {
+		result, err := executeWithBreaker(studentBreaker, func() (interface{}, error) {
+			return gw.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: studentID})
+		})
+		if err != nil {
+			return err
+		}
+
+		studentResp = result.(*studentpb.StudentResponse)
+		return nil
+	})
+
+	g.Go(func() error {
+		result, err := executeWithBreaker(teacherBreaker, func() (interface{}, error) {
+			return gw.teacherClient.GetStudentGrades(ctx, &teacherpb.GetStudentGradesRequest{StudentId: studentID})
+		})
+		if err != nil {
+			return err
+		}
+
+		gradesResp = result.(*teacherpb.StudentGradesResponse)
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		if err == gobreaker.ErrOpenState {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "System overloaded. Please try again later."})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data: " + err.Error()})
 		return
 	}
 
@@ -210,7 +265,7 @@ func (gw *Gateway) GetStudentDetails(c *gin.Context) {
 	defer cancel()
 
 	// Call Student Service
-	student, err := gw.studentClient.GetStudent(ctx, &studentpb.GetStudentRequest{Id: id})
+	student, err := gw.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: id})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
 		return
