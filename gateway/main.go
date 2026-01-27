@@ -53,38 +53,53 @@ func main() {
 
 	api := r.Group("/api/v1")
 	{
-		// Student CRUD
+		// ===== PUBLIC ROUTES (No Auth Required) =====
+
+		// Authentication
+		api.POST("/auth/teacher/login", gw.LoginTeacher)
+		api.POST("/auth/student/login", gw.LoginStudent)
+
+		// Public registration
 		api.POST("/students", gw.CreateStudent)
-		api.GET("/students", gw.GetAllStudents)
-		api.GET("/students/:id", gw.GetStudentDetails)
-		api.PUT("/students/:id", gw.UpdateStudent)
-		api.DELETE("/students/:id", gw.DeleteStudent)
-		api.GET("/students/:id/report-card", gw.GetStudentReportCard)
-		api.GET("/students/:id/courses", gw.GetStudentCoursesByID)
-
-		// Teacher CRUD
 		api.POST("/teachers", gw.CreateTeacher)
-		api.GET("/teachers", gw.ListTeachers)
-		api.GET("/teachers/:id", gw.GetTeacher)
-		api.PUT("/teachers/:id", gw.UpdateTeacher)
-		api.DELETE("/teachers/:id", gw.DeleteTeacher)
 
-		// Course Management
-		api.POST("/courses", gw.CreateCourse)
-		api.GET("/courses", gw.GetCourses)
+		// ===== PROTECTED ROUTES (Auth Required) =====
+		protected := api.Group("")
+		protected.Use(web.AuthMiddleware())
+		{
+			// Student CRUD (Protected)
+			protected.GET("/students", gw.GetAllStudents)
+			protected.GET("/students/:id", gw.GetStudentDetails)
+			protected.PUT("/students/:id", gw.UpdateStudent)
+			protected.DELETE("/students/:id", gw.DeleteStudent)
+			protected.GET("/students/:id/report-card", gw.GetStudentReportCard)
+			protected.GET("/students/:id/courses", gw.GetStudentCoursesByID)
 
-		// api.GET("/courses/:course_id/grades", gw.GetCourseGrades)
-		api.GET("/courses/:id", gw.GetCourse)
-		api.PUT("/courses/:id", gw.UpdateCourse)
-		api.DELETE("/courses/:id", gw.DeleteCourse)
+			// Teacher CRUD (Protected)
+			protected.GET("/teachers", gw.ListTeachers)
+			protected.GET("/teachers/:id", gw.GetTeacher)
+			protected.PUT("/teachers/:id", gw.UpdateTeacher)
+			protected.DELETE("/teachers/:id", gw.DeleteTeacher)
 
-		// Enrollment
-		api.POST("/enrollments", gw.EnrollStudent)
-		// Grading
-		api.POST("/grades", gw.AssignGrade)
+			// Course Management (Teacher Only)
+			teacherRoutes := protected.Group("")
+			teacherRoutes.Use(web.TeacherOnly())
+			{
+				teacherRoutes.POST("/courses", gw.CreateCourse)
+				teacherRoutes.PUT("/courses/:id", gw.UpdateCourse)
+				teacherRoutes.DELETE("/courses/:id", gw.DeleteCourse)
+				teacherRoutes.POST("/grades", gw.AssignGrade)
+				// teacherRoutes.GET("/courses/:course_id/grades", gw.GetCourseGrades)
+				teacherRoutes.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
+			}
 
-		// Reporting
-		api.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
+			// Course Viewing (All authenticated users)
+			protected.GET("/courses", gw.GetCourses)
+			protected.GET("/courses/:id", gw.GetCourse)
+
+			// Enrollment (All authenticated users)
+			protected.POST("/enrollments", gw.EnrollStudent)
+		}
 	}
 
 	log.Println("API Gateway running on port 3000")
