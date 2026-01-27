@@ -4,6 +4,8 @@ FROM golang:1.25-alpine AS development
 # Add build tools
 RUN apk add --no-cache git gcc musl-dev
 
+RUN go install github.com/air-verse/air@latest
+
 # 1. Setup the Monorepo Structure at /app
 WORKDIR /app
 
@@ -25,7 +27,6 @@ ENV GOWORK=off
 RUN go mod download
 
 # 7. Install Air for hot reload
-RUN go install github.com/air-verse/air@latest
 
 COPY student-service/.air.toml .
 COPY student-service/entrypoint.sh .
