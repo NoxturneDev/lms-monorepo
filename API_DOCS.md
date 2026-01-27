@@ -4,6 +4,106 @@ Base URL: `http://localhost:3000`
 
 All endpoints use `Content-Type: application/json`
 
+## 🔐 Authentication
+
+This API uses **JWT (JSON Web Token)** for authentication.
+
+### Getting a Token
+
+Use the login endpoints to get your JWT token:
+- **Teachers**: `POST /api/v1/auth/teacher/login`
+- **Students**: `POST /api/v1/auth/student/login`
+
+### Using the Token
+
+Include the token in the `Authorization` header for protected endpoints:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+### Public vs Protected Routes
+
+**Public Routes** (No authentication required):
+- `POST /api/v1/auth/teacher/login` - Teacher login
+- `POST /api/v1/auth/student/login` - Student login
+- `POST /api/v1/students` - Student registration
+- `POST /api/v1/teachers` - Teacher registration
+
+**Protected Routes** (Authentication required):
+- All other endpoints require a valid JWT token
+
+**Teacher-Only Routes**:
+- Course creation, update, deletion
+- Grade assignment
+- Gradebook viewing
+- Teacher dashboard
+
+---
+
+## Authentication APIs
+
+### Teacher Login
+**POST** `/api/v1/auth/teacher/login`
+
+**Request:**
+```json
+{
+  "email": "turing@uni.edu",
+  "password": "secret"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user_id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "turing@uni.edu",
+  "name": "Alan Turing",
+  "userType": "teacher"
+}
+```
+
+**Error Response:** `401 Unauthorized`
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+---
+
+### Student Login
+**POST** `/api/v1/auth/student/login`
+
+**Request:**
+```json
+{
+  "email": "john@student.edu",
+  "password": "secret"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "john@student.edu",
+  "name": "John Doe",
+  "student_number": "STD-2026-001",
+  "userType": "student"
+}
+```
+
+**Error Response:** `401 Unauthorized`
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
 ---
 
 ## Student APIs
@@ -480,6 +580,20 @@ All endpoints may return the following error responses:
 }
 ```
 
+**401 Unauthorized** (Missing or invalid token)
+```json
+{
+  "error": "Invalid or expired token"
+}
+```
+
+**403 Forbidden** (Insufficient permissions)
+```json
+{
+  "error": "Teacher access only"
+}
+```
+
 **404 Not Found**
 ```json
 {
@@ -499,4 +613,34 @@ All endpoints may return the following error responses:
 {
   "error": "System overloaded. Please try again later."
 }
+```
+
+---
+
+## Example Usage with Authentication
+
+### 1. Login as Teacher
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/teacher/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"turing@uni.edu","password":"secret"}'
+```
+
+### 2. Use Token for Protected Endpoints
+```bash
+# Save the token from login response
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Make authenticated request
+curl -X GET http://localhost:3000/api/v1/students \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 3. Access Teacher-Only Endpoint
+```bash
+# Only works if logged in as teacher
+curl -X POST http://localhost:3000/api/v1/courses \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"teacher_id":"xxx","title":"New Course","description":"Description"}'
 ```
