@@ -7,13 +7,15 @@ option go_package = "github.com/noxturnedev/lms-monorepo/student-service/proto/s
 
 // The Interface
 service StudentService {
-  // Used by Frontend to register
+  // Student CRUD
   rpc CreateStudent (CreateStudentRequest) returns (StudentResponse);
-  
-  // Used by Teacher Service to get names
   rpc GetAllStudents (ListStudentRequest) returns (ListStudentResponse);
   rpc GetStudentById (GetStudentByIdRequest) returns (StudentResponse);
+  rpc UpdateStudent (UpdateStudentRequest) returns (StudentResponse);
   rpc DeleteStudent (DeleteStudentRequest) returns (DeleteStudentResponse);
+
+  // Student Courses
+  rpc GetStudentCourses (GetStudentCoursesRequest) returns (GetStudentCoursesResponse);
 }
 
 // The "Structs" (Messages)
@@ -50,4 +52,27 @@ message DeleteStudentRequest {
 
 message DeleteStudentResponse {
   bool success = 1;
+}
+
+message UpdateStudentRequest {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string student_number = 4;
+  string password = 5; // optional
+}
+
+message GetStudentCoursesRequest {
+  string student_id = 1;
+}
+
+message CourseItem {
+  string course_id = 1;
+  string title = 2;
+  string description = 3;
+  string teacher_name = 4;
+}
+
+message GetStudentCoursesResponse {
+  repeated CourseItem courses = 1;
 }
