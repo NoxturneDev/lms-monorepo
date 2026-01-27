@@ -19,19 +19,29 @@ CREATE TABLE courses (
     CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id)
 );
 
--- 3. GRADES (The "Link" to the outside world)
+-- 3. ENROLLMENTS (Student-Course relationship)
+CREATE TABLE enrollments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    course_id UUID NOT NULL,
+    student_id UUID NOT NULL, -- From Student Service
+    enrolled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_enrollment_course FOREIGN KEY (course_id) REFERENCES courses(id),
+    UNIQUE(course_id, student_id) -- Prevent duplicate enrollments
+);
+
+-- 4. GRADES (The "Link" to the outside world)
 CREATE TABLE grades (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     course_id UUID NOT NULL,
-    
+
     -- THE MICROSERVICES LINK:
     -- This ID belongs to the Student Service. We just store it as text/uuid here.
     -- No "REFERENCES students(id)" allowed!
-    student_id UUID NOT NULL, 
-    
+    student_id UUID NOT NULL,
+
     score INTEGER CHECK (score >= 0 AND score <= 100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT fk_course FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 

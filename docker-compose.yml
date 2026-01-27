@@ -45,7 +45,8 @@ services:
       DATABASE_URL: "postgres://student_admin:student_password@postgres-student:5432/student_db?sslmode=disable"
       PORT: "8080"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-      OTEL_SERVICE_NAME: "teacher-service"
+      OTEL_SERVICE_NAME: "student-service"
+      TEACHER_SERVICE_URL: "teacher-service:8080"
     depends_on:
       - postgres-student
       - rabbitmq
