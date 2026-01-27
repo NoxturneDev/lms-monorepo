@@ -103,7 +103,7 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 	log.Println("Validating student with Student Service...")
 
 	// We call the other microservice just like a local function!
-	_, err := s.studentClient.GetStudent(ctx, &studentpb.GetStudentRequest{
+	_, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{
 		Id: req.StudentId,
 	})
 	if err != nil {

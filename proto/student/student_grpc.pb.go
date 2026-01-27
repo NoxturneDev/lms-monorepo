@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	StudentService_CreateStudent_FullMethodName = "/student.StudentService/CreateStudent"
-	StudentService_GetStudent_FullMethodName    = "/student.StudentService/GetStudent"
-	StudentService_DeleteStudent_FullMethodName = "/student.StudentService/DeleteStudent"
+	StudentService_CreateStudent_FullMethodName  = "/student.StudentService/CreateStudent"
+	StudentService_GetAllStudents_FullMethodName = "/student.StudentService/GetAllStudents"
+	StudentService_GetStudentById_FullMethodName = "/student.StudentService/GetStudentById"
+	StudentService_DeleteStudent_FullMethodName  = "/student.StudentService/DeleteStudent"
 )
 
 // StudentServiceClient is the client API for StudentService service.
@@ -33,7 +34,8 @@ type StudentServiceClient interface {
 	// Used by Frontend to register
 	CreateStudent(ctx context.Context, in *CreateStudentRequest, opts ...grpc.CallOption) (*StudentResponse, error)
 	// Used by Teacher Service to get names
-	GetStudent(ctx context.Context, in *GetStudentRequest, opts ...grpc.CallOption) (*StudentResponse, error)
+	GetAllStudents(ctx context.Context, in *ListStudentRequest, opts ...grpc.CallOption) (*ListStudentResponse, error)
+	GetStudentById(ctx context.Context, in *GetStudentByIdRequest, opts ...grpc.CallOption) (*StudentResponse, error)
 	DeleteStudent(ctx context.Context, in *DeleteStudentRequest, opts ...grpc.CallOption) (*DeleteStudentResponse, error)
 }
 
@@ -55,10 +57,20 @@ func (c *studentServiceClient) CreateStudent(ctx context.Context, in *CreateStud
 	return out, nil
 }
 
-func (c *studentServiceClient) GetStudent(ctx context.Context, in *GetStudentRequest, opts ...grpc.CallOption) (*StudentResponse, error) {
+func (c *studentServiceClient) GetAllStudents(ctx context.Context, in *ListStudentRequest, opts ...grpc.CallOption) (*ListStudentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListStudentResponse)
+	err := c.cc.Invoke(ctx, StudentService_GetAllStudents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studentServiceClient) GetStudentById(ctx context.Context, in *GetStudentByIdRequest, opts ...grpc.CallOption) (*StudentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(StudentResponse)
-	err := c.cc.Invoke(ctx, StudentService_GetStudent_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, StudentService_GetStudentById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +96,8 @@ type StudentServiceServer interface {
 	// Used by Frontend to register
 	CreateStudent(context.Context, *CreateStudentRequest) (*StudentResponse, error)
 	// Used by Teacher Service to get names
-	GetStudent(context.Context, *GetStudentRequest) (*StudentResponse, error)
+	GetAllStudents(context.Context, *ListStudentRequest) (*ListStudentResponse, error)
+	GetStudentById(context.Context, *GetStudentByIdRequest) (*StudentResponse, error)
 	DeleteStudent(context.Context, *DeleteStudentRequest) (*DeleteStudentResponse, error)
 	mustEmbedUnimplementedStudentServiceServer()
 }
@@ -99,8 +112,11 @@ type UnimplementedStudentServiceServer struct{}
 func (UnimplementedStudentServiceServer) CreateStudent(context.Context, *CreateStudentRequest) (*StudentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateStudent not implemented")
 }
-func (UnimplementedStudentServiceServer) GetStudent(context.Context, *GetStudentRequest) (*StudentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetStudent not implemented")
+func (UnimplementedStudentServiceServer) GetAllStudents(context.Context, *ListStudentRequest) (*ListStudentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAllStudents not implemented")
+}
+func (UnimplementedStudentServiceServer) GetStudentById(context.Context, *GetStudentByIdRequest) (*StudentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetStudentById not implemented")
 }
 func (UnimplementedStudentServiceServer) DeleteStudent(context.Context, *DeleteStudentRequest) (*DeleteStudentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteStudent not implemented")
@@ -144,20 +160,38 @@ func _StudentService_CreateStudent_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StudentService_GetStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetStudentRequest)
+func _StudentService_GetAllStudents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStudentRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StudentServiceServer).GetStudent(ctx, in)
+		return srv.(StudentServiceServer).GetAllStudents(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: StudentService_GetStudent_FullMethodName,
+		FullMethod: StudentService_GetAllStudents_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StudentServiceServer).GetStudent(ctx, req.(*GetStudentRequest))
+		return srv.(StudentServiceServer).GetAllStudents(ctx, req.(*ListStudentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudentService_GetStudentById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudentServiceServer).GetStudentById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudentService_GetStudentById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudentServiceServer).GetStudentById(ctx, req.(*GetStudentByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,8 +226,12 @@ var StudentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _StudentService_CreateStudent_Handler,
 		},
 		{
-			MethodName: "GetStudent",
-			Handler:    _StudentService_GetStudent_Handler,
+			MethodName: "GetAllStudents",
+			Handler:    _StudentService_GetAllStudents_Handler,
+		},
+		{
+			MethodName: "GetStudentById",
+			Handler:    _StudentService_GetStudentById_Handler,
 		},
 		{
 			MethodName: "DeleteStudent",

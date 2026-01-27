@@ -72,8 +72,44 @@ func (s *server) CreateStudent(ctx context.Context, req *pb.CreateStudentRequest
 	}, nil
 }
 
-// GetStudent implements the gRPC method
-func (s *server) GetStudent(ctx context.Context, req *pb.GetStudentRequest) (*pb.StudentResponse, error) {
+func (s *server) GetAllStudents(ctx context.Context, req *pb.ListStudentRequest) (*pb.ListStudentResponse, error) {
+	log.Print("Received: GetAllStudent")
+
+	query := "SELECT id, full_name, email, student_number FROM students"
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var students []*pb.StudentResponse
+
+	for rows.Next() {
+		var st pb.StudentResponse
+
+		err := rows.Scan(
+			&st.Id,
+			&st.FullName,
+			&st.Email,
+			&st.StudentNumber,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		students = append(students, &st)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &pb.ListStudentResponse{
+		Students: students,
+	}, nil
+}
+
+func (s *server) GetStudentById(ctx context.Context, req *pb.GetStudentByIdRequest) (*pb.StudentResponse, error) {
 	log.Printf("Received: GetStudent for ID %v", req.Id)
 
 	query := `SELECT id, email, full_name, student_number FROM students WHERE id = $1`
