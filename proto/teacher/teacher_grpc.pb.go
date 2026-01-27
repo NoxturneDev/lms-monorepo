@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	TeacherService_LoginTeacher_FullMethodName         = "/teacher.TeacherService/LoginTeacher"
 	TeacherService_CreateTeacher_FullMethodName        = "/teacher.TeacherService/CreateTeacher"
 	TeacherService_GetTeacher_FullMethodName           = "/teacher.TeacherService/GetTeacher"
 	TeacherService_UpdateTeacher_FullMethodName        = "/teacher.TeacherService/UpdateTeacher"
@@ -41,6 +42,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TeacherServiceClient interface {
+	// Authentication
+	LoginTeacher(ctx context.Context, in *LoginTeacherRequest, opts ...grpc.CallOption) (*LoginTeacherResponse, error)
 	// Teacher CRUD
 	CreateTeacher(ctx context.Context, in *CreateTeacherRequest, opts ...grpc.CallOption) (*TeacherResponse, error)
 	GetTeacher(ctx context.Context, in *GetTeacherRequest, opts ...grpc.CallOption) (*TeacherResponse, error)
@@ -70,6 +73,16 @@ type teacherServiceClient struct {
 
 func NewTeacherServiceClient(cc grpc.ClientConnInterface) TeacherServiceClient {
 	return &teacherServiceClient{cc}
+}
+
+func (c *teacherServiceClient) LoginTeacher(ctx context.Context, in *LoginTeacherRequest, opts ...grpc.CallOption) (*LoginTeacherResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginTeacherResponse)
+	err := c.cc.Invoke(ctx, TeacherService_LoginTeacher_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *teacherServiceClient) CreateTeacher(ctx context.Context, in *CreateTeacherRequest, opts ...grpc.CallOption) (*TeacherResponse, error) {
@@ -236,6 +249,8 @@ func (c *teacherServiceClient) GetTeacherDashboard(ctx context.Context, in *GetT
 // All implementations must embed UnimplementedTeacherServiceServer
 // for forward compatibility.
 type TeacherServiceServer interface {
+	// Authentication
+	LoginTeacher(context.Context, *LoginTeacherRequest) (*LoginTeacherResponse, error)
 	// Teacher CRUD
 	CreateTeacher(context.Context, *CreateTeacherRequest) (*TeacherResponse, error)
 	GetTeacher(context.Context, *GetTeacherRequest) (*TeacherResponse, error)
@@ -267,6 +282,9 @@ type TeacherServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTeacherServiceServer struct{}
 
+func (UnimplementedTeacherServiceServer) LoginTeacher(context.Context, *LoginTeacherRequest) (*LoginTeacherResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LoginTeacher not implemented")
+}
 func (UnimplementedTeacherServiceServer) CreateTeacher(context.Context, *CreateTeacherRequest) (*TeacherResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateTeacher not implemented")
 }
@@ -334,6 +352,24 @@ func RegisterTeacherServiceServer(s grpc.ServiceRegistrar, srv TeacherServiceSer
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&TeacherService_ServiceDesc, srv)
+}
+
+func _TeacherService_LoginTeacher_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginTeacherRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).LoginTeacher(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_LoginTeacher_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).LoginTeacher(ctx, req.(*LoginTeacherRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TeacherService_CreateTeacher_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -631,6 +667,10 @@ var TeacherService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "teacher.TeacherService",
 	HandlerType: (*TeacherServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "LoginTeacher",
+			Handler:    _TeacherService_LoginTeacher_Handler,
+		},
 		{
 			MethodName: "CreateTeacher",
 			Handler:    _TeacherService_CreateTeacher_Handler,

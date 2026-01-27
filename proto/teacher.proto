@@ -5,6 +5,9 @@ package teacher;
 option go_package = "github.com/noxturnedev/lms-monorepo/teacher-service/proto/teacher";
 
 service TeacherService {
+  // Authentication
+  rpc LoginTeacher (LoginTeacherRequest) returns (LoginTeacherResponse);
+
   // Teacher CRUD
   rpc CreateTeacher (CreateTeacherRequest) returns (TeacherResponse);
   rpc GetTeacher (GetTeacherRequest) returns (TeacherResponse);
@@ -66,6 +69,20 @@ message GradeItem {
 
 message StudentGradesResponse {
   repeated GradeItem grades = 1; // array in proto
+}
+
+// Authentication Messages
+message LoginTeacherRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginTeacherResponse {
+  bool success = 1;
+  string message = 2;
+  string teacher_id = 3;
+  string email = 4;
+  string full_name = 5;
 }
 
 // Teacher CRUD Messages

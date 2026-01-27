@@ -7,6 +7,9 @@ option go_package = "github.com/noxturnedev/lms-monorepo/student-service/proto/s
 
 // The Interface
 service StudentService {
+  // Authentication
+  rpc LoginStudent (LoginStudentRequest) returns (LoginStudentResponse);
+
   // Student CRUD
   rpc CreateStudent (CreateStudentRequest) returns (StudentResponse);
   rpc GetAllStudents (ListStudentRequest) returns (ListStudentResponse);
@@ -19,6 +22,21 @@ service StudentService {
 }
 
 // The "Structs" (Messages)
+
+// Authentication Messages
+message LoginStudentRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginStudentResponse {
+  bool success = 1;
+  string message = 2;
+  string student_id = 3;
+  string email = 4;
+  string full_name = 5;
+  string student_number = 6;
+}
 
 message CreateStudentRequest {
   string email = 1;
