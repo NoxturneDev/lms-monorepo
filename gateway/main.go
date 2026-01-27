@@ -53,18 +53,38 @@ func main() {
 
 	api := r.Group("/api/v1")
 	{
-		// Student endpoints
+		// Student CRUD
 		api.POST("/students", gw.CreateStudent)
-		api.DELETE("/students/:id", gw.DeleteStudent)
 		api.GET("/students", gw.GetAllStudents)
 		api.GET("/students/:id", gw.GetStudentDetails)
+		api.PUT("/students/:id", gw.UpdateStudent)
+		api.DELETE("/students/:id", gw.DeleteStudent)
 		api.GET("/students/:id/report-card", gw.GetStudentReportCard)
+		api.GET("/students/:id/courses", gw.GetStudentCoursesByID)
 
-		// Course endpoints (Teacher module)
+		// Teacher CRUD
+		api.POST("/teachers", gw.CreateTeacher)
+		api.GET("/teachers", gw.ListTeachers)
+		api.GET("/teachers/:id", gw.GetTeacher)
+		api.PUT("/teachers/:id", gw.UpdateTeacher)
+		api.DELETE("/teachers/:id", gw.DeleteTeacher)
+
+		// Course Management
 		api.POST("/courses", gw.CreateCourse)
+		api.GET("/courses", gw.GetCourses)
 
-		// Grade endpoints (Teacher module)
+		// api.GET("/courses/:course_id/grades", gw.GetCourseGrades)
+		api.GET("/courses/:id", gw.GetCourse)
+		api.PUT("/courses/:id", gw.UpdateCourse)
+		api.DELETE("/courses/:id", gw.DeleteCourse)
+
+		// Enrollment
+		api.POST("/enrollments", gw.EnrollStudent)
+		// Grading
 		api.POST("/grades", gw.AssignGrade)
+
+		// Reporting
+		api.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
 	}
 
 	log.Println("API Gateway running on port 3000")

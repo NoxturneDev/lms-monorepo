@@ -154,3 +154,35 @@ func (gw *Gateway) GetStudentReportCard(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (gw *Gateway) UpdateStudent(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Email         string `json:"email"`
+		FullName      string `json:"full_name"`
+		StudentNumber string `json:"student_number"`
+		Password      string `json:"password"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.StudentClient.UpdateStudent(ctx, &studentpb.UpdateStudentRequest{
+		Id:            id,
+		Email:         req.Email,
+		FullName:      req.FullName,
+		StudentNumber: req.StudentNumber,
+		Password:      req.Password,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
