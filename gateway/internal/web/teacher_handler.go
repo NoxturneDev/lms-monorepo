@@ -39,10 +39,10 @@ func (gw *Gateway) CreateCourse(c *gin.Context) {
 
 func (gw *Gateway) AssignGrade(c *gin.Context) {
 	var req struct {
-		TeacherID string `json:"teacher_id"`
-		CourseID  string `json:"course_id"`
-		StudentID string `json:"student_id"`
-		Score     int32  `json:"score"`
+		TeacherID    string `json:"teacher_id"`
+		AssignmentID string `json:"assignment_id"`
+		StudentID    string `json:"student_id"`
+		Score        int32  `json:"score"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -53,10 +53,10 @@ func (gw *Gateway) AssignGrade(c *gin.Context) {
 	defer cancel()
 
 	resp, err := gw.TeacherClient.AssignGrade(ctx, &teacherpb.AssignGradeRequest{
-		TeacherId: req.TeacherID,
-		CourseId:  req.CourseID,
-		StudentId: req.StudentID,
-		Score:     req.Score,
+		TeacherId:    req.TeacherID,
+		AssignmentId: req.AssignmentID,
+		StudentId:    req.StudentID,
+		Score:        req.Score,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
@@ -338,6 +338,136 @@ func (gw *Gateway) GetCourseEnrollments(c *gin.Context) {
 
 	resp, err := gw.TeacherClient.GetCourseEnrollments(ctx, &teacherpb.GetCourseEnrollmentsRequest{
 		CourseId: courseID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// ============================================
+// ASSIGNMENT MANAGEMENT
+// ============================================
+
+func (gw *Gateway) CreateAssignment(c *gin.Context) {
+	courseID := c.Param("id")
+	var req struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		MaxScore    int32  `json:"max_score"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.CreateAssignment(ctx, &teacherpb.CreateAssignmentRequest{
+		CourseId:    courseID,
+		Title:       req.Title,
+		Description: req.Description,
+		MaxScore:    req.MaxScore,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, resp)
+}
+
+func (gw *Gateway) GetAssignment(c *gin.Context) {
+	id := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.GetAssignment(ctx, &teacherpb.GetAssignmentRequest{Id: id})
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Assignment not found"})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) UpdateAssignment(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		MaxScore    int32  `json:"max_score"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.UpdateAssignment(ctx, &teacherpb.UpdateAssignmentRequest{
+		Id:          id,
+		Title:       req.Title,
+		Description: req.Description,
+		MaxScore:    req.MaxScore,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) DeleteAssignment(c *gin.Context) {
+	id := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.DeleteAssignment(ctx, &teacherpb.DeleteAssignmentRequest{Id: id})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if !resp.Success {
+		c.JSON(http.StatusConflict, gin.H{"error": resp.Message})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) ListAssignments(c *gin.Context) {
+	courseID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.ListAssignments(ctx, &teacherpb.ListAssignmentsRequest{
+		CourseId: courseID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) GetStudentCourseGrade(c *gin.Context) {
+	courseID := c.Param("id")
+	studentID := c.Query("student_id")
+	if studentID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "student_id query parameter is required"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.GetStudentCourseGrade(ctx, &teacherpb.GetStudentCourseGradeRequest{
+		CourseId:  courseID,
+		StudentId: studentID,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

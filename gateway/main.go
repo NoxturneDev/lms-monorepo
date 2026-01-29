@@ -113,11 +113,21 @@ func main() {
 				teacherRoutes.GET("/courses/:id/grades", gw.GetCourseGrades)
 				teacherRoutes.GET("/courses/:id/enrollments", gw.GetCourseEnrollments)
 				teacherRoutes.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
+
+				// Assignment Management (Teacher Only - write)
+				teacherRoutes.POST("/courses/:id/assignments", gw.CreateAssignment)
+				teacherRoutes.PUT("/assignments/:id", gw.UpdateAssignment)
+				teacherRoutes.DELETE("/assignments/:id", gw.DeleteAssignment)
 			}
 
 			// Course Viewing (All authenticated users)
 			protected.GET("/courses", gw.GetCourses)
 			protected.GET("/courses/:id", gw.GetCourse)
+
+			// Assignment Viewing (All authenticated users)
+			protected.GET("/courses/:id/assignments", gw.ListAssignments)
+			protected.GET("/assignments/:id", gw.GetAssignment)
+			protected.GET("/courses/:id/student-grade", gw.GetStudentCourseGrade)
 
 			// Enrollment (All authenticated users)
 			protected.POST("/enrollments", gw.EnrollStudent)

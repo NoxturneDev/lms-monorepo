@@ -125,11 +125,14 @@ func (m *mockTeacherClientFull) GetCourseGrades(ctx context.Context, req *teache
 		CourseTitle: "Advanced Algorithms",
 		Grades: []*teacherpb.StudentGradeItem{
 			{
-				GradeId:       "grade-123",
-				StudentId:     "student-123",
-				StudentName:   "John Doe",
-				StudentNumber: "STD-2026-001",
-				Score:         95,
+				GradeId:         "grade-123",
+				StudentId:       "student-123",
+				StudentName:     "John Doe",
+				StudentNumber:   "STD-2026-001",
+				Score:           95,
+				AssignmentTitle: "Midterm Exam",
+				MaxScore:        100,
+				AssignmentId:    "assignment-123",
 			},
 		},
 	}, nil
@@ -146,6 +149,74 @@ func (m *mockTeacherClientFull) GetTeacherDashboard(ctx context.Context, req *te
 				CourseId:      "course-123",
 				Title:         "Advanced Algorithms",
 				EnrolledCount: 45,
+			},
+		},
+	}, nil
+}
+
+func (m *mockTeacherClientFull) CreateAssignment(ctx context.Context, req *teacherpb.CreateAssignmentRequest, opts ...grpc.CallOption) (*teacherpb.AssignmentResponse, error) {
+	return &teacherpb.AssignmentResponse{
+		Id:       "assignment-123",
+		Title:    req.Title,
+		MaxScore: req.MaxScore,
+	}, nil
+}
+
+func (m *mockTeacherClientFull) GetAssignment(ctx context.Context, req *teacherpb.GetAssignmentRequest, opts ...grpc.CallOption) (*teacherpb.AssignmentDetailResponse, error) {
+	return &teacherpb.AssignmentDetailResponse{
+		Id:          req.Id,
+		CourseId:    "course-123",
+		CourseTitle: "Advanced Algorithms",
+		Title:       "Midterm Exam",
+		Description: "Covers sorting and graph algorithms",
+		MaxScore:    100,
+	}, nil
+}
+
+func (m *mockTeacherClientFull) UpdateAssignment(ctx context.Context, req *teacherpb.UpdateAssignmentRequest, opts ...grpc.CallOption) (*teacherpb.AssignmentResponse, error) {
+	return &teacherpb.AssignmentResponse{
+		Id:       req.Id,
+		Title:    req.Title,
+		MaxScore: req.MaxScore,
+	}, nil
+}
+
+func (m *mockTeacherClientFull) DeleteAssignment(ctx context.Context, req *teacherpb.DeleteAssignmentRequest, opts ...grpc.CallOption) (*teacherpb.DeleteAssignmentResponse, error) {
+	return &teacherpb.DeleteAssignmentResponse{
+		Success: true,
+		Message: "Assignment deleted successfully",
+	}, nil
+}
+
+func (m *mockTeacherClientFull) ListAssignments(ctx context.Context, req *teacherpb.ListAssignmentsRequest, opts ...grpc.CallOption) (*teacherpb.ListAssignmentsResponse, error) {
+	return &teacherpb.ListAssignmentsResponse{
+		Assignments: []*teacherpb.AssignmentDetailResponse{
+			{
+				Id:          "assignment-123",
+				CourseId:    req.CourseId,
+				CourseTitle: "Advanced Algorithms",
+				Title:       "Midterm Exam",
+				Description: "Covers sorting and graph algorithms",
+				MaxScore:    100,
+			},
+		},
+	}, nil
+}
+
+func (m *mockTeacherClientFull) GetStudentCourseGrade(ctx context.Context, req *teacherpb.GetStudentCourseGradeRequest, opts ...grpc.CallOption) (*teacherpb.StudentCourseGradeResponse, error) {
+	return &teacherpb.StudentCourseGradeResponse{
+		CourseId:      req.CourseId,
+		CourseTitle:   "Advanced Algorithms",
+		StudentId:     req.StudentId,
+		OverallScore:  95.0,
+		TotalScore:    95,
+		TotalMaxScore: 100,
+		Assignments: []*teacherpb.AssignmentGradeItem{
+			{
+				AssignmentId:    "assignment-123",
+				AssignmentTitle: "Midterm Exam",
+				Score:           95,
+				MaxScore:        100,
 			},
 		},
 	}, nil
@@ -353,10 +424,10 @@ func TestAssignGrade(t *testing.T) {
 	r.POST("/grades", gw.AssignGrade)
 
 	reqBody := map[string]interface{}{
-		"teacher_id": "teacher-123",
-		"course_id":  "course-123",
-		"student_id": "student-123",
-		"score":      95,
+		"teacher_id":    "teacher-123",
+		"assignment_id": "assignment-123",
+		"student_id":    "student-123",
+		"score":         95,
 	}
 	jsonData, _ := json.Marshal(reqBody)
 
@@ -401,5 +472,147 @@ func TestGetTeacherDashboard(t *testing.T) {
 
 	if resp["total_courses"].(float64) != 3 {
 		t.Errorf("Expected 3 total courses, got %v", resp["total_courses"])
+	}
+}
+
+// ============================================
+// ASSIGNMENT TESTS
+// ============================================
+
+func TestCreateAssignment(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.POST("/courses/:id/assignments", gw.CreateAssignment)
+
+	reqBody := map[string]interface{}{
+		"title":       "Midterm Exam",
+		"description": "Covers sorting and graph algorithms",
+		"max_score":   100,
+	}
+	jsonData, _ := json.Marshal(reqBody)
+
+	req, _ := http.NewRequest("POST", "/courses/course-123/assignments", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Errorf("Expected status 201, got %d", w.Code)
+	}
+
+	var resp map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &resp)
+
+	if resp["title"] != "Midterm Exam" {
+		t.Errorf("Expected title 'Midterm Exam', got %v", resp["title"])
+	}
+}
+
+func TestGetAssignment(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.GET("/assignments/:id", gw.GetAssignment)
+
+	req, _ := http.NewRequest("GET", "/assignments/assignment-123", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	var resp map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &resp)
+
+	if resp["title"] != "Midterm Exam" {
+		t.Errorf("Expected title 'Midterm Exam', got %v", resp["title"])
+	}
+}
+
+func TestUpdateAssignment(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.PUT("/assignments/:id", gw.UpdateAssignment)
+
+	reqBody := map[string]interface{}{
+		"title":       "Midterm Exam - Updated",
+		"description": "Updated description",
+		"max_score":   150,
+	}
+	jsonData, _ := json.Marshal(reqBody)
+
+	req, _ := http.NewRequest("PUT", "/assignments/assignment-123", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestDeleteAssignment(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.DELETE("/assignments/:id", gw.DeleteAssignment)
+
+	req, _ := http.NewRequest("DELETE", "/assignments/assignment-123", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestListAssignments(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.GET("/courses/:id/assignments", gw.ListAssignments)
+
+	req, _ := http.NewRequest("GET", "/courses/course-123/assignments", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	var resp map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &resp)
+
+	assignments := resp["assignments"].([]interface{})
+	if len(assignments) != 1 {
+		t.Errorf("Expected 1 assignment, got %d", len(assignments))
+	}
+}
+
+func TestGetStudentCourseGrade(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.GET("/courses/:id/student-grade", gw.GetStudentCourseGrade)
+
+	req, _ := http.NewRequest("GET", "/courses/course-123/student-grade?student_id=student-123", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	var resp map[string]interface{}
+	json.Unmarshal(w.Body.Bytes(), &resp)
+
+	if resp["overall_score"].(float64) != 95.0 {
+		t.Errorf("Expected overall_score 95.0, got %v", resp["overall_score"])
+	}
+}
+
+func TestGetStudentCourseGradeMissingStudentID(t *testing.T) {
+	r, gw := setupTeacherRouter()
+	r.GET("/courses/:id/student-grade", gw.GetStudentCourseGrade)
+
+	req, _ := http.NewRequest("GET", "/courses/course-123/student-grade", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400, got %d", w.Code)
 	}
 }
