@@ -36,6 +36,7 @@ Authorization: Bearer <your-jwt-token>
 
 **Teacher-Only Routes**:
 - Course creation, update, deletion
+- Assignment creation, update, deletion
 - Grade assignment
 - Gradebook viewing
 - Teacher dashboard
@@ -617,6 +618,8 @@ Authorization: Bearer <your-jwt-token>
 ### Get Student Report Card
 **GET** `/api/v1/students/:id/report-card`
 
+Returns all grades for the student, broken down by assignment.
+
 **Response:** `200 OK`
 ```json
 {
@@ -628,11 +631,17 @@ Authorization: Bearer <your-jwt-token>
   "academic_record": [
     {
       "course_title": "Advanced Algorithms",
-      "score": 95
+      "score": 95,
+      "assignment_title": "Midterm Exam",
+      "max_score": 100,
+      "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0001"
     },
     {
       "course_title": "Operating Systems",
-      "score": 88
+      "score": 45,
+      "assignment_title": "Lab Report 1",
+      "max_score": 50,
+      "assignment_id": "a200f1ee-6c54-4b01-90e6-d701748f0003"
     }
   ],
   "generated_at": "2026-01-28T10:30:00Z"
@@ -855,6 +864,141 @@ Authorization: Bearer <your-jwt-token>
 
 ---
 
+## Assignment APIs
+
+### Create Assignment
+**POST** `/api/v1/courses/:id/assignments`
+
+**Teacher Only**
+
+**Request:**
+```json
+{
+  "title": "Midterm Exam",
+  "description": "Covers sorting and graph algorithms",
+  "max_score": 100
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
+  "title": "Midterm Exam",
+  "max_score": 100
+}
+```
+
+**Notes:**
+- `max_score` defaults to 100 if not provided or <= 0
+- The course ID comes from the URL path parameter
+
+---
+
+### List Assignments
+**GET** `/api/v1/courses/:id/assignments`
+
+**Protected (Any authenticated user)**
+
+**Response:** `200 OK`
+```json
+{
+  "assignments": [
+    {
+      "id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
+      "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+      "course_title": "Advanced Algorithms",
+      "title": "Midterm Exam",
+      "description": "Covers sorting and graph algorithms",
+      "max_score": 100
+    },
+    {
+      "id": "a100f1ee-6c54-4b01-90e6-d701748f0002",
+      "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+      "course_title": "Advanced Algorithms",
+      "title": "Final Project",
+      "description": "Implement a novel algorithm",
+      "max_score": 200
+    }
+  ]
+}
+```
+
+---
+
+### Get Assignment Details
+**GET** `/api/v1/assignments/:id`
+
+**Protected (Any authenticated user)**
+
+**Response:** `200 OK`
+```json
+{
+  "id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "course_title": "Advanced Algorithms",
+  "title": "Midterm Exam",
+  "description": "Covers sorting and graph algorithms",
+  "max_score": 100
+}
+```
+
+**Error Response:** `404 Not Found`
+```json
+{
+  "error": "Assignment not found"
+}
+```
+
+---
+
+### Update Assignment
+**PUT** `/api/v1/assignments/:id`
+
+**Teacher Only**
+
+**Request:**
+```json
+{
+  "title": "Midterm Exam - Updated",
+  "description": "Updated scope: sorting, graphs, and dynamic programming",
+  "max_score": 150
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
+  "title": "Midterm Exam - Updated",
+  "max_score": 150
+}
+```
+
+---
+
+### Delete Assignment
+**DELETE** `/api/v1/assignments/:id`
+
+**Teacher Only**
+
+**Response:** `200 OK` (Success)
+```json
+{
+  "success": true,
+  "message": "Assignment deleted successfully"
+}
+```
+
+**Response:** `409 Conflict` (Has existing grades)
+```json
+{
+  "error": "Cannot delete assignment with 12 existing grades"
+}
+```
+
+---
+
 ## Enrollment APIs
 
 ### Enroll Student
@@ -891,11 +1035,19 @@ Authorization: Bearer <your-jwt-token>
 ### Assign Grade
 **POST** `/api/v1/grades`
 
+**Teacher Only**
+
+Grades are assigned per assignment (not per course). The service validates:
+- Student exists (via Student Service)
+- Assignment exists
+- Score does not exceed the assignment's `max_score`
+- Student is enrolled in the assignment's course
+
 **Request:**
 ```json
 {
   "teacher_id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
-  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
   "student_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
   "score": 95
 }
@@ -909,10 +1061,17 @@ Authorization: Bearer <your-jwt-token>
 }
 ```
 
+**Error Responses:**
+- `502 Bad Gateway` - Student not found, assignment not found, score exceeds max, or student not enrolled
+
 ---
 
 ### Get Course Gradebook
-**GET** `/api/v1/courses/:course_id/grades`
+**GET** `/api/v1/courses/:id/grades`
+
+**Teacher Only**
+
+Returns all grades for a course, grouped by assignment.
 
 **Response:** `200 OK`
 ```json
@@ -925,16 +1084,66 @@ Authorization: Bearer <your-jwt-token>
       "student_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
       "student_name": "John Doe",
       "student_number": "STD-2026-001",
-      "score": 95
+      "score": 95,
+      "assignment_title": "Midterm Exam",
+      "max_score": 100,
+      "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0001"
     },
     {
       "grade_id": "g101f1ee-6c54-4b01-90e6-d701748f0851",
       "student_id": "a888f1ee-6c54-4b01-90e6-d701748f0852",
       "student_name": "Jane Smith",
       "student_number": "STD-2026-002",
-      "score": 88
+      "score": 88,
+      "assignment_title": "Midterm Exam",
+      "max_score": 100,
+      "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0001"
     }
   ]
+}
+```
+
+---
+
+### Get Student Course Grade
+**GET** `/api/v1/courses/:id/student-grade?student_id=UUID`
+
+**Protected (Any authenticated user)**
+
+Computes the overall course grade for a student on the fly. The overall score is a weighted percentage: `SUM(score) / SUM(max_score) * 100`.
+
+**Query Params:** `student_id` (required)
+
+**Response:** `200 OK`
+```json
+{
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "course_title": "Advanced Algorithms",
+  "student_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
+  "overall_score": 63.33,
+  "total_score": 190,
+  "total_max_score": 300,
+  "assignments": [
+    {
+      "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0001",
+      "assignment_title": "Midterm Exam",
+      "score": 95,
+      "max_score": 100
+    },
+    {
+      "assignment_id": "a100f1ee-6c54-4b01-90e6-d701748f0002",
+      "assignment_title": "Final Project",
+      "score": 95,
+      "max_score": 200
+    }
+  ]
+}
+```
+
+**Error Response:** `400 Bad Request` (missing student_id)
+```json
+{
+  "error": "student_id query parameter is required"
 }
 ```
 
@@ -1048,4 +1257,26 @@ curl -X POST http://localhost:3000/api/v1/courses \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"teacher_id":"xxx","title":"New Course","description":"Description"}'
+```
+
+### 4. Create an Assignment for a Course
+```bash
+curl -X POST http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/assignments \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Midterm Exam","description":"Covers chapters 1-5","max_score":100}'
+```
+
+### 5. Grade a Student on an Assignment
+```bash
+curl -X POST http://localhost:3000/api/v1/grades \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"teacher_id":"xxx","assignment_id":"yyy","student_id":"zzz","score":95}'
+```
+
+### 6. Get a Student's Overall Course Grade
+```bash
+curl -X GET "http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/student-grade?student_id=a999f1ee-6c54-4b01-90e6-d701748f0851" \
+  -H "Authorization: Bearer $TOKEN"
 ```
