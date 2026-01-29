@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.0
 // - protoc             v6.33.1
-// source: proto/teacher.proto
+// source: teacher.proto
 
 package teacher
 
@@ -19,23 +19,29 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TeacherService_LoginTeacher_FullMethodName         = "/teacher.TeacherService/LoginTeacher"
-	TeacherService_CreateTeacher_FullMethodName        = "/teacher.TeacherService/CreateTeacher"
-	TeacherService_GetTeacher_FullMethodName           = "/teacher.TeacherService/GetTeacher"
-	TeacherService_UpdateTeacher_FullMethodName        = "/teacher.TeacherService/UpdateTeacher"
-	TeacherService_DeleteTeacher_FullMethodName        = "/teacher.TeacherService/DeleteTeacher"
-	TeacherService_ListTeachers_FullMethodName         = "/teacher.TeacherService/ListTeachers"
-	TeacherService_CreateCourse_FullMethodName         = "/teacher.TeacherService/CreateCourse"
-	TeacherService_GetCourses_FullMethodName           = "/teacher.TeacherService/GetCourses"
-	TeacherService_GetCourse_FullMethodName            = "/teacher.TeacherService/GetCourse"
-	TeacherService_UpdateCourse_FullMethodName         = "/teacher.TeacherService/UpdateCourse"
-	TeacherService_DeleteCourse_FullMethodName         = "/teacher.TeacherService/DeleteCourse"
-	TeacherService_EnrollStudent_FullMethodName        = "/teacher.TeacherService/EnrollStudent"
-	TeacherService_GetCourseEnrollments_FullMethodName = "/teacher.TeacherService/GetCourseEnrollments"
-	TeacherService_AssignGrade_FullMethodName          = "/teacher.TeacherService/AssignGrade"
-	TeacherService_GetStudentGrades_FullMethodName     = "/teacher.TeacherService/GetStudentGrades"
-	TeacherService_GetCourseGrades_FullMethodName      = "/teacher.TeacherService/GetCourseGrades"
-	TeacherService_GetTeacherDashboard_FullMethodName  = "/teacher.TeacherService/GetTeacherDashboard"
+	TeacherService_LoginTeacher_FullMethodName          = "/teacher.TeacherService/LoginTeacher"
+	TeacherService_CreateTeacher_FullMethodName         = "/teacher.TeacherService/CreateTeacher"
+	TeacherService_GetTeacher_FullMethodName            = "/teacher.TeacherService/GetTeacher"
+	TeacherService_UpdateTeacher_FullMethodName         = "/teacher.TeacherService/UpdateTeacher"
+	TeacherService_DeleteTeacher_FullMethodName         = "/teacher.TeacherService/DeleteTeacher"
+	TeacherService_ListTeachers_FullMethodName          = "/teacher.TeacherService/ListTeachers"
+	TeacherService_CreateCourse_FullMethodName          = "/teacher.TeacherService/CreateCourse"
+	TeacherService_GetCourses_FullMethodName            = "/teacher.TeacherService/GetCourses"
+	TeacherService_GetCourse_FullMethodName             = "/teacher.TeacherService/GetCourse"
+	TeacherService_UpdateCourse_FullMethodName          = "/teacher.TeacherService/UpdateCourse"
+	TeacherService_DeleteCourse_FullMethodName          = "/teacher.TeacherService/DeleteCourse"
+	TeacherService_CreateAssignment_FullMethodName      = "/teacher.TeacherService/CreateAssignment"
+	TeacherService_GetAssignment_FullMethodName         = "/teacher.TeacherService/GetAssignment"
+	TeacherService_UpdateAssignment_FullMethodName      = "/teacher.TeacherService/UpdateAssignment"
+	TeacherService_DeleteAssignment_FullMethodName      = "/teacher.TeacherService/DeleteAssignment"
+	TeacherService_ListAssignments_FullMethodName       = "/teacher.TeacherService/ListAssignments"
+	TeacherService_EnrollStudent_FullMethodName         = "/teacher.TeacherService/EnrollStudent"
+	TeacherService_GetCourseEnrollments_FullMethodName  = "/teacher.TeacherService/GetCourseEnrollments"
+	TeacherService_AssignGrade_FullMethodName           = "/teacher.TeacherService/AssignGrade"
+	TeacherService_GetStudentGrades_FullMethodName      = "/teacher.TeacherService/GetStudentGrades"
+	TeacherService_GetCourseGrades_FullMethodName       = "/teacher.TeacherService/GetCourseGrades"
+	TeacherService_GetStudentCourseGrade_FullMethodName = "/teacher.TeacherService/GetStudentCourseGrade"
+	TeacherService_GetTeacherDashboard_FullMethodName   = "/teacher.TeacherService/GetTeacherDashboard"
 )
 
 // TeacherServiceClient is the client API for TeacherService service.
@@ -56,6 +62,12 @@ type TeacherServiceClient interface {
 	GetCourse(ctx context.Context, in *GetCourseRequest, opts ...grpc.CallOption) (*CourseDetailResponse, error)
 	UpdateCourse(ctx context.Context, in *UpdateCourseRequest, opts ...grpc.CallOption) (*CourseResponse, error)
 	DeleteCourse(ctx context.Context, in *DeleteCourseRequest, opts ...grpc.CallOption) (*DeleteCourseResponse, error)
+	// Assignment Management
+	CreateAssignment(ctx context.Context, in *CreateAssignmentRequest, opts ...grpc.CallOption) (*AssignmentResponse, error)
+	GetAssignment(ctx context.Context, in *GetAssignmentRequest, opts ...grpc.CallOption) (*AssignmentDetailResponse, error)
+	UpdateAssignment(ctx context.Context, in *UpdateAssignmentRequest, opts ...grpc.CallOption) (*AssignmentResponse, error)
+	DeleteAssignment(ctx context.Context, in *DeleteAssignmentRequest, opts ...grpc.CallOption) (*DeleteAssignmentResponse, error)
+	ListAssignments(ctx context.Context, in *ListAssignmentsRequest, opts ...grpc.CallOption) (*ListAssignmentsResponse, error)
 	// Enrollment
 	EnrollStudent(ctx context.Context, in *EnrollStudentRequest, opts ...grpc.CallOption) (*EnrollmentResponse, error)
 	GetCourseEnrollments(ctx context.Context, in *GetCourseEnrollmentsRequest, opts ...grpc.CallOption) (*GetCourseEnrollmentsResponse, error)
@@ -63,6 +75,7 @@ type TeacherServiceClient interface {
 	AssignGrade(ctx context.Context, in *AssignGradeRequest, opts ...grpc.CallOption) (*GradeResponse, error)
 	GetStudentGrades(ctx context.Context, in *GetStudentGradesRequest, opts ...grpc.CallOption) (*StudentGradesResponse, error)
 	GetCourseGrades(ctx context.Context, in *GetCourseGradesRequest, opts ...grpc.CallOption) (*CourseGradesResponse, error)
+	GetStudentCourseGrade(ctx context.Context, in *GetStudentCourseGradeRequest, opts ...grpc.CallOption) (*StudentCourseGradeResponse, error)
 	// Reporting
 	GetTeacherDashboard(ctx context.Context, in *GetTeacherDashboardRequest, opts ...grpc.CallOption) (*TeacherDashboardResponse, error)
 }
@@ -185,6 +198,56 @@ func (c *teacherServiceClient) DeleteCourse(ctx context.Context, in *DeleteCours
 	return out, nil
 }
 
+func (c *teacherServiceClient) CreateAssignment(ctx context.Context, in *CreateAssignmentRequest, opts ...grpc.CallOption) (*AssignmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignmentResponse)
+	err := c.cc.Invoke(ctx, TeacherService_CreateAssignment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *teacherServiceClient) GetAssignment(ctx context.Context, in *GetAssignmentRequest, opts ...grpc.CallOption) (*AssignmentDetailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignmentDetailResponse)
+	err := c.cc.Invoke(ctx, TeacherService_GetAssignment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *teacherServiceClient) UpdateAssignment(ctx context.Context, in *UpdateAssignmentRequest, opts ...grpc.CallOption) (*AssignmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignmentResponse)
+	err := c.cc.Invoke(ctx, TeacherService_UpdateAssignment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *teacherServiceClient) DeleteAssignment(ctx context.Context, in *DeleteAssignmentRequest, opts ...grpc.CallOption) (*DeleteAssignmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAssignmentResponse)
+	err := c.cc.Invoke(ctx, TeacherService_DeleteAssignment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *teacherServiceClient) ListAssignments(ctx context.Context, in *ListAssignmentsRequest, opts ...grpc.CallOption) (*ListAssignmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAssignmentsResponse)
+	err := c.cc.Invoke(ctx, TeacherService_ListAssignments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *teacherServiceClient) EnrollStudent(ctx context.Context, in *EnrollStudentRequest, opts ...grpc.CallOption) (*EnrollmentResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EnrollmentResponse)
@@ -235,6 +298,16 @@ func (c *teacherServiceClient) GetCourseGrades(ctx context.Context, in *GetCours
 	return out, nil
 }
 
+func (c *teacherServiceClient) GetStudentCourseGrade(ctx context.Context, in *GetStudentCourseGradeRequest, opts ...grpc.CallOption) (*StudentCourseGradeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StudentCourseGradeResponse)
+	err := c.cc.Invoke(ctx, TeacherService_GetStudentCourseGrade_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *teacherServiceClient) GetTeacherDashboard(ctx context.Context, in *GetTeacherDashboardRequest, opts ...grpc.CallOption) (*TeacherDashboardResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TeacherDashboardResponse)
@@ -263,6 +336,12 @@ type TeacherServiceServer interface {
 	GetCourse(context.Context, *GetCourseRequest) (*CourseDetailResponse, error)
 	UpdateCourse(context.Context, *UpdateCourseRequest) (*CourseResponse, error)
 	DeleteCourse(context.Context, *DeleteCourseRequest) (*DeleteCourseResponse, error)
+	// Assignment Management
+	CreateAssignment(context.Context, *CreateAssignmentRequest) (*AssignmentResponse, error)
+	GetAssignment(context.Context, *GetAssignmentRequest) (*AssignmentDetailResponse, error)
+	UpdateAssignment(context.Context, *UpdateAssignmentRequest) (*AssignmentResponse, error)
+	DeleteAssignment(context.Context, *DeleteAssignmentRequest) (*DeleteAssignmentResponse, error)
+	ListAssignments(context.Context, *ListAssignmentsRequest) (*ListAssignmentsResponse, error)
 	// Enrollment
 	EnrollStudent(context.Context, *EnrollStudentRequest) (*EnrollmentResponse, error)
 	GetCourseEnrollments(context.Context, *GetCourseEnrollmentsRequest) (*GetCourseEnrollmentsResponse, error)
@@ -270,6 +349,7 @@ type TeacherServiceServer interface {
 	AssignGrade(context.Context, *AssignGradeRequest) (*GradeResponse, error)
 	GetStudentGrades(context.Context, *GetStudentGradesRequest) (*StudentGradesResponse, error)
 	GetCourseGrades(context.Context, *GetCourseGradesRequest) (*CourseGradesResponse, error)
+	GetStudentCourseGrade(context.Context, *GetStudentCourseGradeRequest) (*StudentCourseGradeResponse, error)
 	// Reporting
 	GetTeacherDashboard(context.Context, *GetTeacherDashboardRequest) (*TeacherDashboardResponse, error)
 	mustEmbedUnimplementedTeacherServiceServer()
@@ -315,6 +395,21 @@ func (UnimplementedTeacherServiceServer) UpdateCourse(context.Context, *UpdateCo
 func (UnimplementedTeacherServiceServer) DeleteCourse(context.Context, *DeleteCourseRequest) (*DeleteCourseResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteCourse not implemented")
 }
+func (UnimplementedTeacherServiceServer) CreateAssignment(context.Context, *CreateAssignmentRequest) (*AssignmentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateAssignment not implemented")
+}
+func (UnimplementedTeacherServiceServer) GetAssignment(context.Context, *GetAssignmentRequest) (*AssignmentDetailResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAssignment not implemented")
+}
+func (UnimplementedTeacherServiceServer) UpdateAssignment(context.Context, *UpdateAssignmentRequest) (*AssignmentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateAssignment not implemented")
+}
+func (UnimplementedTeacherServiceServer) DeleteAssignment(context.Context, *DeleteAssignmentRequest) (*DeleteAssignmentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteAssignment not implemented")
+}
+func (UnimplementedTeacherServiceServer) ListAssignments(context.Context, *ListAssignmentsRequest) (*ListAssignmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAssignments not implemented")
+}
 func (UnimplementedTeacherServiceServer) EnrollStudent(context.Context, *EnrollStudentRequest) (*EnrollmentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method EnrollStudent not implemented")
 }
@@ -329,6 +424,9 @@ func (UnimplementedTeacherServiceServer) GetStudentGrades(context.Context, *GetS
 }
 func (UnimplementedTeacherServiceServer) GetCourseGrades(context.Context, *GetCourseGradesRequest) (*CourseGradesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCourseGrades not implemented")
+}
+func (UnimplementedTeacherServiceServer) GetStudentCourseGrade(context.Context, *GetStudentCourseGradeRequest) (*StudentCourseGradeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetStudentCourseGrade not implemented")
 }
 func (UnimplementedTeacherServiceServer) GetTeacherDashboard(context.Context, *GetTeacherDashboardRequest) (*TeacherDashboardResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTeacherDashboard not implemented")
@@ -552,6 +650,96 @@ func _TeacherService_DeleteCourse_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TeacherService_CreateAssignment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAssignmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).CreateAssignment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_CreateAssignment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).CreateAssignment(ctx, req.(*CreateAssignmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TeacherService_GetAssignment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAssignmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).GetAssignment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_GetAssignment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).GetAssignment(ctx, req.(*GetAssignmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TeacherService_UpdateAssignment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAssignmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).UpdateAssignment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_UpdateAssignment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).UpdateAssignment(ctx, req.(*UpdateAssignmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TeacherService_DeleteAssignment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAssignmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).DeleteAssignment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_DeleteAssignment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).DeleteAssignment(ctx, req.(*DeleteAssignmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TeacherService_ListAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).ListAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_ListAssignments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).ListAssignments(ctx, req.(*ListAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TeacherService_EnrollStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EnrollStudentRequest)
 	if err := dec(in); err != nil {
@@ -642,6 +830,24 @@ func _TeacherService_GetCourseGrades_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TeacherService_GetStudentCourseGrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentCourseGradeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeacherServiceServer).GetStudentCourseGrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TeacherService_GetStudentCourseGrade_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeacherServiceServer).GetStudentCourseGrade(ctx, req.(*GetStudentCourseGradeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TeacherService_GetTeacherDashboard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetTeacherDashboardRequest)
 	if err := dec(in); err != nil {
@@ -712,6 +918,26 @@ var TeacherService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TeacherService_DeleteCourse_Handler,
 		},
 		{
+			MethodName: "CreateAssignment",
+			Handler:    _TeacherService_CreateAssignment_Handler,
+		},
+		{
+			MethodName: "GetAssignment",
+			Handler:    _TeacherService_GetAssignment_Handler,
+		},
+		{
+			MethodName: "UpdateAssignment",
+			Handler:    _TeacherService_UpdateAssignment_Handler,
+		},
+		{
+			MethodName: "DeleteAssignment",
+			Handler:    _TeacherService_DeleteAssignment_Handler,
+		},
+		{
+			MethodName: "ListAssignments",
+			Handler:    _TeacherService_ListAssignments_Handler,
+		},
+		{
 			MethodName: "EnrollStudent",
 			Handler:    _TeacherService_EnrollStudent_Handler,
 		},
@@ -732,10 +958,14 @@ var TeacherService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TeacherService_GetCourseGrades_Handler,
 		},
 		{
+			MethodName: "GetStudentCourseGrade",
+			Handler:    _TeacherService_GetStudentCourseGrade_Handler,
+		},
+		{
 			MethodName: "GetTeacherDashboard",
 			Handler:    _TeacherService_GetTeacherDashboard_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/teacher.proto",
+	Metadata: "teacher.proto",
 }

@@ -22,6 +22,13 @@ service TeacherService {
   rpc UpdateCourse (UpdateCourseRequest) returns (CourseResponse);
   rpc DeleteCourse (DeleteCourseRequest) returns (DeleteCourseResponse);
 
+  // Assignment Management
+  rpc CreateAssignment (CreateAssignmentRequest) returns (AssignmentResponse);
+  rpc GetAssignment (GetAssignmentRequest) returns (AssignmentDetailResponse);
+  rpc UpdateAssignment (UpdateAssignmentRequest) returns (AssignmentResponse);
+  rpc DeleteAssignment (DeleteAssignmentRequest) returns (DeleteAssignmentResponse);
+  rpc ListAssignments (ListAssignmentsRequest) returns (ListAssignmentsResponse);
+
   // Enrollment
   rpc EnrollStudent (EnrollStudentRequest) returns (EnrollmentResponse);
   rpc GetCourseEnrollments (GetCourseEnrollmentsRequest) returns (GetCourseEnrollmentsResponse);
@@ -30,6 +37,7 @@ service TeacherService {
   rpc AssignGrade (AssignGradeRequest) returns (GradeResponse);
   rpc GetStudentGrades (GetStudentGradesRequest) returns (StudentGradesResponse);
   rpc GetCourseGrades (GetCourseGradesRequest) returns (CourseGradesResponse);
+  rpc GetStudentCourseGrade (GetStudentCourseGradeRequest) returns (StudentCourseGradeResponse);
 
   // Reporting
   rpc GetTeacherDashboard (GetTeacherDashboardRequest) returns (TeacherDashboardResponse);
@@ -48,7 +56,7 @@ message CourseResponse {
 
 message AssignGradeRequest {
   string teacher_id = 1; // Security check
-  string course_id = 2;
+  string assignment_id = 2;
   string student_id = 3; // The UUID from Student Service
   int32 score = 4;
 }
@@ -65,6 +73,9 @@ message GetStudentGradesRequest {
 message GradeItem {
   string course_title = 1;
   int32 score = 2;
+  string assignment_title = 3;
+  int32 max_score = 4;
+  string assignment_id = 5;
 }
 
 message StudentGradesResponse {
@@ -161,6 +172,80 @@ message DeleteCourseResponse {
   string message = 2;
 }
 
+// Assignment Messages
+message CreateAssignmentRequest {
+  string course_id = 1;
+  string title = 2;
+  string description = 3;
+  int32 max_score = 4;
+}
+
+message AssignmentResponse {
+  string id = 1;
+  string title = 2;
+  int32 max_score = 3;
+}
+
+message GetAssignmentRequest {
+  string id = 1;
+}
+
+message AssignmentDetailResponse {
+  string id = 1;
+  string course_id = 2;
+  string course_title = 3;
+  string title = 4;
+  string description = 5;
+  int32 max_score = 6;
+}
+
+message UpdateAssignmentRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 max_score = 4;
+}
+
+message DeleteAssignmentRequest {
+  string id = 1;
+}
+
+message DeleteAssignmentResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListAssignmentsRequest {
+  string course_id = 1;
+}
+
+message ListAssignmentsResponse {
+  repeated AssignmentDetailResponse assignments = 1;
+}
+
+// Student Course Grade Messages
+message GetStudentCourseGradeRequest {
+  string course_id = 1;
+  string student_id = 2;
+}
+
+message AssignmentGradeItem {
+  string assignment_id = 1;
+  string assignment_title = 2;
+  int32 score = 3;
+  int32 max_score = 4;
+}
+
+message StudentCourseGradeResponse {
+  string course_id = 1;
+  string course_title = 2;
+  string student_id = 3;
+  double overall_score = 4;
+  int32 total_score = 5;
+  int32 total_max_score = 6;
+  repeated AssignmentGradeItem assignments = 7;
+}
+
 // Enrollment Messages
 message EnrollStudentRequest {
   string student_id = 1;
@@ -198,6 +283,9 @@ message StudentGradeItem {
   string student_number = 3;
   int32 score = 4;
   string grade_id = 5;
+  string assignment_title = 6;
+  int32 max_score = 7;
+  string assignment_id = 8;
 }
 
 message CourseGradesResponse {
