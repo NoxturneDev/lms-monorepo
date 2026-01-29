@@ -95,32 +95,48 @@ func (s *server) CreateCourse(ctx context.Context, req *teacherpb.CreateCourseRe
 
 // UPDATE THIS FUNCTION
 func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequest) (*teacherpb.GradeResponse, error) {
-	log.Printf("Assigning Grade for Student %v in Course %v", req.StudentId, req.CourseId)
+	log.Printf("Assigning Grade for Student %v on Assignment %v", req.StudentId, req.AssignmentId)
 
-	// ---------------------------------------------------------
-	// 1. THE CALL (East-West Traffic)
-	// ---------------------------------------------------------
+	// 1. Validate student exists via Student Service
 	log.Println("Validating student with Student Service...")
-
-	// We call the other microservice just like a local function!
 	_, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{
 		Id: req.StudentId,
 	})
 	if err != nil {
-		// If Student Service returns error (e.g., "not found"), we reject the request.
 		log.Printf("Student validation failed: %v", err)
 		return nil, fmt.Errorf("student not found: %v", err)
 	}
-
 	log.Println("Student verified! Proceeding to save grade.")
 
-	// ---------------------------------------------------------
-	// 2. Save to DB (Only if validation passed)
-	// ---------------------------------------------------------
-	query := `INSERT INTO grades (course_id, student_id, score) VALUES ($1, $2, $3) RETURNING id`
+	// 2. Look up the assignment and validate score <= max_score
+	var courseID string
+	var maxScore int32
+	err = s.db.QueryRow("SELECT course_id, max_score FROM assignments WHERE id = $1", req.AssignmentId).Scan(&courseID, &maxScore)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("assignment not found")
+		}
+		return nil, err
+	}
 
+	if req.Score > maxScore {
+		return nil, fmt.Errorf("score %d exceeds max score %d for this assignment", req.Score, maxScore)
+	}
+
+	// 3. Validate student is enrolled in the assignment's course
+	var enrolled bool
+	err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM enrollments WHERE course_id = $1 AND student_id = $2)", courseID, req.StudentId).Scan(&enrolled)
+	if err != nil {
+		return nil, err
+	}
+	if !enrolled {
+		return nil, fmt.Errorf("student is not enrolled in the course for this assignment")
+	}
+
+	// 4. Save to DB
+	query := `INSERT INTO grades (assignment_id, student_id, score) VALUES ($1, $2, $3) RETURNING id`
 	var id string
-	err = s.db.QueryRow(query, req.CourseId, req.StudentId, req.Score).Scan(&id)
+	err = s.db.QueryRow(query, req.AssignmentId, req.StudentId, req.Score).Scan(&id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to assign grade: %v", err)
 	}
@@ -131,13 +147,13 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudentGradesRequest) (*teacherpb.StudentGradesResponse, error) {
 	log.Printf("Fetching grades for student: %v", req.StudentId)
 
-	// A simple JOIN to get the course title along with the score
 	query := `
-        SELECT c.title, g.score 
-        FROM grades g
-        JOIN courses c ON g.course_id = c.id
-        WHERE g.student_id = $1
-    `
+		SELECT c.title, g.score, a.title, a.max_score, a.id
+		FROM grades g
+		JOIN assignments a ON g.assignment_id = a.id
+		JOIN courses c ON a.course_id = c.id
+		WHERE g.student_id = $1
+	`
 
 	rows, err := s.db.Query(query, req.StudentId)
 	if err != nil {
@@ -148,14 +164,17 @@ func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudent
 	var gradeList []*teacherpb.GradeItem
 
 	for rows.Next() {
-		var title string
-		var score int32
-		if err := rows.Scan(&title, &score); err != nil {
+		var courseTitle, assignmentTitle, assignmentID string
+		var score, maxScore int32
+		if err := rows.Scan(&courseTitle, &score, &assignmentTitle, &maxScore, &assignmentID); err != nil {
 			continue
 		}
 		gradeList = append(gradeList, &teacherpb.GradeItem{
-			CourseTitle: title,
-			Score:       score,
+			CourseTitle:     courseTitle,
+			Score:           score,
+			AssignmentTitle: assignmentTitle,
+			MaxScore:        maxScore,
+			AssignmentId:    assignmentID,
 		})
 	}
 
@@ -371,6 +390,185 @@ func (s *server) DeleteCourse(ctx context.Context, req *teacherpb.DeleteCourseRe
 }
 
 // ============================================
+// ASSIGNMENT MANAGEMENT
+// ============================================
+
+func (s *server) CreateAssignment(ctx context.Context, req *teacherpb.CreateAssignmentRequest) (*teacherpb.AssignmentResponse, error) {
+	log.Printf("Creating Assignment: %v for course %v", req.Title, req.CourseId)
+
+	// Validate course exists
+	var courseExists bool
+	err := s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = $1)", req.CourseId).Scan(&courseExists)
+	if err != nil {
+		return nil, err
+	}
+	if !courseExists {
+		return nil, fmt.Errorf("course not found")
+	}
+
+	maxScore := req.MaxScore
+	if maxScore <= 0 {
+		maxScore = 100
+	}
+
+	query := `INSERT INTO assignments (course_id, title, description, max_score) VALUES ($1, $2, $3, $4) RETURNING id`
+	var id string
+	err = s.db.QueryRow(query, req.CourseId, req.Title, req.Description, maxScore).Scan(&id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create assignment: %v", err)
+	}
+
+	return &teacherpb.AssignmentResponse{Id: id, Title: req.Title, MaxScore: maxScore}, nil
+}
+
+func (s *server) GetAssignment(ctx context.Context, req *teacherpb.GetAssignmentRequest) (*teacherpb.AssignmentDetailResponse, error) {
+	log.Printf("Getting Assignment: %v", req.Id)
+
+	query := `SELECT a.id, a.course_id, c.title, a.title, a.description, a.max_score
+			FROM assignments a
+			JOIN courses c ON a.course_id = c.id
+			WHERE a.id = $1`
+
+	var assignment teacherpb.AssignmentDetailResponse
+	err := s.db.QueryRow(query, req.Id).Scan(
+		&assignment.Id, &assignment.CourseId, &assignment.CourseTitle,
+		&assignment.Title, &assignment.Description, &assignment.MaxScore,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("assignment not found")
+		}
+		return nil, err
+	}
+	return &assignment, nil
+}
+
+func (s *server) UpdateAssignment(ctx context.Context, req *teacherpb.UpdateAssignmentRequest) (*teacherpb.AssignmentResponse, error) {
+	log.Printf("Updating Assignment: %v", req.Id)
+
+	maxScore := req.MaxScore
+	if maxScore <= 0 {
+		maxScore = 100
+	}
+
+	query := `UPDATE assignments SET title = $1, description = $2, max_score = $3 WHERE id = $4 RETURNING id, title, max_score`
+	var assignment teacherpb.AssignmentResponse
+	err := s.db.QueryRow(query, req.Title, req.Description, maxScore, req.Id).Scan(&assignment.Id, &assignment.Title, &assignment.MaxScore)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update assignment: %v", err)
+	}
+	return &assignment, nil
+}
+
+func (s *server) DeleteAssignment(ctx context.Context, req *teacherpb.DeleteAssignmentRequest) (*teacherpb.DeleteAssignmentResponse, error) {
+	log.Printf("Deleting Assignment: %v", req.Id)
+
+	// Check for existing grades
+	var gradeCount int
+	err := s.db.QueryRow("SELECT COUNT(*) FROM grades WHERE assignment_id = $1", req.Id).Scan(&gradeCount)
+	if err != nil {
+		return nil, err
+	}
+
+	if gradeCount > 0 {
+		return &teacherpb.DeleteAssignmentResponse{
+			Success: false,
+			Message: fmt.Sprintf("Cannot delete assignment with %d existing grades", gradeCount),
+		}, nil
+	}
+
+	_, err = s.db.Exec("DELETE FROM assignments WHERE id = $1", req.Id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete assignment: %v", err)
+	}
+	return &teacherpb.DeleteAssignmentResponse{Success: true, Message: "Assignment deleted successfully"}, nil
+}
+
+func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignmentsRequest) (*teacherpb.ListAssignmentsResponse, error) {
+	log.Printf("Listing assignments for course: %v", req.CourseId)
+
+	query := `SELECT a.id, a.course_id, c.title, a.title, a.description, a.max_score
+			FROM assignments a
+			JOIN courses c ON a.course_id = c.id
+			WHERE a.course_id = $1`
+
+	rows, err := s.db.Query(query, req.CourseId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var assignments []*teacherpb.AssignmentDetailResponse
+	for rows.Next() {
+		var a teacherpb.AssignmentDetailResponse
+		if err := rows.Scan(&a.Id, &a.CourseId, &a.CourseTitle, &a.Title, &a.Description, &a.MaxScore); err != nil {
+			continue
+		}
+		assignments = append(assignments, &a)
+	}
+	return &teacherpb.ListAssignmentsResponse{Assignments: assignments}, nil
+}
+
+// ============================================
+// STUDENT COURSE GRADE
+// ============================================
+
+func (s *server) GetStudentCourseGrade(ctx context.Context, req *teacherpb.GetStudentCourseGradeRequest) (*teacherpb.StudentCourseGradeResponse, error) {
+	log.Printf("Getting student course grade: student=%v course=%v", req.StudentId, req.CourseId)
+
+	// Get course title
+	var courseTitle string
+	err := s.db.QueryRow("SELECT title FROM courses WHERE id = $1", req.CourseId).Scan(&courseTitle)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("course not found")
+		}
+		return nil, err
+	}
+
+	// Get per-assignment breakdown
+	query := `
+		SELECT a.id, a.title, g.score, a.max_score
+		FROM grades g
+		JOIN assignments a ON g.assignment_id = a.id
+		WHERE a.course_id = $1 AND g.student_id = $2
+	`
+	rows, err := s.db.Query(query, req.CourseId, req.StudentId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []*teacherpb.AssignmentGradeItem
+	var totalScore, totalMaxScore int32
+
+	for rows.Next() {
+		var item teacherpb.AssignmentGradeItem
+		if err := rows.Scan(&item.AssignmentId, &item.AssignmentTitle, &item.Score, &item.MaxScore); err != nil {
+			continue
+		}
+		totalScore += item.Score
+		totalMaxScore += item.MaxScore
+		items = append(items, &item)
+	}
+
+	var overallScore float64
+	if totalMaxScore > 0 {
+		overallScore = float64(totalScore) / float64(totalMaxScore) * 100
+	}
+
+	return &teacherpb.StudentCourseGradeResponse{
+		CourseId:      req.CourseId,
+		CourseTitle:   courseTitle,
+		StudentId:     req.StudentId,
+		OverallScore:  overallScore,
+		TotalScore:    totalScore,
+		TotalMaxScore: totalMaxScore,
+		Assignments:   items,
+	}, nil
+}
+
+// ============================================
 // ENROLLMENT
 // ============================================
 
@@ -442,7 +640,10 @@ func (s *server) GetCourseGrades(ctx context.Context, req *teacherpb.GetCourseGr
 		return nil, fmt.Errorf("course not found")
 	}
 
-	query := `SELECT g.id, g.student_id, g.score FROM grades g WHERE g.course_id = $1`
+	query := `SELECT g.id, g.student_id, g.score, a.title, a.max_score, a.id
+			FROM grades g
+			JOIN assignments a ON g.assignment_id = a.id
+			WHERE a.course_id = $1`
 	rows, err := s.db.Query(query, req.CourseId)
 	if err != nil {
 		return nil, err
@@ -451,37 +652,43 @@ func (s *server) GetCourseGrades(ctx context.Context, req *teacherpb.GetCourseGr
 
 	var grades []*teacherpb.StudentGradeItem
 	for rows.Next() {
-		var gradeId, studentId string
-		var score int32
-		if err := rows.Scan(&gradeId, &studentId, &score); err != nil {
+		var gradeId, studentId, assignmentTitle, assignmentId string
+		var score, maxScore int32
+		if err := rows.Scan(&gradeId, &studentId, &score, &assignmentTitle, &maxScore, &assignmentId); err != nil {
 			continue
 		}
 
 		studentResp, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: studentId})
 		if err != nil {
 			grades = append(grades, &teacherpb.StudentGradeItem{
-				GradeId:       gradeId,
-				StudentId:     studentId,
-				StudentName:   "Unknown",
-				StudentNumber: "N/A",
-				Score:         score,
+				GradeId:         gradeId,
+				StudentId:       studentId,
+				StudentName:     "Unknown",
+				StudentNumber:   "N/A",
+				Score:           score,
+				AssignmentTitle: assignmentTitle,
+				MaxScore:        maxScore,
+				AssignmentId:    assignmentId,
 			})
 			continue
 		}
 
 		grades = append(grades, &teacherpb.StudentGradeItem{
-			GradeId:       gradeId,
-			StudentId:     studentId,
-			StudentName:   studentResp.FullName,
-			StudentNumber: studentResp.StudentNumber,
-			Score:         score,
+			GradeId:         gradeId,
+			StudentId:       studentId,
+			StudentName:     studentResp.FullName,
+			StudentNumber:   studentResp.StudentNumber,
+			Score:           score,
+			AssignmentTitle: assignmentTitle,
+			MaxScore:        maxScore,
+			AssignmentId:    assignmentId,
 		})
 	}
 
 	return &teacherpb.CourseGradesResponse{
 		CourseId:    req.CourseId,
 		CourseTitle: courseTitle,
-		Grades:      grades,
+		Grades:     grades,
 	}, nil
 }
 
@@ -537,11 +744,11 @@ func (s *server) GetTeacherDashboard(ctx context.Context, req *teacherpb.GetTeac
 	}
 
 	return &teacherpb.TeacherDashboardResponse{
-		TeacherId:              req.TeacherId,
-		TeacherName:            teacherName,
-		TotalCourses:           totalCourses,
-		TotalStudentsEnrolled:  totalStudents,
-		Courses:                courseSummaries,
+		TeacherId:             req.TeacherId,
+		TeacherName:           teacherName,
+		TotalCourses:          totalCourses,
+		TotalStudentsEnrolled: totalStudents,
+		Courses:               courseSummaries,
 	}, nil
 }
 
