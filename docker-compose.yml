@@ -95,9 +95,11 @@ services:
     environment:
       STUDENT_SERVICE_URL: "student-service:8080"
       TEACHER_SERVICE_URL: "teacher-service:8080"
+      SCHOOL_SERVICE_URL: "school-service:8080"
     depends_on:
       - student-service
       - teacher-service
+      - school-service
     volumes:
       - ./gateway:/app/gateway
       - ./proto:/app/proto

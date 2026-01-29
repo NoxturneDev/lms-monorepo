@@ -295,7 +295,7 @@ func (gw *Gateway) GetStudentCoursesByID(c *gin.Context) {
 // ============================================
 
 func (gw *Gateway) GetCourseGrades(c *gin.Context) {
-	courseID := c.Param("course_id")
+	courseID := c.Param("id")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -322,6 +322,22 @@ func (gw *Gateway) GetTeacherDashboard(c *gin.Context) {
 
 	resp, err := gw.TeacherClient.GetTeacherDashboard(ctx, &teacherpb.GetTeacherDashboardRequest{
 		TeacherId: teacherID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+func (gw *Gateway) GetCourseEnrollments(c *gin.Context) {
+	courseID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.TeacherClient.GetCourseEnrollments(ctx, &teacherpb.GetCourseEnrollmentsRequest{
+		CourseId: courseID,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

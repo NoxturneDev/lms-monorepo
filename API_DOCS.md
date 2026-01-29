@@ -27,6 +27,7 @@ Authorization: Bearer <your-jwt-token>
 **Public Routes** (No authentication required):
 - `POST /api/v1/auth/teacher/login` - Teacher login
 - `POST /api/v1/auth/student/login` - Student login
+- `POST /api/v1/auth/admin/login` - Admin login
 - `POST /api/v1/students` - Student registration
 - `POST /api/v1/teachers` - Teacher registration
 
@@ -38,6 +39,11 @@ Authorization: Bearer <your-jwt-token>
 - Grade assignment
 - Gradebook viewing
 - Teacher dashboard
+
+**Admin-Only Routes**:
+- Admin management (CRUD)
+- School management (CRUD)
+- Class management (CRUD)
 
 ---
 
@@ -101,6 +107,405 @@ Authorization: Bearer <your-jwt-token>
 ```json
 {
   "error": "Invalid email or password"
+}
+```
+
+---
+
+### Admin Login
+**POST** `/api/v1/auth/admin/login`
+
+**Request:**
+```json
+{
+  "email": "admin@school.edu",
+  "password": "adminsecret"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user_id": "f290f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "admin@school.edu",
+  "name": "Admin User",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School",
+  "userType": "admin"
+}
+```
+
+**Error Response:** `401 Unauthorized`
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+---
+
+## Admin APIs
+
+### Create Admin
+**POST** `/api/v1/admins`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "email": "admin@school.edu",
+  "password": "adminsecret",
+  "full_name": "Admin User",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": "f290f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "admin@school.edu",
+  "full_name": "Admin User",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School"
+}
+```
+
+---
+
+### Get All Admins
+**GET** `/api/v1/admins`
+
+**Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "admins": [
+    {
+      "id": "f290f1ee-6c54-4b01-90e6-d701748f0851",
+      "email": "admin@school.edu",
+      "full_name": "Admin User",
+      "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_name": "Central High School"
+    }
+  ]
+}
+```
+
+---
+
+### Get Admin Details
+**GET** `/api/v1/admins/:id`
+
+**Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "id": "f290f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "admin@school.edu",
+  "full_name": "Admin User",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School"
+}
+```
+
+**Error Response:** `404 Not Found`
+```json
+{
+  "error": "Admin not found"
+}
+```
+
+---
+
+### Update Admin
+**PUT** `/api/v1/admins/:id`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "email": "admin.updated@school.edu",
+  "full_name": "Admin User Updated",
+  "password": "newadminsecret",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "f290f1ee-6c54-4b01-90e6-d701748f0851",
+  "email": "admin.updated@school.edu",
+  "full_name": "Admin User Updated",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School"
+}
+```
+
+---
+
+### Delete Admin
+**DELETE** `/api/v1/admins/:id`
+
+**Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "message": "Admin deleted successfully"
+}
+```
+
+---
+
+## School APIs
+
+### Get All Schools
+**GET** `/api/v1/schools`
+
+**Protected (Any authenticated user)**
+
+**Response:** `200 OK`
+```json
+{
+  "schools": [
+    {
+      "id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+      "name": "Central High School",
+      "address": "123 Education Ave, City, State 12345"
+    },
+    {
+      "id": "s101f1ee-6c54-4b01-90e6-d701748f0851",
+      "name": "Downtown Elementary",
+      "address": "456 Learning Blvd, City, State 12346"
+    }
+  ]
+}
+```
+
+---
+
+### Get School Details
+**GET** `/api/v1/schools/:id`
+
+**Protected (Any authenticated user)**
+
+**Response:** `200 OK`
+```json
+{
+  "id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "name": "Central High School",
+  "address": "123 Education Ave, City, State 12345"
+}
+```
+
+**Error Response:** `404 Not Found`
+```json
+{
+  "error": "School not found"
+}
+```
+
+---
+
+### Create School
+**POST** `/api/v1/schools`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "name": "Central High School",
+  "address": "123 Education Ave, City, State 12345"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "name": "Central High School",
+  "address": "123 Education Ave, City, State 12345"
+}
+```
+
+---
+
+### Update School
+**PUT** `/api/v1/schools/:id`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "name": "Central High School - Updated",
+  "address": "123 Education Ave, New City, State 12345"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "name": "Central High School - Updated",
+  "address": "123 Education Ave, New City, State 12345"
+}
+```
+
+---
+
+### Delete School
+**DELETE** `/api/v1/schools/:id`
+
+**Admin Only**
+
+**Response:** `200 OK` (Success)
+```json
+{
+  "success": true,
+  "message": "School deleted successfully"
+}
+```
+
+**Response:** `409 Conflict` (School has admins or classes)
+```json
+{
+  "error": "Cannot delete school with existing admins or classes"
+}
+```
+
+---
+
+## Class APIs
+
+### Get All Classes
+**GET** `/api/v1/classes`
+
+**Protected (Any authenticated user)**
+
+**Query Params:** `?school_id=UUID` (optional, filter by school)
+
+**Response:** `200 OK`
+```json
+{
+  "classes": [
+    {
+      "id": "c200f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_name": "Central High School",
+      "name": "Class 10-A",
+      "grade_level": 10
+    },
+    {
+      "id": "c201f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_name": "Central High School",
+      "name": "Class 10-B",
+      "grade_level": 10
+    }
+  ]
+}
+```
+
+---
+
+### Get Class Details
+**GET** `/api/v1/classes/:id`
+
+**Protected (Any authenticated user)**
+
+**Response:** `200 OK`
+```json
+{
+  "id": "c200f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School",
+  "name": "Class 10-A",
+  "grade_level": 10
+}
+```
+
+**Error Response:** `404 Not Found`
+```json
+{
+  "error": "Class not found"
+}
+```
+
+---
+
+### Create Class
+**POST** `/api/v1/classes`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "name": "Class 10-A",
+  "grade_level": 10
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "id": "c200f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School",
+  "name": "Class 10-A",
+  "grade_level": 10
+}
+```
+
+---
+
+### Update Class
+**PUT** `/api/v1/classes/:id`
+
+**Admin Only**
+
+**Request:**
+```json
+{
+  "name": "Class 10-A-Advanced",
+  "grade_level": 10
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": "c200f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_id": "s100f1ee-6c54-4b01-90e6-d701748f0851",
+  "school_name": "Central High School",
+  "name": "Class 10-A-Advanced",
+  "grade_level": 10
+}
+```
+
+---
+
+### Delete Class
+**DELETE** `/api/v1/classes/:id`
+
+**Admin Only**
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "message": "Class deleted successfully"
 }
 ```
 

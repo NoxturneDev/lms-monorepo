@@ -12,6 +12,7 @@ import (
 
 	"github.com/noxturnedev/lms-monorepo/gateway/internal/web"
 	"github.com/noxturnedev/lms-monorepo/gateway/utils"
+	schoolpb "github.com/noxturnedev/lms-monorepo/proto/school"
 	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -44,9 +45,20 @@ func main() {
 	}
 	defer teacherConn.Close()
 
+	schoolConn, err := grpc.NewClient(
+		getEnv("SCHOOL_SERVICE_URL", "localhost:8083"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to School Service: %v", err)
+	}
+	defer schoolConn.Close()
+
 	gw := web.NewGateway(
 		studentpb.NewStudentServiceClient(studentConn),
 		teacherpb.NewTeacherServiceClient(teacherConn),
+		schoolpb.NewSchoolServiceClient(schoolConn),
 	)
 
 	r := gin.Default()
@@ -66,6 +78,7 @@ func main() {
 		// Authentication
 		api.POST("/auth/teacher/login", gw.LoginTeacher)
 		api.POST("/auth/student/login", gw.LoginStudent)
+		api.POST("/auth/admin/login", gw.LoginAdmin)
 
 		// Public registration
 		api.POST("/students", gw.CreateStudent)
@@ -97,7 +110,8 @@ func main() {
 				teacherRoutes.PUT("/courses/:id", gw.UpdateCourse)
 				teacherRoutes.DELETE("/courses/:id", gw.DeleteCourse)
 				teacherRoutes.POST("/grades", gw.AssignGrade)
-				// teacherRoutes.GET("/courses/:course_id/grades", gw.GetCourseGrades)
+				teacherRoutes.GET("/courses/:id/grades", gw.GetCourseGrades)
+				teacherRoutes.GET("/courses/:id/enrollments", gw.GetCourseEnrollments)
 				teacherRoutes.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
 			}
 
@@ -107,6 +121,34 @@ func main() {
 
 			// Enrollment (All authenticated users)
 			protected.POST("/enrollments", gw.EnrollStudent)
+
+			// School/Class Viewing (All authenticated users)
+			protected.GET("/schools", gw.ListSchools)
+			protected.GET("/schools/:id", gw.GetSchool)
+			protected.GET("/classes", gw.ListClasses)
+			protected.GET("/classes/:id", gw.GetClass)
+
+			// Admin Management (Admin Only)
+			adminRoutes := protected.Group("")
+			adminRoutes.Use(web.AdminOnly())
+			{
+				// Admin CRUD
+				adminRoutes.POST("/admins", gw.CreateAdmin)
+				adminRoutes.GET("/admins", gw.ListAdmins)
+				adminRoutes.GET("/admins/:id", gw.GetAdmin)
+				adminRoutes.PUT("/admins/:id", gw.UpdateAdmin)
+				adminRoutes.DELETE("/admins/:id", gw.DeleteAdmin)
+
+				// School Management
+				adminRoutes.POST("/schools", gw.CreateSchool)
+				adminRoutes.PUT("/schools/:id", gw.UpdateSchool)
+				adminRoutes.DELETE("/schools/:id", gw.DeleteSchool)
+
+				// Class Management
+				adminRoutes.POST("/classes", gw.CreateClass)
+				adminRoutes.PUT("/classes/:id", gw.UpdateClass)
+				adminRoutes.DELETE("/classes/:id", gw.DeleteClass)
+			}
 		}
 	}
 
