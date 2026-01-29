@@ -29,26 +29,38 @@ CREATE TABLE enrollments (
     UNIQUE(course_id, student_id) -- Prevent duplicate enrollments
 );
 
--- 4. GRADES (The "Link" to the outside world)
-CREATE TABLE grades (
+-- 4. ASSIGNMENTS (Course has many assignments)
+CREATE TABLE assignments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     course_id UUID NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    max_score INTEGER NOT NULL DEFAULT 100,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_assignment_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- 5. GRADES (Per-assignment, per-student)
+CREATE TABLE grades (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    assignment_id UUID NOT NULL,
 
     -- THE MICROSERVICES LINK:
     -- This ID belongs to the Student Service. We just store it as text/uuid here.
     -- No "REFERENCES students(id)" allowed!
     student_id UUID NOT NULL,
 
-    score INTEGER CHECK (score >= 0 AND score <= 100),
+    score INTEGER CHECK (score >= 0),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_course FOREIGN KEY (course_id) REFERENCES courses(id)
+    CONSTRAINT fk_grade_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
+    UNIQUE(assignment_id, student_id) -- One grade per student per assignment
 );
 
 -- === SEED DATA ===
 
 -- Teachers
-INSERT INTO teachers (id, email, password_hash, full_name) VALUES 
+INSERT INTO teachers (id, email, password_hash, full_name) VALUES
 ('d290f1ee-6c54-4b01-90e6-d701748f0851', 'turing@uni.edu', 'secret', 'Alan Turing'),
 ('e390f1ee-6c54-4b01-90e6-d701748f0852', 'hopper@uni.edu', 'secret', 'Grace Hopper'),
 ('f490f1ee-6c54-4b01-90e6-d701748f0853', 'ritchie@uni.edu', 'secret', 'Dennis Ritchie');
@@ -64,9 +76,15 @@ INSERT INTO courses (id, teacher_id, title, description) VALUES
 ('c200f1ee-6c54-4b01-90e6-d701748f0852', 'e390f1ee-6c54-4b01-90e6-d701748f0852', 'Operating Systems', 'Compilers and Cobol'),
 ('c201f1ee-6c54-4b01-90e6-d701748f0852', 'e390f1ee-6c54-4b01-90e6-d701748f0852', 'Legacy Systems', 'Why banks still use mainframe');
 
--- Grades (Pre-assigning some grades to Students we are about to create)
--- Student 1 (John) got 95 in Algorithms
-INSERT INTO grades (course_id, student_id, score) VALUES
-('c100f1ee-6c54-4b01-90e6-d701748f0851', 'a999f1ee-6c54-4b01-90e6-d701748f0851', 95),
-('c100f1ee-6c54-4b01-90e6-d701748f0851', 'a888f1ee-6c54-4b01-90e6-d701748f0852', 88),
-('c200f1ee-6c54-4b01-90e6-d701748f0852', 'a999f1ee-6c54-4b01-90e6-d701748f0851', 100);
+-- Assignments
+INSERT INTO assignments (id, course_id, title, description, max_score) VALUES
+('a100f1ee-6c54-4b01-90e6-d701748f0001', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Midterm Exam', 'Covers sorting and graph algorithms', 100),
+('a100f1ee-6c54-4b01-90e6-d701748f0002', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Final Project', 'Implement a novel algorithm', 200),
+('a200f1ee-6c54-4b01-90e6-d701748f0003', 'c200f1ee-6c54-4b01-90e6-d701748f0852', 'Lab Report 1', 'Process scheduling analysis', 50);
+
+-- Grades (Pre-assigning some grades to Students)
+-- Student 1 (John) got 95 on Algorithms Midterm
+INSERT INTO grades (assignment_id, student_id, score) VALUES
+('a100f1ee-6c54-4b01-90e6-d701748f0001', 'a999f1ee-6c54-4b01-90e6-d701748f0851', 95),
+('a100f1ee-6c54-4b01-90e6-d701748f0001', 'a888f1ee-6c54-4b01-90e6-d701748f0852', 88),
+('a200f1ee-6c54-4b01-90e6-d701748f0003', 'a999f1ee-6c54-4b01-90e6-d701748f0851', 45);
