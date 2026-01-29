@@ -28,6 +28,9 @@ services:
       - rabbitmq
     networks:
       - lms-net
+    profiles:
+      - teacher
+      - all
 
   student-service:
     build:
@@ -52,6 +55,34 @@ services:
       - rabbitmq
     networks:
       - lms-net
+    profiles:
+      - student
+      - all
+
+  school-service:
+    build:
+      context: ./
+      dockerfile: school-service/Dockerfile
+      target: development
+    volumes:
+      - ./school-service:/app/school-service
+      - ./proto:/app/proto
+    container_name: school_app
+    restart: on-failure
+    ports:
+      - "8083:8080"
+    environment:
+      DATABASE_URL: "postgres://school_admin:school_password@postgres-school:5432/school_db?sslmode=disable"
+      PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "school-service"
+    depends_on:
+      - postgres-school
+    networks:
+      - lms-net
+    profiles:
+      - school
+      - all
 
   gateway:
     build:
@@ -72,6 +103,10 @@ services:
       - ./proto:/app/proto
     networks:
       - lms-net
+    profiles:
+      - gateway
+      - all
+
   # ----------------------------------------------------------------
   # INFRASTRUCTURE: DATABASES
   # ----------------------------------------------------------------
@@ -89,6 +124,9 @@ services:
       - ./infra/postgres/teacher-init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - lms-net
+    profiles:
+      - teacher
+      - all
 
   postgres-student:
     image: postgres:15-alpine
@@ -103,6 +141,26 @@ services:
       - ./infra/postgres/student-init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - lms-net
+    profiles:
+      - student
+      - all
+
+  postgres-school:
+    image: postgres:15-alpine
+    container_name: postgres_school
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: school_admin
+      POSTGRES_PASSWORD: school_password
+      POSTGRES_DB: school_db
+    volumes:
+      - ./infra/postgres/school-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - lms-net
+    profiles:
+      - school
+      - all
 
   # ----------------------------------------------------------------
   # INFRASTRUCTURE: MESSAGE BROKER
@@ -119,6 +177,10 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     networks:
       - lms-net
+    profiles:
+      - teacher
+      - student
+      - all
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -130,6 +192,12 @@ services:
       - "4317:4317" # OTLP gRPC Receiver (Apps send traces here)
     networks:
       - lms-net
+    profiles:
+      - teacher
+      - student
+      - school
+      - gateway
+      - all
 
 networks:
   lms-net:
