@@ -1,0 +1,183 @@
+syntax = "proto3";
+
+package school;
+
+option go_package = "github.com/noxturnedev/lms-monorepo/proto/school";
+
+service SchoolService {
+  // Authentication
+  rpc LoginAdmin (LoginAdminRequest) returns (LoginAdminResponse);
+
+  // Admin CRUD
+  rpc CreateAdmin (CreateAdminRequest) returns (AdminResponse);
+  rpc GetAdmin (GetAdminRequest) returns (AdminResponse);
+  rpc UpdateAdmin (UpdateAdminRequest) returns (AdminResponse);
+  rpc DeleteAdmin (DeleteAdminRequest) returns (DeleteAdminResponse);
+  rpc ListAdmins (ListAdminsRequest) returns (ListAdminsResponse);
+
+  // School CRUD
+  rpc CreateSchool (CreateSchoolRequest) returns (SchoolResponse);
+  rpc GetSchool (GetSchoolRequest) returns (SchoolResponse);
+  rpc UpdateSchool (UpdateSchoolRequest) returns (SchoolResponse);
+  rpc DeleteSchool (DeleteSchoolRequest) returns (DeleteSchoolResponse);
+  rpc ListSchools (ListSchoolsRequest) returns (ListSchoolsResponse);
+
+  // Class CRUD
+  rpc CreateClass (CreateClassRequest) returns (ClassResponse);
+  rpc GetClass (GetClassRequest) returns (ClassResponse);
+  rpc UpdateClass (UpdateClassRequest) returns (ClassResponse);
+  rpc DeleteClass (DeleteClassRequest) returns (DeleteClassResponse);
+  rpc ListClasses (ListClassesRequest) returns (ListClassesResponse);
+}
+
+// ============================================
+// Authentication Messages
+// ============================================
+
+message LoginAdminRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginAdminResponse {
+  bool success = 1;
+  string message = 2;
+  string admin_id = 3;
+  string email = 4;
+  string full_name = 5;
+  string school_id = 6;
+  string school_name = 7;
+}
+
+// ============================================
+// Admin CRUD Messages
+// ============================================
+
+message CreateAdminRequest {
+  string email = 1;
+  string password = 2;
+  string full_name = 3;
+  string school_id = 4;
+}
+
+message GetAdminRequest {
+  string id = 1;
+}
+
+message UpdateAdminRequest {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string password = 4; // optional
+  string school_id = 5;
+}
+
+message DeleteAdminRequest {
+  string id = 1;
+}
+
+message DeleteAdminResponse {
+  bool success = 1;
+}
+
+message ListAdminsRequest {
+  // empty for now, can add pagination later
+}
+
+message AdminResponse {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string school_id = 4;
+  string school_name = 5;
+}
+
+message ListAdminsResponse {
+  repeated AdminResponse admins = 1;
+}
+
+// ============================================
+// School CRUD Messages
+// ============================================
+
+message CreateSchoolRequest {
+  string name = 1;
+  string address = 2;
+}
+
+message GetSchoolRequest {
+  string id = 1;
+}
+
+message UpdateSchoolRequest {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+}
+
+message DeleteSchoolRequest {
+  string id = 1;
+}
+
+message DeleteSchoolResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListSchoolsRequest {
+  // empty for now
+}
+
+message SchoolResponse {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+}
+
+message ListSchoolsResponse {
+  repeated SchoolResponse schools = 1;
+}
+
+// ============================================
+// Class CRUD Messages
+// ============================================
+
+message CreateClassRequest {
+  string school_id = 1;
+  string name = 2;
+  string grade_level = 3;
+}
+
+message GetClassRequest {
+  string id = 1;
+}
+
+message UpdateClassRequest {
+  string id = 1;
+  string name = 2;
+  string grade_level = 3;
+}
+
+message DeleteClassRequest {
+  string id = 1;
+}
+
+message DeleteClassResponse {
+  bool success = 1;
+}
+
+message ListClassesRequest {
+  string school_id = 1; // optional filter by school
+}
+
+message ClassResponse {
+  string id = 1;
+  string school_id = 2;
+  string school_name = 3;
+  string name = 4;
+  string grade_level = 5;
+}
+
+message ListClassesResponse {
+  repeated ClassResponse classes = 1;
+}

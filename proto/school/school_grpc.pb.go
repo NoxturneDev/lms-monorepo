@@ -19,12 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SchoolService_LoginAdmin_FullMethodName  = "/school.SchoolService/LoginAdmin"
-	SchoolService_CreateAdmin_FullMethodName = "/school.SchoolService/CreateAdmin"
-	SchoolService_GetAdmin_FullMethodName    = "/school.SchoolService/GetAdmin"
-	SchoolService_UpdateAdmin_FullMethodName = "/school.SchoolService/UpdateAdmin"
-	SchoolService_DeleteAdmin_FullMethodName = "/school.SchoolService/DeleteAdmin"
-	SchoolService_ListAdmins_FullMethodName  = "/school.SchoolService/ListAdmins"
+	SchoolService_LoginAdmin_FullMethodName   = "/school.SchoolService/LoginAdmin"
+	SchoolService_CreateAdmin_FullMethodName  = "/school.SchoolService/CreateAdmin"
+	SchoolService_GetAdmin_FullMethodName     = "/school.SchoolService/GetAdmin"
+	SchoolService_UpdateAdmin_FullMethodName  = "/school.SchoolService/UpdateAdmin"
+	SchoolService_DeleteAdmin_FullMethodName  = "/school.SchoolService/DeleteAdmin"
+	SchoolService_ListAdmins_FullMethodName   = "/school.SchoolService/ListAdmins"
+	SchoolService_CreateSchool_FullMethodName = "/school.SchoolService/CreateSchool"
+	SchoolService_GetSchool_FullMethodName    = "/school.SchoolService/GetSchool"
+	SchoolService_UpdateSchool_FullMethodName = "/school.SchoolService/UpdateSchool"
+	SchoolService_DeleteSchool_FullMethodName = "/school.SchoolService/DeleteSchool"
+	SchoolService_ListSchools_FullMethodName  = "/school.SchoolService/ListSchools"
+	SchoolService_CreateClass_FullMethodName  = "/school.SchoolService/CreateClass"
+	SchoolService_GetClass_FullMethodName     = "/school.SchoolService/GetClass"
+	SchoolService_UpdateClass_FullMethodName  = "/school.SchoolService/UpdateClass"
+	SchoolService_DeleteClass_FullMethodName  = "/school.SchoolService/DeleteClass"
+	SchoolService_ListClasses_FullMethodName  = "/school.SchoolService/ListClasses"
 )
 
 // SchoolServiceClient is the client API for SchoolService service.
@@ -39,6 +49,18 @@ type SchoolServiceClient interface {
 	UpdateAdmin(ctx context.Context, in *UpdateAdminRequest, opts ...grpc.CallOption) (*AdminResponse, error)
 	DeleteAdmin(ctx context.Context, in *DeleteAdminRequest, opts ...grpc.CallOption) (*DeleteAdminResponse, error)
 	ListAdmins(ctx context.Context, in *ListAdminsRequest, opts ...grpc.CallOption) (*ListAdminsResponse, error)
+	// School CRUD
+	CreateSchool(ctx context.Context, in *CreateSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error)
+	GetSchool(ctx context.Context, in *GetSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error)
+	UpdateSchool(ctx context.Context, in *UpdateSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error)
+	DeleteSchool(ctx context.Context, in *DeleteSchoolRequest, opts ...grpc.CallOption) (*DeleteSchoolResponse, error)
+	ListSchools(ctx context.Context, in *ListSchoolsRequest, opts ...grpc.CallOption) (*ListSchoolsResponse, error)
+	// Class CRUD
+	CreateClass(ctx context.Context, in *CreateClassRequest, opts ...grpc.CallOption) (*ClassResponse, error)
+	GetClass(ctx context.Context, in *GetClassRequest, opts ...grpc.CallOption) (*ClassResponse, error)
+	UpdateClass(ctx context.Context, in *UpdateClassRequest, opts ...grpc.CallOption) (*ClassResponse, error)
+	DeleteClass(ctx context.Context, in *DeleteClassRequest, opts ...grpc.CallOption) (*DeleteClassResponse, error)
+	ListClasses(ctx context.Context, in *ListClassesRequest, opts ...grpc.CallOption) (*ListClassesResponse, error)
 }
 
 type schoolServiceClient struct {
@@ -109,6 +131,106 @@ func (c *schoolServiceClient) ListAdmins(ctx context.Context, in *ListAdminsRequ
 	return out, nil
 }
 
+func (c *schoolServiceClient) CreateSchool(ctx context.Context, in *CreateSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SchoolResponse)
+	err := c.cc.Invoke(ctx, SchoolService_CreateSchool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) GetSchool(ctx context.Context, in *GetSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SchoolResponse)
+	err := c.cc.Invoke(ctx, SchoolService_GetSchool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) UpdateSchool(ctx context.Context, in *UpdateSchoolRequest, opts ...grpc.CallOption) (*SchoolResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SchoolResponse)
+	err := c.cc.Invoke(ctx, SchoolService_UpdateSchool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) DeleteSchool(ctx context.Context, in *DeleteSchoolRequest, opts ...grpc.CallOption) (*DeleteSchoolResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteSchoolResponse)
+	err := c.cc.Invoke(ctx, SchoolService_DeleteSchool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) ListSchools(ctx context.Context, in *ListSchoolsRequest, opts ...grpc.CallOption) (*ListSchoolsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSchoolsResponse)
+	err := c.cc.Invoke(ctx, SchoolService_ListSchools_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) CreateClass(ctx context.Context, in *CreateClassRequest, opts ...grpc.CallOption) (*ClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClassResponse)
+	err := c.cc.Invoke(ctx, SchoolService_CreateClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) GetClass(ctx context.Context, in *GetClassRequest, opts ...grpc.CallOption) (*ClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClassResponse)
+	err := c.cc.Invoke(ctx, SchoolService_GetClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) UpdateClass(ctx context.Context, in *UpdateClassRequest, opts ...grpc.CallOption) (*ClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClassResponse)
+	err := c.cc.Invoke(ctx, SchoolService_UpdateClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) DeleteClass(ctx context.Context, in *DeleteClassRequest, opts ...grpc.CallOption) (*DeleteClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteClassResponse)
+	err := c.cc.Invoke(ctx, SchoolService_DeleteClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schoolServiceClient) ListClasses(ctx context.Context, in *ListClassesRequest, opts ...grpc.CallOption) (*ListClassesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListClassesResponse)
+	err := c.cc.Invoke(ctx, SchoolService_ListClasses_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SchoolServiceServer is the server API for SchoolService service.
 // All implementations must embed UnimplementedSchoolServiceServer
 // for forward compatibility.
@@ -121,6 +243,18 @@ type SchoolServiceServer interface {
 	UpdateAdmin(context.Context, *UpdateAdminRequest) (*AdminResponse, error)
 	DeleteAdmin(context.Context, *DeleteAdminRequest) (*DeleteAdminResponse, error)
 	ListAdmins(context.Context, *ListAdminsRequest) (*ListAdminsResponse, error)
+	// School CRUD
+	CreateSchool(context.Context, *CreateSchoolRequest) (*SchoolResponse, error)
+	GetSchool(context.Context, *GetSchoolRequest) (*SchoolResponse, error)
+	UpdateSchool(context.Context, *UpdateSchoolRequest) (*SchoolResponse, error)
+	DeleteSchool(context.Context, *DeleteSchoolRequest) (*DeleteSchoolResponse, error)
+	ListSchools(context.Context, *ListSchoolsRequest) (*ListSchoolsResponse, error)
+	// Class CRUD
+	CreateClass(context.Context, *CreateClassRequest) (*ClassResponse, error)
+	GetClass(context.Context, *GetClassRequest) (*ClassResponse, error)
+	UpdateClass(context.Context, *UpdateClassRequest) (*ClassResponse, error)
+	DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassResponse, error)
+	ListClasses(context.Context, *ListClassesRequest) (*ListClassesResponse, error)
 	mustEmbedUnimplementedSchoolServiceServer()
 }
 
@@ -148,6 +282,36 @@ func (UnimplementedSchoolServiceServer) DeleteAdmin(context.Context, *DeleteAdmi
 }
 func (UnimplementedSchoolServiceServer) ListAdmins(context.Context, *ListAdminsRequest) (*ListAdminsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAdmins not implemented")
+}
+func (UnimplementedSchoolServiceServer) CreateSchool(context.Context, *CreateSchoolRequest) (*SchoolResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateSchool not implemented")
+}
+func (UnimplementedSchoolServiceServer) GetSchool(context.Context, *GetSchoolRequest) (*SchoolResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSchool not implemented")
+}
+func (UnimplementedSchoolServiceServer) UpdateSchool(context.Context, *UpdateSchoolRequest) (*SchoolResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateSchool not implemented")
+}
+func (UnimplementedSchoolServiceServer) DeleteSchool(context.Context, *DeleteSchoolRequest) (*DeleteSchoolResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteSchool not implemented")
+}
+func (UnimplementedSchoolServiceServer) ListSchools(context.Context, *ListSchoolsRequest) (*ListSchoolsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListSchools not implemented")
+}
+func (UnimplementedSchoolServiceServer) CreateClass(context.Context, *CreateClassRequest) (*ClassResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateClass not implemented")
+}
+func (UnimplementedSchoolServiceServer) GetClass(context.Context, *GetClassRequest) (*ClassResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetClass not implemented")
+}
+func (UnimplementedSchoolServiceServer) UpdateClass(context.Context, *UpdateClassRequest) (*ClassResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateClass not implemented")
+}
+func (UnimplementedSchoolServiceServer) DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteClass not implemented")
+}
+func (UnimplementedSchoolServiceServer) ListClasses(context.Context, *ListClassesRequest) (*ListClassesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListClasses not implemented")
 }
 func (UnimplementedSchoolServiceServer) mustEmbedUnimplementedSchoolServiceServer() {}
 func (UnimplementedSchoolServiceServer) testEmbeddedByValue()                       {}
@@ -278,6 +442,186 @@ func _SchoolService_ListAdmins_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SchoolService_CreateSchool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSchoolRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).CreateSchool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_CreateSchool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).CreateSchool(ctx, req.(*CreateSchoolRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_GetSchool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSchoolRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).GetSchool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_GetSchool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).GetSchool(ctx, req.(*GetSchoolRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_UpdateSchool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSchoolRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).UpdateSchool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_UpdateSchool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).UpdateSchool(ctx, req.(*UpdateSchoolRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_DeleteSchool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSchoolRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).DeleteSchool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_DeleteSchool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).DeleteSchool(ctx, req.(*DeleteSchoolRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_ListSchools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSchoolsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).ListSchools(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_ListSchools_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).ListSchools(ctx, req.(*ListSchoolsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_CreateClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).CreateClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_CreateClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).CreateClass(ctx, req.(*CreateClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_GetClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).GetClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_GetClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).GetClass(ctx, req.(*GetClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_UpdateClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).UpdateClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_UpdateClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).UpdateClass(ctx, req.(*UpdateClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_DeleteClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).DeleteClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_DeleteClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).DeleteClass(ctx, req.(*DeleteClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SchoolService_ListClasses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListClassesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchoolServiceServer).ListClasses(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SchoolService_ListClasses_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchoolServiceServer).ListClasses(ctx, req.(*ListClassesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SchoolService_ServiceDesc is the grpc.ServiceDesc for SchoolService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -308,6 +652,46 @@ var SchoolService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAdmins",
 			Handler:    _SchoolService_ListAdmins_Handler,
+		},
+		{
+			MethodName: "CreateSchool",
+			Handler:    _SchoolService_CreateSchool_Handler,
+		},
+		{
+			MethodName: "GetSchool",
+			Handler:    _SchoolService_GetSchool_Handler,
+		},
+		{
+			MethodName: "UpdateSchool",
+			Handler:    _SchoolService_UpdateSchool_Handler,
+		},
+		{
+			MethodName: "DeleteSchool",
+			Handler:    _SchoolService_DeleteSchool_Handler,
+		},
+		{
+			MethodName: "ListSchools",
+			Handler:    _SchoolService_ListSchools_Handler,
+		},
+		{
+			MethodName: "CreateClass",
+			Handler:    _SchoolService_CreateClass_Handler,
+		},
+		{
+			MethodName: "GetClass",
+			Handler:    _SchoolService_GetClass_Handler,
+		},
+		{
+			MethodName: "UpdateClass",
+			Handler:    _SchoolService_UpdateClass_Handler,
+		},
+		{
+			MethodName: "DeleteClass",
+			Handler:    _SchoolService_DeleteClass_Handler,
+		},
+		{
+			MethodName: "ListClasses",
+			Handler:    _SchoolService_ListClasses_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

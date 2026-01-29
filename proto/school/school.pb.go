@@ -21,7 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Authentication Messages
 type LoginAdminRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -166,7 +165,6 @@ func (x *LoginAdminResponse) GetSchoolName() string {
 	return ""
 }
 
-// Admin CRUD Messages
 type CreateAdminRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -599,6 +597,814 @@ func (x *ListAdminsResponse) GetAdmins() []*AdminResponse {
 	return nil
 }
 
+type CreateSchoolRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSchoolRequest) Reset() {
+	*x = CreateSchoolRequest{}
+	mi := &file_proto_school_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSchoolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSchoolRequest) ProtoMessage() {}
+
+func (x *CreateSchoolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSchoolRequest.ProtoReflect.Descriptor instead.
+func (*CreateSchoolRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CreateSchoolRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateSchoolRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type GetSchoolRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSchoolRequest) Reset() {
+	*x = GetSchoolRequest{}
+	mi := &file_proto_school_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSchoolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSchoolRequest) ProtoMessage() {}
+
+func (x *GetSchoolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSchoolRequest.ProtoReflect.Descriptor instead.
+func (*GetSchoolRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetSchoolRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpdateSchoolRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Address       string                 `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateSchoolRequest) Reset() {
+	*x = UpdateSchoolRequest{}
+	mi := &file_proto_school_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateSchoolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSchoolRequest) ProtoMessage() {}
+
+func (x *UpdateSchoolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSchoolRequest.ProtoReflect.Descriptor instead.
+func (*UpdateSchoolRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UpdateSchoolRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateSchoolRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateSchoolRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type DeleteSchoolRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSchoolRequest) Reset() {
+	*x = DeleteSchoolRequest{}
+	mi := &file_proto_school_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSchoolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSchoolRequest) ProtoMessage() {}
+
+func (x *DeleteSchoolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSchoolRequest.ProtoReflect.Descriptor instead.
+func (*DeleteSchoolRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *DeleteSchoolRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteSchoolResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSchoolResponse) Reset() {
+	*x = DeleteSchoolResponse{}
+	mi := &file_proto_school_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSchoolResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSchoolResponse) ProtoMessage() {}
+
+func (x *DeleteSchoolResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSchoolResponse.ProtoReflect.Descriptor instead.
+func (*DeleteSchoolResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteSchoolResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteSchoolResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ListSchoolsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSchoolsRequest) Reset() {
+	*x = ListSchoolsRequest{}
+	mi := &file_proto_school_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSchoolsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSchoolsRequest) ProtoMessage() {}
+
+func (x *ListSchoolsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSchoolsRequest.ProtoReflect.Descriptor instead.
+func (*ListSchoolsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{15}
+}
+
+type SchoolResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Address       string                 `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SchoolResponse) Reset() {
+	*x = SchoolResponse{}
+	mi := &file_proto_school_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SchoolResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SchoolResponse) ProtoMessage() {}
+
+func (x *SchoolResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SchoolResponse.ProtoReflect.Descriptor instead.
+func (*SchoolResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SchoolResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SchoolResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SchoolResponse) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type ListSchoolsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Schools       []*SchoolResponse      `protobuf:"bytes,1,rep,name=schools,proto3" json:"schools,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSchoolsResponse) Reset() {
+	*x = ListSchoolsResponse{}
+	mi := &file_proto_school_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSchoolsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSchoolsResponse) ProtoMessage() {}
+
+func (x *ListSchoolsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSchoolsResponse.ProtoReflect.Descriptor instead.
+func (*ListSchoolsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListSchoolsResponse) GetSchools() []*SchoolResponse {
+	if x != nil {
+		return x.Schools
+	}
+	return nil
+}
+
+type CreateClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchoolId      string                 `protobuf:"bytes,1,opt,name=school_id,json=schoolId,proto3" json:"school_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	GradeLevel    string                 `protobuf:"bytes,3,opt,name=grade_level,json=gradeLevel,proto3" json:"grade_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateClassRequest) Reset() {
+	*x = CreateClassRequest{}
+	mi := &file_proto_school_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClassRequest) ProtoMessage() {}
+
+func (x *CreateClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateClassRequest.ProtoReflect.Descriptor instead.
+func (*CreateClassRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *CreateClassRequest) GetSchoolId() string {
+	if x != nil {
+		return x.SchoolId
+	}
+	return ""
+}
+
+func (x *CreateClassRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateClassRequest) GetGradeLevel() string {
+	if x != nil {
+		return x.GradeLevel
+	}
+	return ""
+}
+
+type GetClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClassRequest) Reset() {
+	*x = GetClassRequest{}
+	mi := &file_proto_school_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClassRequest) ProtoMessage() {}
+
+func (x *GetClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClassRequest.ProtoReflect.Descriptor instead.
+func (*GetClassRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetClassRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpdateClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	GradeLevel    string                 `protobuf:"bytes,3,opt,name=grade_level,json=gradeLevel,proto3" json:"grade_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateClassRequest) Reset() {
+	*x = UpdateClassRequest{}
+	mi := &file_proto_school_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateClassRequest) ProtoMessage() {}
+
+func (x *UpdateClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateClassRequest.ProtoReflect.Descriptor instead.
+func (*UpdateClassRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *UpdateClassRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateClassRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateClassRequest) GetGradeLevel() string {
+	if x != nil {
+		return x.GradeLevel
+	}
+	return ""
+}
+
+type DeleteClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteClassRequest) Reset() {
+	*x = DeleteClassRequest{}
+	mi := &file_proto_school_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteClassRequest) ProtoMessage() {}
+
+func (x *DeleteClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteClassRequest.ProtoReflect.Descriptor instead.
+func (*DeleteClassRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DeleteClassRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteClassResponse) Reset() {
+	*x = DeleteClassResponse{}
+	mi := &file_proto_school_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteClassResponse) ProtoMessage() {}
+
+func (x *DeleteClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteClassResponse.ProtoReflect.Descriptor instead.
+func (*DeleteClassResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DeleteClassResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type ListClassesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchoolId      string                 `protobuf:"bytes,1,opt,name=school_id,json=schoolId,proto3" json:"school_id,omitempty"` // optional filter by school
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListClassesRequest) Reset() {
+	*x = ListClassesRequest{}
+	mi := &file_proto_school_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListClassesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListClassesRequest) ProtoMessage() {}
+
+func (x *ListClassesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListClassesRequest.ProtoReflect.Descriptor instead.
+func (*ListClassesRequest) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListClassesRequest) GetSchoolId() string {
+	if x != nil {
+		return x.SchoolId
+	}
+	return ""
+}
+
+type ClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	SchoolId      string                 `protobuf:"bytes,2,opt,name=school_id,json=schoolId,proto3" json:"school_id,omitempty"`
+	SchoolName    string                 `protobuf:"bytes,3,opt,name=school_name,json=schoolName,proto3" json:"school_name,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	GradeLevel    string                 `protobuf:"bytes,5,opt,name=grade_level,json=gradeLevel,proto3" json:"grade_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClassResponse) Reset() {
+	*x = ClassResponse{}
+	mi := &file_proto_school_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClassResponse) ProtoMessage() {}
+
+func (x *ClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClassResponse.ProtoReflect.Descriptor instead.
+func (*ClassResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ClassResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ClassResponse) GetSchoolId() string {
+	if x != nil {
+		return x.SchoolId
+	}
+	return ""
+}
+
+func (x *ClassResponse) GetSchoolName() string {
+	if x != nil {
+		return x.SchoolName
+	}
+	return ""
+}
+
+func (x *ClassResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ClassResponse) GetGradeLevel() string {
+	if x != nil {
+		return x.GradeLevel
+	}
+	return ""
+}
+
+type ListClassesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Classes       []*ClassResponse       `protobuf:"bytes,1,rep,name=classes,proto3" json:"classes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListClassesResponse) Reset() {
+	*x = ListClassesResponse{}
+	mi := &file_proto_school_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListClassesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListClassesResponse) ProtoMessage() {}
+
+func (x *ListClassesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListClassesResponse.ProtoReflect.Descriptor instead.
+func (*ListClassesResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ListClassesResponse) GetClasses() []*ClassResponse {
+	if x != nil {
+		return x.Classes
+	}
+	return nil
+}
+
 var File_proto_school_proto protoreflect.FileDescriptor
 
 const file_proto_school_proto_rawDesc = "" +
@@ -642,7 +1448,56 @@ const file_proto_school_proto_rawDesc = "" +
 	"\vschool_name\x18\x05 \x01(\tR\n" +
 	"schoolName\"C\n" +
 	"\x12ListAdminsResponse\x12-\n" +
-	"\x06admins\x18\x01 \x03(\v2\x15.school.AdminResponseR\x06admins2\xa1\x03\n" +
+	"\x06admins\x18\x01 \x03(\v2\x15.school.AdminResponseR\x06admins\"C\n" +
+	"\x13CreateSchoolRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\"\"\n" +
+	"\x10GetSchoolRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"S\n" +
+	"\x13UpdateSchoolRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aaddress\x18\x03 \x01(\tR\aaddress\"%\n" +
+	"\x13DeleteSchoolRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
+	"\x14DeleteSchoolResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x14\n" +
+	"\x12ListSchoolsRequest\"N\n" +
+	"\x0eSchoolResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aaddress\x18\x03 \x01(\tR\aaddress\"G\n" +
+	"\x13ListSchoolsResponse\x120\n" +
+	"\aschools\x18\x01 \x03(\v2\x16.school.SchoolResponseR\aschools\"f\n" +
+	"\x12CreateClassRequest\x12\x1b\n" +
+	"\tschool_id\x18\x01 \x01(\tR\bschoolId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
+	"\vgrade_level\x18\x03 \x01(\tR\n" +
+	"gradeLevel\"!\n" +
+	"\x0fGetClassRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"Y\n" +
+	"\x12UpdateClassRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
+	"\vgrade_level\x18\x03 \x01(\tR\n" +
+	"gradeLevel\"$\n" +
+	"\x12DeleteClassRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"/\n" +
+	"\x13DeleteClassResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"1\n" +
+	"\x12ListClassesRequest\x12\x1b\n" +
+	"\tschool_id\x18\x01 \x01(\tR\bschoolId\"\x92\x01\n" +
+	"\rClassResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
+	"\tschool_id\x18\x02 \x01(\tR\bschoolId\x12\x1f\n" +
+	"\vschool_name\x18\x03 \x01(\tR\n" +
+	"schoolName\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1f\n" +
+	"\vgrade_level\x18\x05 \x01(\tR\n" +
+	"gradeLevel\"F\n" +
+	"\x13ListClassesResponse\x12/\n" +
+	"\aclasses\x18\x01 \x03(\v2\x15.school.ClassResponseR\aclasses2\xcd\b\n" +
 	"\rSchoolService\x12C\n" +
 	"\n" +
 	"LoginAdmin\x12\x19.school.LoginAdminRequest\x1a\x1a.school.LoginAdminResponse\x12@\n" +
@@ -651,7 +1506,17 @@ const file_proto_school_proto_rawDesc = "" +
 	"\vUpdateAdmin\x12\x1a.school.UpdateAdminRequest\x1a\x15.school.AdminResponse\x12F\n" +
 	"\vDeleteAdmin\x12\x1a.school.DeleteAdminRequest\x1a\x1b.school.DeleteAdminResponse\x12C\n" +
 	"\n" +
-	"ListAdmins\x12\x19.school.ListAdminsRequest\x1a\x1a.school.ListAdminsResponseB2Z0github.com/noxturnedev/lms-monorepo/proto/schoolb\x06proto3"
+	"ListAdmins\x12\x19.school.ListAdminsRequest\x1a\x1a.school.ListAdminsResponse\x12C\n" +
+	"\fCreateSchool\x12\x1b.school.CreateSchoolRequest\x1a\x16.school.SchoolResponse\x12=\n" +
+	"\tGetSchool\x12\x18.school.GetSchoolRequest\x1a\x16.school.SchoolResponse\x12C\n" +
+	"\fUpdateSchool\x12\x1b.school.UpdateSchoolRequest\x1a\x16.school.SchoolResponse\x12I\n" +
+	"\fDeleteSchool\x12\x1b.school.DeleteSchoolRequest\x1a\x1c.school.DeleteSchoolResponse\x12F\n" +
+	"\vListSchools\x12\x1a.school.ListSchoolsRequest\x1a\x1b.school.ListSchoolsResponse\x12@\n" +
+	"\vCreateClass\x12\x1a.school.CreateClassRequest\x1a\x15.school.ClassResponse\x12:\n" +
+	"\bGetClass\x12\x17.school.GetClassRequest\x1a\x15.school.ClassResponse\x12@\n" +
+	"\vUpdateClass\x12\x1a.school.UpdateClassRequest\x1a\x15.school.ClassResponse\x12F\n" +
+	"\vDeleteClass\x12\x1a.school.DeleteClassRequest\x1a\x1b.school.DeleteClassResponse\x12F\n" +
+	"\vListClasses\x12\x1a.school.ListClassesRequest\x1a\x1b.school.ListClassesResponseB2Z0github.com/noxturnedev/lms-monorepo/proto/schoolb\x06proto3"
 
 var (
 	file_proto_school_proto_rawDescOnce sync.Once
@@ -665,38 +1530,76 @@ func file_proto_school_proto_rawDescGZIP() []byte {
 	return file_proto_school_proto_rawDescData
 }
 
-var file_proto_school_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_proto_school_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_proto_school_proto_goTypes = []any{
-	(*LoginAdminRequest)(nil),   // 0: school.LoginAdminRequest
-	(*LoginAdminResponse)(nil),  // 1: school.LoginAdminResponse
-	(*CreateAdminRequest)(nil),  // 2: school.CreateAdminRequest
-	(*GetAdminRequest)(nil),     // 3: school.GetAdminRequest
-	(*UpdateAdminRequest)(nil),  // 4: school.UpdateAdminRequest
-	(*DeleteAdminRequest)(nil),  // 5: school.DeleteAdminRequest
-	(*DeleteAdminResponse)(nil), // 6: school.DeleteAdminResponse
-	(*ListAdminsRequest)(nil),   // 7: school.ListAdminsRequest
-	(*AdminResponse)(nil),       // 8: school.AdminResponse
-	(*ListAdminsResponse)(nil),  // 9: school.ListAdminsResponse
+	(*LoginAdminRequest)(nil),    // 0: school.LoginAdminRequest
+	(*LoginAdminResponse)(nil),   // 1: school.LoginAdminResponse
+	(*CreateAdminRequest)(nil),   // 2: school.CreateAdminRequest
+	(*GetAdminRequest)(nil),      // 3: school.GetAdminRequest
+	(*UpdateAdminRequest)(nil),   // 4: school.UpdateAdminRequest
+	(*DeleteAdminRequest)(nil),   // 5: school.DeleteAdminRequest
+	(*DeleteAdminResponse)(nil),  // 6: school.DeleteAdminResponse
+	(*ListAdminsRequest)(nil),    // 7: school.ListAdminsRequest
+	(*AdminResponse)(nil),        // 8: school.AdminResponse
+	(*ListAdminsResponse)(nil),   // 9: school.ListAdminsResponse
+	(*CreateSchoolRequest)(nil),  // 10: school.CreateSchoolRequest
+	(*GetSchoolRequest)(nil),     // 11: school.GetSchoolRequest
+	(*UpdateSchoolRequest)(nil),  // 12: school.UpdateSchoolRequest
+	(*DeleteSchoolRequest)(nil),  // 13: school.DeleteSchoolRequest
+	(*DeleteSchoolResponse)(nil), // 14: school.DeleteSchoolResponse
+	(*ListSchoolsRequest)(nil),   // 15: school.ListSchoolsRequest
+	(*SchoolResponse)(nil),       // 16: school.SchoolResponse
+	(*ListSchoolsResponse)(nil),  // 17: school.ListSchoolsResponse
+	(*CreateClassRequest)(nil),   // 18: school.CreateClassRequest
+	(*GetClassRequest)(nil),      // 19: school.GetClassRequest
+	(*UpdateClassRequest)(nil),   // 20: school.UpdateClassRequest
+	(*DeleteClassRequest)(nil),   // 21: school.DeleteClassRequest
+	(*DeleteClassResponse)(nil),  // 22: school.DeleteClassResponse
+	(*ListClassesRequest)(nil),   // 23: school.ListClassesRequest
+	(*ClassResponse)(nil),        // 24: school.ClassResponse
+	(*ListClassesResponse)(nil),  // 25: school.ListClassesResponse
 }
 var file_proto_school_proto_depIdxs = []int32{
-	8, // 0: school.ListAdminsResponse.admins:type_name -> school.AdminResponse
-	0, // 1: school.SchoolService.LoginAdmin:input_type -> school.LoginAdminRequest
-	2, // 2: school.SchoolService.CreateAdmin:input_type -> school.CreateAdminRequest
-	3, // 3: school.SchoolService.GetAdmin:input_type -> school.GetAdminRequest
-	4, // 4: school.SchoolService.UpdateAdmin:input_type -> school.UpdateAdminRequest
-	5, // 5: school.SchoolService.DeleteAdmin:input_type -> school.DeleteAdminRequest
-	7, // 6: school.SchoolService.ListAdmins:input_type -> school.ListAdminsRequest
-	1, // 7: school.SchoolService.LoginAdmin:output_type -> school.LoginAdminResponse
-	8, // 8: school.SchoolService.CreateAdmin:output_type -> school.AdminResponse
-	8, // 9: school.SchoolService.GetAdmin:output_type -> school.AdminResponse
-	8, // 10: school.SchoolService.UpdateAdmin:output_type -> school.AdminResponse
-	6, // 11: school.SchoolService.DeleteAdmin:output_type -> school.DeleteAdminResponse
-	9, // 12: school.SchoolService.ListAdmins:output_type -> school.ListAdminsResponse
-	7, // [7:13] is the sub-list for method output_type
-	1, // [1:7] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	8,  // 0: school.ListAdminsResponse.admins:type_name -> school.AdminResponse
+	16, // 1: school.ListSchoolsResponse.schools:type_name -> school.SchoolResponse
+	24, // 2: school.ListClassesResponse.classes:type_name -> school.ClassResponse
+	0,  // 3: school.SchoolService.LoginAdmin:input_type -> school.LoginAdminRequest
+	2,  // 4: school.SchoolService.CreateAdmin:input_type -> school.CreateAdminRequest
+	3,  // 5: school.SchoolService.GetAdmin:input_type -> school.GetAdminRequest
+	4,  // 6: school.SchoolService.UpdateAdmin:input_type -> school.UpdateAdminRequest
+	5,  // 7: school.SchoolService.DeleteAdmin:input_type -> school.DeleteAdminRequest
+	7,  // 8: school.SchoolService.ListAdmins:input_type -> school.ListAdminsRequest
+	10, // 9: school.SchoolService.CreateSchool:input_type -> school.CreateSchoolRequest
+	11, // 10: school.SchoolService.GetSchool:input_type -> school.GetSchoolRequest
+	12, // 11: school.SchoolService.UpdateSchool:input_type -> school.UpdateSchoolRequest
+	13, // 12: school.SchoolService.DeleteSchool:input_type -> school.DeleteSchoolRequest
+	15, // 13: school.SchoolService.ListSchools:input_type -> school.ListSchoolsRequest
+	18, // 14: school.SchoolService.CreateClass:input_type -> school.CreateClassRequest
+	19, // 15: school.SchoolService.GetClass:input_type -> school.GetClassRequest
+	20, // 16: school.SchoolService.UpdateClass:input_type -> school.UpdateClassRequest
+	21, // 17: school.SchoolService.DeleteClass:input_type -> school.DeleteClassRequest
+	23, // 18: school.SchoolService.ListClasses:input_type -> school.ListClassesRequest
+	1,  // 19: school.SchoolService.LoginAdmin:output_type -> school.LoginAdminResponse
+	8,  // 20: school.SchoolService.CreateAdmin:output_type -> school.AdminResponse
+	8,  // 21: school.SchoolService.GetAdmin:output_type -> school.AdminResponse
+	8,  // 22: school.SchoolService.UpdateAdmin:output_type -> school.AdminResponse
+	6,  // 23: school.SchoolService.DeleteAdmin:output_type -> school.DeleteAdminResponse
+	9,  // 24: school.SchoolService.ListAdmins:output_type -> school.ListAdminsResponse
+	16, // 25: school.SchoolService.CreateSchool:output_type -> school.SchoolResponse
+	16, // 26: school.SchoolService.GetSchool:output_type -> school.SchoolResponse
+	16, // 27: school.SchoolService.UpdateSchool:output_type -> school.SchoolResponse
+	14, // 28: school.SchoolService.DeleteSchool:output_type -> school.DeleteSchoolResponse
+	17, // 29: school.SchoolService.ListSchools:output_type -> school.ListSchoolsResponse
+	24, // 30: school.SchoolService.CreateClass:output_type -> school.ClassResponse
+	24, // 31: school.SchoolService.GetClass:output_type -> school.ClassResponse
+	24, // 32: school.SchoolService.UpdateClass:output_type -> school.ClassResponse
+	22, // 33: school.SchoolService.DeleteClass:output_type -> school.DeleteClassResponse
+	25, // 34: school.SchoolService.ListClasses:output_type -> school.ListClassesResponse
+	19, // [19:35] is the sub-list for method output_type
+	3,  // [3:19] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_school_proto_init() }
@@ -710,7 +1613,7 @@ func file_proto_school_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_school_proto_rawDesc), len(file_proto_school_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
