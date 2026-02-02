@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	// Alias the imports so they don't conflict
+	schoolpb "github.com/noxturnedev/lms-monorepo/proto/school"
 	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -23,9 +24,9 @@ import (
 
 type server struct {
 	teacherpb.UnimplementedTeacherServiceServer
-	db *sql.DB
-	// NEW: We hold a client to talk to the Student Service
+	db            *sql.DB
 	studentClient studentpb.StudentServiceClient
+	schoolClient  schoolpb.SchoolServiceClient
 }
 
 func startEventConsumer(db *sql.DB) {
@@ -80,20 +81,6 @@ func startEventConsumer(db *sql.DB) {
 	}()
 }
 
-// ... CreateCourse stays the same ...
-func (s *server) CreateCourse(ctx context.Context, req *teacherpb.CreateCourseRequest) (*teacherpb.CourseResponse, error) {
-	// (Keep your existing code here)
-	log.Printf("Creating Course: %v", req.Title)
-	query := `INSERT INTO courses (teacher_id, title, description) VALUES ($1, $2, $3) RETURNING id`
-	var id string
-	err := s.db.QueryRow(query, req.TeacherId, req.Title, req.Description).Scan(&id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create course: %v", err)
-	}
-	return &teacherpb.CourseResponse{Id: id, Title: req.Title}, nil
-}
-
-// UPDATE THIS FUNCTION
 func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequest) (*teacherpb.GradeResponse, error) {
 	log.Printf("Assigning Grade for Student %v on Assignment %v", req.StudentId, req.AssignmentId)
 
@@ -123,17 +110,7 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 		return nil, fmt.Errorf("score %d exceeds max score %d for this assignment", req.Score, maxScore)
 	}
 
-	// 3. Validate student is enrolled in the assignment's course
-	var enrolled bool
-	err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM enrollments WHERE course_id = $1 AND student_id = $2)", courseID, req.StudentId).Scan(&enrolled)
-	if err != nil {
-		return nil, err
-	}
-	if !enrolled {
-		return nil, fmt.Errorf("student is not enrolled in the course for this assignment")
-	}
-
-	// 4. Save to DB
+	// 3. Save to DB (enrollment validation is now handled by school service)
 	query := `INSERT INTO grades (assignment_id, student_id, score) VALUES ($1, $2, $3) RETURNING id`
 	var id string
 	err = s.db.QueryRow(query, req.AssignmentId, req.StudentId, req.Score).Scan(&id)
@@ -148,10 +125,9 @@ func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudent
 	log.Printf("Fetching grades for student: %v", req.StudentId)
 
 	query := `
-		SELECT c.title, g.score, a.title, a.max_score, a.id
+		SELECT g.score, a.title, a.max_score, a.id, a.course_id
 		FROM grades g
 		JOIN assignments a ON g.assignment_id = a.id
-		JOIN courses c ON a.course_id = c.id
 		WHERE g.student_id = $1
 	`
 
@@ -162,13 +138,27 @@ func (s *server) GetStudentGrades(ctx context.Context, req *teacherpb.GetStudent
 	defer rows.Close()
 
 	var gradeList []*teacherpb.GradeItem
+	courseCache := make(map[string]string) // Cache course titles
 
 	for rows.Next() {
-		var courseTitle, assignmentTitle, assignmentID string
+		var assignmentTitle, assignmentID, courseID string
 		var score, maxScore int32
-		if err := rows.Scan(&courseTitle, &score, &assignmentTitle, &maxScore, &assignmentID); err != nil {
+		if err := rows.Scan(&score, &assignmentTitle, &maxScore, &assignmentID, &courseID); err != nil {
 			continue
 		}
+
+		// Get course title from cache or school service
+		courseTitle, exists := courseCache[courseID]
+		if !exists {
+			courseResp, err := s.schoolClient.GetCourse(ctx, &schoolpb.GetCourseRequest{Id: courseID})
+			if err == nil {
+				courseTitle = courseResp.Title
+				courseCache[courseID] = courseTitle
+			} else {
+				courseTitle = "Unknown Course"
+			}
+		}
+
 		gradeList = append(gradeList, &teacherpb.GradeItem{
 			CourseTitle:     courseTitle,
 			Score:           score,
@@ -298,112 +288,18 @@ func (s *server) ListTeachers(ctx context.Context, req *teacherpb.ListTeachersRe
 }
 
 // ============================================
-// COURSE MANAGEMENT
-// ============================================
-
-func (s *server) GetCourses(ctx context.Context, req *teacherpb.GetCoursesRequest) (*teacherpb.GetCoursesResponse, error) {
-	log.Printf("Getting courses, filter: %v", req.TeacherId)
-
-	var query string
-	var rows *sql.Rows
-	var err error
-
-	if req.TeacherId != "" {
-		query = `SELECT c.id, c.teacher_id, c.title, c.description, t.full_name
-				FROM courses c
-				JOIN teachers t ON c.teacher_id = t.id
-				WHERE c.teacher_id = $1`
-		rows, err = s.db.Query(query, req.TeacherId)
-	} else {
-		query = `SELECT c.id, c.teacher_id, c.title, c.description, t.full_name
-				FROM courses c
-				JOIN teachers t ON c.teacher_id = t.id`
-		rows, err = s.db.Query(query)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var courses []*teacherpb.CourseDetailResponse
-	for rows.Next() {
-		var course teacherpb.CourseDetailResponse
-		if err := rows.Scan(&course.Id, &course.TeacherId, &course.Title, &course.Description, &course.TeacherName); err != nil {
-			continue
-		}
-		courses = append(courses, &course)
-	}
-	return &teacherpb.GetCoursesResponse{Courses: courses}, nil
-}
-
-func (s *server) GetCourse(ctx context.Context, req *teacherpb.GetCourseRequest) (*teacherpb.CourseDetailResponse, error) {
-	log.Printf("Getting course: %v", req.Id)
-	query := `SELECT c.id, c.teacher_id, c.title, c.description, t.full_name
-			FROM courses c
-			JOIN teachers t ON c.teacher_id = t.id
-			WHERE c.id = $1`
-
-	var course teacherpb.CourseDetailResponse
-	err := s.db.QueryRow(query, req.Id).Scan(&course.Id, &course.TeacherId, &course.Title, &course.Description, &course.TeacherName)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("course not found")
-		}
-		return nil, err
-	}
-	return &course, nil
-}
-
-func (s *server) UpdateCourse(ctx context.Context, req *teacherpb.UpdateCourseRequest) (*teacherpb.CourseResponse, error) {
-	log.Printf("Updating course: %v", req.Id)
-	query := `UPDATE courses SET title = $1, description = $2 WHERE id = $3 RETURNING id, title`
-	var course teacherpb.CourseResponse
-	err := s.db.QueryRow(query, req.Title, req.Description, req.Id).Scan(&course.Id, &course.Title)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update course: %v", err)
-	}
-	return &course, nil
-}
-
-func (s *server) DeleteCourse(ctx context.Context, req *teacherpb.DeleteCourseRequest) (*teacherpb.DeleteCourseResponse, error) {
-	log.Printf("Deleting course: %v", req.Id)
-
-	var enrollmentCount int
-	err := s.db.QueryRow("SELECT COUNT(*) FROM enrollments WHERE course_id = $1", req.Id).Scan(&enrollmentCount)
-	if err != nil {
-		return nil, err
-	}
-
-	if enrollmentCount > 0 {
-		return &teacherpb.DeleteCourseResponse{
-			Success: false,
-			Message: fmt.Sprintf("Cannot delete course with %d enrolled students", enrollmentCount),
-		}, nil
-	}
-
-	_, err = s.db.Exec("DELETE FROM courses WHERE id = $1", req.Id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to delete course: %v", err)
-	}
-	return &teacherpb.DeleteCourseResponse{Success: true, Message: "Course deleted successfully"}, nil
-}
-
-// ============================================
 // ASSIGNMENT MANAGEMENT
 // ============================================
 
 func (s *server) CreateAssignment(ctx context.Context, req *teacherpb.CreateAssignmentRequest) (*teacherpb.AssignmentResponse, error) {
 	log.Printf("Creating Assignment: %v for course %v", req.Title, req.CourseId)
 
-	// Validate course exists
-	var courseExists bool
-	err := s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = $1)", req.CourseId).Scan(&courseExists)
-	if err != nil {
-		return nil, err
-	}
-	if !courseExists {
-		return nil, fmt.Errorf("course not found")
+	// Validate course exists via school service
+	courseResp, err := s.schoolClient.ValidateCourseExists(ctx, &schoolpb.ValidateCourseRequest{
+		CourseId: req.CourseId,
+	})
+	if err != nil || !courseResp.Exists {
+		return nil, fmt.Errorf("course not found or school service unavailable")
 	}
 
 	maxScore := req.MaxScore
@@ -424,14 +320,11 @@ func (s *server) CreateAssignment(ctx context.Context, req *teacherpb.CreateAssi
 func (s *server) GetAssignment(ctx context.Context, req *teacherpb.GetAssignmentRequest) (*teacherpb.AssignmentDetailResponse, error) {
 	log.Printf("Getting Assignment: %v", req.Id)
 
-	query := `SELECT a.id, a.course_id, c.title, a.title, a.description, a.max_score
-			FROM assignments a
-			JOIN courses c ON a.course_id = c.id
-			WHERE a.id = $1`
+	query := `SELECT id, course_id, title, description, max_score FROM assignments WHERE id = $1`
 
 	var assignment teacherpb.AssignmentDetailResponse
 	err := s.db.QueryRow(query, req.Id).Scan(
-		&assignment.Id, &assignment.CourseId, &assignment.CourseTitle,
+		&assignment.Id, &assignment.CourseId,
 		&assignment.Title, &assignment.Description, &assignment.MaxScore,
 	)
 	if err != nil {
@@ -440,6 +333,15 @@ func (s *server) GetAssignment(ctx context.Context, req *teacherpb.GetAssignment
 		}
 		return nil, err
 	}
+
+	// Get course details from school service
+	courseResp, err := s.schoolClient.GetCourse(ctx, &schoolpb.GetCourseRequest{
+		Id: assignment.CourseId,
+	})
+	if err == nil {
+		assignment.CourseTitle = courseResp.Title
+	}
+
 	return &assignment, nil
 }
 
@@ -487,10 +389,7 @@ func (s *server) DeleteAssignment(ctx context.Context, req *teacherpb.DeleteAssi
 func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignmentsRequest) (*teacherpb.ListAssignmentsResponse, error) {
 	log.Printf("Listing assignments for course: %v", req.CourseId)
 
-	query := `SELECT a.id, a.course_id, c.title, a.title, a.description, a.max_score
-			FROM assignments a
-			JOIN courses c ON a.course_id = c.id
-			WHERE a.course_id = $1`
+	query := `SELECT id, course_id, title, description, max_score FROM assignments WHERE course_id = $1`
 
 	rows, err := s.db.Query(query, req.CourseId)
 	if err != nil {
@@ -498,15 +397,41 @@ func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignm
 	}
 	defer rows.Close()
 
+	// Get course details from school service
+	var courseTitle string
+	courseResp, err := s.schoolClient.GetCourse(ctx, &schoolpb.GetCourseRequest{
+		Id: req.CourseId,
+	})
+	if err == nil {
+		courseTitle = courseResp.Title
+	}
+
 	var assignments []*teacherpb.AssignmentDetailResponse
 	for rows.Next() {
 		var a teacherpb.AssignmentDetailResponse
-		if err := rows.Scan(&a.Id, &a.CourseId, &a.CourseTitle, &a.Title, &a.Description, &a.MaxScore); err != nil {
+		if err := rows.Scan(&a.Id, &a.CourseId, &a.Title, &a.Description, &a.MaxScore); err != nil {
 			continue
 		}
+		a.CourseTitle = courseTitle
 		assignments = append(assignments, &a)
 	}
 	return &teacherpb.ListAssignmentsResponse{Assignments: assignments}, nil
+}
+
+// ============================================
+// VALIDATION (used by School Service)
+// ============================================
+
+func (s *server) ValidateCourseHasAssignments(ctx context.Context, req *teacherpb.ValidateCourseAssignmentsRequest) (*teacherpb.ValidateCourseAssignmentsResponse, error) {
+	var count int32
+	err := s.db.QueryRow("SELECT COUNT(*) FROM assignments WHERE course_id = $1", req.CourseId).Scan(&count)
+	if err != nil {
+		return nil, err
+	}
+	return &teacherpb.ValidateCourseAssignmentsResponse{
+		HasAssignments:  count > 0,
+		AssignmentCount: count,
+	}, nil
 }
 
 // ============================================
@@ -516,14 +441,12 @@ func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignm
 func (s *server) GetStudentCourseGrade(ctx context.Context, req *teacherpb.GetStudentCourseGradeRequest) (*teacherpb.StudentCourseGradeResponse, error) {
 	log.Printf("Getting student course grade: student=%v course=%v", req.StudentId, req.CourseId)
 
-	// Get course title
-	var courseTitle string
-	err := s.db.QueryRow("SELECT title FROM courses WHERE id = $1", req.CourseId).Scan(&courseTitle)
+	// Get course title from school service
+	courseResp, err := s.schoolClient.GetCourse(ctx, &schoolpb.GetCourseRequest{
+		Id: req.CourseId,
+	})
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("course not found")
-		}
-		return nil, err
+		return nil, fmt.Errorf("course not found or school service unavailable")
 	}
 
 	// Get per-assignment breakdown
@@ -559,7 +482,7 @@ func (s *server) GetStudentCourseGrade(ctx context.Context, req *teacherpb.GetSt
 
 	return &teacherpb.StudentCourseGradeResponse{
 		CourseId:      req.CourseId,
-		CourseTitle:   courseTitle,
+		CourseTitle:   courseResp.Title,
 		StudentId:     req.StudentId,
 		OverallScore:  overallScore,
 		TotalScore:    totalScore,
@@ -569,75 +492,17 @@ func (s *server) GetStudentCourseGrade(ctx context.Context, req *teacherpb.GetSt
 }
 
 // ============================================
-// ENROLLMENT
-// ============================================
-
-func (s *server) EnrollStudent(ctx context.Context, req *teacherpb.EnrollStudentRequest) (*teacherpb.EnrollmentResponse, error) {
-	log.Printf("Enrolling student %v in course %v", req.StudentId, req.CourseId)
-
-	_, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: req.StudentId})
-	if err != nil {
-		return &teacherpb.EnrollmentResponse{Success: false, Message: "Student not found"}, nil
-	}
-
-	var courseExists bool
-	err = s.db.QueryRow("SELECT EXISTS(SELECT 1 FROM courses WHERE id = $1)", req.CourseId).Scan(&courseExists)
-	if err != nil || !courseExists {
-		return &teacherpb.EnrollmentResponse{Success: false, Message: "Course not found"}, nil
-	}
-
-	query := `INSERT INTO enrollments (student_id, course_id) VALUES ($1, $2) RETURNING id`
-	var id string
-	err = s.db.QueryRow(query, req.StudentId, req.CourseId).Scan(&id)
-	if err != nil {
-		return &teacherpb.EnrollmentResponse{Success: false, Message: "Already enrolled or enrollment failed"}, nil
-	}
-
-	return &teacherpb.EnrollmentResponse{Id: id, Success: true, Message: "Enrolled successfully"}, nil
-}
-
-func (s *server) GetCourseEnrollments(ctx context.Context, req *teacherpb.GetCourseEnrollmentsRequest) (*teacherpb.GetCourseEnrollmentsResponse, error) {
-	log.Printf("Getting enrollments for course: %v", req.CourseId)
-
-	query := `SELECT student_id FROM enrollments WHERE course_id = $1`
-	rows, err := s.db.Query(query, req.CourseId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var enrollments []*teacherpb.EnrollmentItem
-	for rows.Next() {
-		var studentId string
-		if err := rows.Scan(&studentId); err != nil {
-			continue
-		}
-
-		studentResp, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: studentId})
-		if err != nil {
-			continue
-		}
-
-		enrollments = append(enrollments, &teacherpb.EnrollmentItem{
-			StudentId:     studentId,
-			StudentName:   studentResp.FullName,
-			StudentNumber: studentResp.StudentNumber,
-		})
-	}
-	return &teacherpb.GetCourseEnrollmentsResponse{Enrollments: enrollments}, nil
-}
-
-// ============================================
 // GRADEBOOK
 // ============================================
-
 func (s *server) GetCourseGrades(ctx context.Context, req *teacherpb.GetCourseGradesRequest) (*teacherpb.CourseGradesResponse, error) {
 	log.Printf("Getting grades for course: %v", req.CourseId)
 
-	var courseTitle string
-	err := s.db.QueryRow("SELECT title FROM courses WHERE id = $1", req.CourseId).Scan(&courseTitle)
+	// Get course title from school service
+	courseResp, err := s.schoolClient.GetCourse(ctx, &schoolpb.GetCourseRequest{
+		Id: req.CourseId,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("course not found")
+		return nil, fmt.Errorf("course not found or school service unavailable")
 	}
 
 	query := `SELECT g.id, g.student_id, g.score, a.title, a.max_score, a.id
@@ -687,8 +552,8 @@ func (s *server) GetCourseGrades(ctx context.Context, req *teacherpb.GetCourseGr
 
 	return &teacherpb.CourseGradesResponse{
 		CourseId:    req.CourseId,
-		CourseTitle: courseTitle,
-		Grades:     grades,
+		CourseTitle: courseResp.Title,
+		Grades:      grades,
 	}, nil
 }
 
@@ -705,52 +570,21 @@ func (s *server) GetTeacherDashboard(ctx context.Context, req *teacherpb.GetTeac
 		return nil, fmt.Errorf("teacher not found")
 	}
 
-	var totalCourses int32
-	err = s.db.QueryRow("SELECT COUNT(*) FROM courses WHERE teacher_id = $1", req.TeacherId).Scan(&totalCourses)
-	if err != nil {
-		return nil, err
-	}
-
-	var totalStudents int32
-	query := `SELECT COUNT(DISTINCT e.student_id)
-			FROM enrollments e
-			JOIN courses c ON e.course_id = c.id
-			WHERE c.teacher_id = $1`
-	err = s.db.QueryRow(query, req.TeacherId).Scan(&totalStudents)
-	if err != nil {
-		return nil, err
-	}
-
-	courseSummaryQuery := `
-		SELECT c.id, c.title, COUNT(e.student_id) as enrolled_count
-		FROM courses c
-		LEFT JOIN enrollments e ON c.id = e.course_id
-		WHERE c.teacher_id = $1
-		GROUP BY c.id, c.title`
-
-	rows, err := s.db.Query(courseSummaryQuery, req.TeacherId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var courseSummaries []*teacherpb.CourseSummary
-	for rows.Next() {
-		var summary teacherpb.CourseSummary
-		if err := rows.Scan(&summary.CourseId, &summary.Title, &summary.EnrolledCount); err != nil {
-			continue
-		}
-		courseSummaries = append(courseSummaries, &summary)
-	}
+	// Get courses assigned to this teacher from school service
+	// Note: This requires the school service to provide a method to get courses by teacher
+	// For now, we'll return basic teacher info without course statistics
+	// This functionality should be implemented in school service
 
 	return &teacherpb.TeacherDashboardResponse{
 		TeacherId:             req.TeacherId,
 		TeacherName:           teacherName,
-		TotalCourses:          totalCourses,
-		TotalStudentsEnrolled: totalStudents,
-		Courses:               courseSummaries,
+		TotalCourses:          0,
+		TotalStudentsEnrolled: 0,
+		Courses:               []*teacherpb.CourseSummary{},
 	}, nil
 }
+
+func (s *server) GetTeacherCourseList(ctx context.Context, req *teacherpb.GetTeacherCourseList) (*teacherpb.GetTeacherCourseListResponse, error)
 
 func main() {
 	shutdown := initTracer()
@@ -768,7 +602,7 @@ func main() {
 		studentServiceUrl = "localhost:8082" // Fallback for local dev without Docker
 	}
 
-	conn, err := grpc.NewClient(
+	studentConn, err := grpc.NewClient(
 		studentServiceUrl,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
@@ -776,9 +610,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("did not connect to student service: %v", err)
 	}
-	defer conn.Close()
+	defer studentConn.Close()
 
-	studentClient := studentpb.NewStudentServiceClient(conn)
+	studentClient := studentpb.NewStudentServiceClient(studentConn)
+
+	schoolServiceUrl := os.Getenv("SCHOOL_SERVICE_URL")
+	if schoolServiceUrl == "" {
+		schoolServiceUrl = "localhost:8083"
+	}
+
+	schoolConn, err := grpc.NewClient(
+		schoolServiceUrl,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Fatalf("did not connect to school service: %v", err)
+	}
+	defer schoolConn.Close()
+
+	schoolClient := schoolpb.NewSchoolServiceClient(schoolConn)
 
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
@@ -792,6 +643,7 @@ func main() {
 	teacherpb.RegisterTeacherServiceServer(s, &server{
 		db:            db,
 		studentClient: studentClient,
+		schoolClient:  schoolClient,
 	})
 
 	startEventConsumer(db)
