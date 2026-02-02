@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/noxturnedev/lms-monorepo/proto/student"
-	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
+	schoolpb "github.com/noxturnedev/lms-monorepo/proto/school"
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -27,7 +27,7 @@ type server struct {
 	pb.UnimplementedStudentServiceServer // Embedding for forward compatibility
 	db                                   *sql.DB
 	rabbitChannel                        *amqp.Channel
-	teacherClient                        teacherpb.TeacherServiceClient
+	schoolClient                         schoolpb.SchoolServiceClient
 }
 
 func (s *server) PublishEvent(event string, payload interface{}) error {
@@ -216,36 +216,36 @@ func (s *server) UpdateStudent(ctx context.Context, req *pb.UpdateStudentRequest
 func (s *server) GetStudentCourses(ctx context.Context, req *pb.GetStudentCoursesRequest) (*pb.GetStudentCoursesResponse, error) {
 	log.Printf("Getting courses for student: %v", req.StudentId)
 
-	_, err := s.db.Query("SELECT id FROM students WHERE id = $1", req.StudentId)
+	// Verify student exists using QueryRow (Query won't error on zero rows)
+	var studentID string
+	err := s.db.QueryRowContext(ctx, "SELECT id FROM students WHERE id = $1", req.StudentId).Scan(&studentID)
 	if err != nil {
-		return nil, fmt.Errorf("student not found")
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("student not found")
+		}
+		return nil, fmt.Errorf("failed to check student: %v", err)
 	}
 
-	coursesResp, err := s.teacherClient.GetCourses(ctx, &teacherpb.GetCoursesRequest{})
+	// Get enrolled courses from school service
+	enrollmentsResp, err := s.schoolClient.GetStudentEnrollments(ctx, &schoolpb.GetStudentEnrollmentsRequest{
+		StudentId: req.StudentId,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch courses: %v", err)
+		return nil, fmt.Errorf("failed to fetch enrolled courses: %v", err)
 	}
 
 	var studentCourses []*pb.CourseItem
-	for _, course := range coursesResp.Courses {
-		enrollments, err := s.teacherClient.GetCourseEnrollments(ctx, &teacherpb.GetCourseEnrollmentsRequest{
-			CourseId: course.Id,
+	for _, course := range enrollmentsResp.Courses {
+		teacherName := ""
+		if len(course.TeacherNames) > 0 {
+			teacherName = course.TeacherNames[0]
+		}
+		studentCourses = append(studentCourses, &pb.CourseItem{
+			CourseId:    course.Id,
+			Title:       course.Title,
+			Description: course.Description,
+			TeacherName: teacherName,
 		})
-		if err != nil {
-			continue
-		}
-
-		for _, enrollment := range enrollments.Enrollments {
-			if enrollment.StudentId == req.StudentId {
-				studentCourses = append(studentCourses, &pb.CourseItem{
-					CourseId:    course.Id,
-					Title:       course.Title,
-					Description: course.Description,
-					TeacherName: course.TeacherName,
-				})
-				break
-			}
-		}
 	}
 
 	return &pb.GetStudentCoursesResponse{Courses: studentCourses}, nil
@@ -267,22 +267,22 @@ func main() {
 	}
 	defer db.Close()
 
-	teacherServiceUrl := os.Getenv("TEACHER_SERVICE_URL")
-	if teacherServiceUrl == "" {
-		teacherServiceUrl = "localhost:8081"
+	schoolServiceUrl := os.Getenv("SCHOOL_SERVICE_URL")
+	if schoolServiceUrl == "" {
+		schoolServiceUrl = "localhost:8083"
 	}
 
-	teacherConn, err := grpc.NewClient(
-		teacherServiceUrl,
+	schoolConn, err := grpc.NewClient(
+		schoolServiceUrl,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 	if err != nil {
-		log.Fatalf("did not connect to teacher service: %v", err)
+		log.Fatalf("did not connect to school service: %v", err)
 	}
-	defer teacherConn.Close()
+	defer schoolConn.Close()
 
-	teacherClient := teacherpb.NewTeacherServiceClient(teacherConn)
+	schoolClient := schoolpb.NewSchoolServiceClient(schoolConn)
 
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
@@ -326,7 +326,7 @@ func main() {
 	pb.RegisterStudentServiceServer(s, &server{
 		db:            db,
 		rabbitChannel: ch,
-		teacherClient: teacherClient,
+		schoolClient:  schoolClient,
 	})
 
 	reflection.Register(s)
