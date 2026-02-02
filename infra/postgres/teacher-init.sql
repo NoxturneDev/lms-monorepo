@@ -9,38 +9,18 @@ CREATE TABLE teachers (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. COURSES (e.g., "Intro to Go", "Advanced Algorithms")
-CREATE TABLE courses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    teacher_id UUID NOT NULL, -- FK to local teachers table
-    title VARCHAR(150) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES teachers(id)
-);
-
--- 3. ENROLLMENTS (Student-Course relationship)
-CREATE TABLE enrollments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    course_id UUID NOT NULL,
-    student_id UUID NOT NULL, -- From Student Service
-    enrolled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_enrollment_course FOREIGN KEY (course_id) REFERENCES courses(id),
-    UNIQUE(course_id, student_id) -- Prevent duplicate enrollments
-);
-
--- 4. ASSIGNMENTS (Course has many assignments)
+-- 2. ASSIGNMENTS (Course has many assignments)
+-- NOTE: course_id is an external reference to School Service (no FK constraint)
 CREATE TABLE assignments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    course_id UUID NOT NULL,
+    course_id UUID NOT NULL,  -- External ID from School Service
     title VARCHAR(150) NOT NULL,
     description TEXT,
     max_score INTEGER NOT NULL DEFAULT 100,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_assignment_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. GRADES (Per-assignment, per-student)
+-- 3. GRADES (Per-assignment, per-student)
 CREATE TABLE grades (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     assignment_id UUID NOT NULL,
@@ -65,18 +45,7 @@ INSERT INTO teachers (id, email, password_hash, full_name) VALUES
 ('e390f1ee-6c54-4b01-90e6-d701748f0852', 'hopper@uni.edu', 'secret', 'Grace Hopper'),
 ('f490f1ee-6c54-4b01-90e6-d701748f0853', 'ritchie@uni.edu', 'secret', 'Dennis Ritchie');
 
--- Courses
--- Alan Turing teaches Algorithms
-INSERT INTO courses (id, teacher_id, title, description) VALUES
-('c100f1ee-6c54-4b01-90e6-d701748f0851', 'd290f1ee-6c54-4b01-90e6-d701748f0851', 'Advanced Algorithms', 'P vs NP and beyond'),
-('c101f1ee-6c54-4b01-90e6-d701748f0851', 'd290f1ee-6c54-4b01-90e6-d701748f0851', 'Cryptography 101', 'Breaking Enigma');
-
--- Grace Hopper teaches Systems
-INSERT INTO courses (id, teacher_id, title, description) VALUES
-('c200f1ee-6c54-4b01-90e6-d701748f0852', 'e390f1ee-6c54-4b01-90e6-d701748f0852', 'Operating Systems', 'Compilers and Cobol'),
-('c201f1ee-6c54-4b01-90e6-d701748f0852', 'e390f1ee-6c54-4b01-90e6-d701748f0852', 'Legacy Systems', 'Why banks still use mainframe');
-
--- Assignments
+-- Assignments (course_id references courses in School Service)
 INSERT INTO assignments (id, course_id, title, description, max_score) VALUES
 ('a100f1ee-6c54-4b01-90e6-d701748f0001', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Midterm Exam', 'Covers sorting and graph algorithms', 100),
 ('a100f1ee-6c54-4b01-90e6-d701748f0002', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Final Project', 'Implement a novel algorithm', 200),
