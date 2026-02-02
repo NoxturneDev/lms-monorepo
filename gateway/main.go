@@ -102,16 +102,12 @@ func main() {
 			protected.PUT("/teachers/:id", gw.UpdateTeacher)
 			protected.DELETE("/teachers/:id", gw.DeleteTeacher)
 
-			// Course Management (Teacher Only)
+			// Teacher Routes (Teacher Only)
 			teacherRoutes := protected.Group("")
 			teacherRoutes.Use(web.TeacherOnly())
 			{
-				teacherRoutes.POST("/courses", gw.CreateCourse)
-				teacherRoutes.PUT("/courses/:id", gw.UpdateCourse)
-				teacherRoutes.DELETE("/courses/:id", gw.DeleteCourse)
 				teacherRoutes.POST("/grades", gw.AssignGrade)
 				teacherRoutes.GET("/courses/:id/grades", gw.GetCourseGrades)
-				teacherRoutes.GET("/courses/:id/enrollments", gw.GetCourseEnrollments)
 				teacherRoutes.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
 
 				// Assignment Management (Teacher Only - write)
@@ -121,8 +117,9 @@ func main() {
 			}
 
 			// Course Viewing (All authenticated users)
-			protected.GET("/courses", gw.GetCourses)
+			protected.GET("/courses", gw.ListCourses)
 			protected.GET("/courses/:id", gw.GetCourse)
+			protected.GET("/courses/:id/teachers", gw.GetCourseTeachers)
 
 			// Assignment Viewing (All authenticated users)
 			protected.GET("/courses/:id/assignments", gw.ListAssignments)
@@ -131,6 +128,9 @@ func main() {
 
 			// Enrollment (All authenticated users)
 			protected.POST("/enrollments", gw.EnrollStudent)
+			protected.DELETE("/enrollments", gw.UnenrollStudent)
+			protected.GET("/courses/:id/enrollments", gw.GetCourseEnrollments)
+			protected.GET("/students/:id/enrollments", gw.GetStudentEnrollments)
 
 			// School/Class Viewing (All authenticated users)
 			protected.GET("/schools", gw.ListSchools)
@@ -158,6 +158,15 @@ func main() {
 				adminRoutes.POST("/classes", gw.CreateClass)
 				adminRoutes.PUT("/classes/:id", gw.UpdateClass)
 				adminRoutes.DELETE("/classes/:id", gw.DeleteClass)
+
+				// Course Management (Admin Only)
+				adminRoutes.POST("/courses", gw.CreateCourse)
+				adminRoutes.PUT("/courses/:id", gw.UpdateCourse)
+				adminRoutes.DELETE("/courses/:id", gw.DeleteCourse)
+
+				// Course-Teacher Assignment (Admin Only)
+				adminRoutes.POST("/courses/:id/teachers", gw.AssignTeacherToCourse)
+				adminRoutes.DELETE("/courses/:id/teachers/:teacher_id", gw.UnassignTeacherFromCourse)
 			}
 		}
 	}

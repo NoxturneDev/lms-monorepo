@@ -11,32 +11,6 @@ import (
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
 )
 
-func (gw *Gateway) CreateCourse(c *gin.Context) {
-	var req struct {
-		TeacherID   string `json:"teacher_id"`
-		Title       string `json:"title"`
-		Description string `json:"description"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.CreateCourse(ctx, &teacherpb.CreateCourseRequest{
-		TeacherId:   req.TeacherID,
-		Title:       req.Title,
-		Description: req.Description,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusCreated, resp)
-}
-
 func (gw *Gateway) AssignGrade(c *gin.Context) {
 	var req struct {
 		TeacherID    string `json:"teacher_id"`
@@ -164,114 +138,8 @@ func (gw *Gateway) ListTeachers(c *gin.Context) {
 }
 
 // ============================================
-// COURSE MANAGEMENT
+// STUDENT COURSES
 // ============================================
-
-func (gw *Gateway) GetCourses(c *gin.Context) {
-	teacherID := c.Query("teacher_id")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.GetCourses(ctx, &teacherpb.GetCoursesRequest{
-		TeacherId: teacherID,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-func (gw *Gateway) GetCourse(c *gin.Context) {
-	id := c.Param("id")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.GetCourse(ctx, &teacherpb.GetCourseRequest{Id: id})
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-func (gw *Gateway) UpdateCourse(c *gin.Context) {
-	id := c.Param("id")
-	var req struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.UpdateCourse(ctx, &teacherpb.UpdateCourseRequest{
-		Id:          id,
-		Title:       req.Title,
-		Description: req.Description,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-func (gw *Gateway) DeleteCourse(c *gin.Context) {
-	id := c.Param("id")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.DeleteCourse(ctx, &teacherpb.DeleteCourseRequest{Id: id})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if !resp.Success {
-		c.JSON(http.StatusConflict, gin.H{"error": resp.Message})
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-// ============================================
-// ENROLLMENT
-// ============================================
-
-func (gw *Gateway) EnrollStudent(c *gin.Context) {
-	var req struct {
-		StudentID string `json:"student_id"`
-		CourseID  string `json:"course_id"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.EnrollStudent(ctx, &teacherpb.EnrollStudentRequest{
-		StudentId: req.StudentID,
-		CourseId:  req.CourseID,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if !resp.Success {
-		c.JSON(http.StatusBadRequest, gin.H{"error": resp.Message})
-		return
-	}
-	c.JSON(http.StatusCreated, resp)
-}
 
 func (gw *Gateway) GetStudentCoursesByID(c *gin.Context) {
 	studentID := c.Param("id")
@@ -322,22 +190,6 @@ func (gw *Gateway) GetTeacherDashboard(c *gin.Context) {
 
 	resp, err := gw.TeacherClient.GetTeacherDashboard(ctx, &teacherpb.GetTeacherDashboardRequest{
 		TeacherId: teacherID,
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-func (gw *Gateway) GetCourseEnrollments(c *gin.Context) {
-	courseID := c.Param("id")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	resp, err := gw.TeacherClient.GetCourseEnrollments(ctx, &teacherpb.GetCourseEnrollmentsRequest{
-		CourseId: courseID,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
