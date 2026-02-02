@@ -1861,6 +1861,66 @@ func (x *ListCoursesRequest) GetSchoolId() string {
 	return ""
 }
 
+type TeacherCourseListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	TeacherId     string                 `protobuf:"bytes,2,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TeacherCourseListResponse) Reset() {
+	*x = TeacherCourseListResponse{}
+	mi := &file_proto_school_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TeacherCourseListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TeacherCourseListResponse) ProtoMessage() {}
+
+func (x *TeacherCourseListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TeacherCourseListResponse.ProtoReflect.Descriptor instead.
+func (*TeacherCourseListResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *TeacherCourseListResponse) GetCourseId() string {
+	if x != nil {
+		return x.CourseId
+	}
+	return ""
+}
+
+func (x *TeacherCourseListResponse) GetTeacherId() string {
+	if x != nil {
+		return x.TeacherId
+	}
+	return ""
+}
+
+func (x *TeacherCourseListResponse) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
 type GetTeacherCourseListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TeacherId     string                 `protobuf:"bytes,1,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
@@ -1870,7 +1930,7 @@ type GetTeacherCourseListRequest struct {
 
 func (x *GetTeacherCourseListRequest) Reset() {
 	*x = GetTeacherCourseListRequest{}
-	mi := &file_proto_school_proto_msgTypes[34]
+	mi := &file_proto_school_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1882,7 +1942,7 @@ func (x *GetTeacherCourseListRequest) String() string {
 func (*GetTeacherCourseListRequest) ProtoMessage() {}
 
 func (x *GetTeacherCourseListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[34]
+	mi := &file_proto_school_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1895,7 +1955,7 @@ func (x *GetTeacherCourseListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTeacherCourseListRequest.ProtoReflect.Descriptor instead.
 func (*GetTeacherCourseListRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{34}
+	return file_proto_school_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetTeacherCourseListRequest) GetTeacherId() string {
@@ -1903,6 +1963,50 @@ func (x *GetTeacherCourseListRequest) GetTeacherId() string {
 		return x.TeacherId
 	}
 	return ""
+}
+
+type GetTeacherCourseListResponse struct {
+	state         protoimpl.MessageState       `protogen:"open.v1"`
+	Courses       []*TeacherCourseListResponse `protobuf:"bytes,1,rep,name=courses,proto3" json:"courses,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTeacherCourseListResponse) Reset() {
+	*x = GetTeacherCourseListResponse{}
+	mi := &file_proto_school_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTeacherCourseListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTeacherCourseListResponse) ProtoMessage() {}
+
+func (x *GetTeacherCourseListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_school_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTeacherCourseListResponse.ProtoReflect.Descriptor instead.
+func (*GetTeacherCourseListResponse) Descriptor() ([]byte, []int) {
+	return file_proto_school_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *GetTeacherCourseListResponse) GetCourses() []*TeacherCourseListResponse {
+	if x != nil {
+		return x.Courses
+	}
+	return nil
 }
 
 type ListCoursesResponse struct {
@@ -1914,7 +2018,7 @@ type ListCoursesResponse struct {
 
 func (x *ListCoursesResponse) Reset() {
 	*x = ListCoursesResponse{}
-	mi := &file_proto_school_proto_msgTypes[35]
+	mi := &file_proto_school_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1926,7 +2030,7 @@ func (x *ListCoursesResponse) String() string {
 func (*ListCoursesResponse) ProtoMessage() {}
 
 func (x *ListCoursesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[35]
+	mi := &file_proto_school_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1939,7 +2043,7 @@ func (x *ListCoursesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCoursesResponse.ProtoReflect.Descriptor instead.
 func (*ListCoursesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{35}
+	return file_proto_school_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ListCoursesResponse) GetCourses() []*CourseDetailResponse {
@@ -1959,7 +2063,7 @@ type AssignTeacherToCourseRequest struct {
 
 func (x *AssignTeacherToCourseRequest) Reset() {
 	*x = AssignTeacherToCourseRequest{}
-	mi := &file_proto_school_proto_msgTypes[36]
+	mi := &file_proto_school_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1971,7 +2075,7 @@ func (x *AssignTeacherToCourseRequest) String() string {
 func (*AssignTeacherToCourseRequest) ProtoMessage() {}
 
 func (x *AssignTeacherToCourseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[36]
+	mi := &file_proto_school_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1984,7 +2088,7 @@ func (x *AssignTeacherToCourseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AssignTeacherToCourseRequest.ProtoReflect.Descriptor instead.
 func (*AssignTeacherToCourseRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{36}
+	return file_proto_school_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *AssignTeacherToCourseRequest) GetCourseId() string {
@@ -2012,7 +2116,7 @@ type AssignmentResponse struct {
 
 func (x *AssignmentResponse) Reset() {
 	*x = AssignmentResponse{}
-	mi := &file_proto_school_proto_msgTypes[37]
+	mi := &file_proto_school_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2024,7 +2128,7 @@ func (x *AssignmentResponse) String() string {
 func (*AssignmentResponse) ProtoMessage() {}
 
 func (x *AssignmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[37]
+	mi := &file_proto_school_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2037,7 +2141,7 @@ func (x *AssignmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AssignmentResponse.ProtoReflect.Descriptor instead.
 func (*AssignmentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{37}
+	return file_proto_school_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *AssignmentResponse) GetId() string {
@@ -2071,7 +2175,7 @@ type UnassignTeacherRequest struct {
 
 func (x *UnassignTeacherRequest) Reset() {
 	*x = UnassignTeacherRequest{}
-	mi := &file_proto_school_proto_msgTypes[38]
+	mi := &file_proto_school_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2083,7 +2187,7 @@ func (x *UnassignTeacherRequest) String() string {
 func (*UnassignTeacherRequest) ProtoMessage() {}
 
 func (x *UnassignTeacherRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[38]
+	mi := &file_proto_school_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2096,7 +2200,7 @@ func (x *UnassignTeacherRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnassignTeacherRequest.ProtoReflect.Descriptor instead.
 func (*UnassignTeacherRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{38}
+	return file_proto_school_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *UnassignTeacherRequest) GetCourseId() string {
@@ -2123,7 +2227,7 @@ type UnassignmentResponse struct {
 
 func (x *UnassignmentResponse) Reset() {
 	*x = UnassignmentResponse{}
-	mi := &file_proto_school_proto_msgTypes[39]
+	mi := &file_proto_school_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2135,7 +2239,7 @@ func (x *UnassignmentResponse) String() string {
 func (*UnassignmentResponse) ProtoMessage() {}
 
 func (x *UnassignmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[39]
+	mi := &file_proto_school_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2148,7 +2252,7 @@ func (x *UnassignmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnassignmentResponse.ProtoReflect.Descriptor instead.
 func (*UnassignmentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{39}
+	return file_proto_school_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *UnassignmentResponse) GetSuccess() bool {
@@ -2174,7 +2278,7 @@ type GetCourseTeachersRequest struct {
 
 func (x *GetCourseTeachersRequest) Reset() {
 	*x = GetCourseTeachersRequest{}
-	mi := &file_proto_school_proto_msgTypes[40]
+	mi := &file_proto_school_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2186,7 +2290,7 @@ func (x *GetCourseTeachersRequest) String() string {
 func (*GetCourseTeachersRequest) ProtoMessage() {}
 
 func (x *GetCourseTeachersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[40]
+	mi := &file_proto_school_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2199,7 +2303,7 @@ func (x *GetCourseTeachersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCourseTeachersRequest.ProtoReflect.Descriptor instead.
 func (*GetCourseTeachersRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{40}
+	return file_proto_school_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *GetCourseTeachersRequest) GetCourseId() string {
@@ -2218,7 +2322,7 @@ type CourseTeachersResponse struct {
 
 func (x *CourseTeachersResponse) Reset() {
 	*x = CourseTeachersResponse{}
-	mi := &file_proto_school_proto_msgTypes[41]
+	mi := &file_proto_school_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2230,7 +2334,7 @@ func (x *CourseTeachersResponse) String() string {
 func (*CourseTeachersResponse) ProtoMessage() {}
 
 func (x *CourseTeachersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[41]
+	mi := &file_proto_school_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2243,7 +2347,7 @@ func (x *CourseTeachersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CourseTeachersResponse.ProtoReflect.Descriptor instead.
 func (*CourseTeachersResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{41}
+	return file_proto_school_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *CourseTeachersResponse) GetTeachers() []*TeacherInfo {
@@ -2264,7 +2368,7 @@ type TeacherInfo struct {
 
 func (x *TeacherInfo) Reset() {
 	*x = TeacherInfo{}
-	mi := &file_proto_school_proto_msgTypes[42]
+	mi := &file_proto_school_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2276,7 +2380,7 @@ func (x *TeacherInfo) String() string {
 func (*TeacherInfo) ProtoMessage() {}
 
 func (x *TeacherInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[42]
+	mi := &file_proto_school_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2289,7 +2393,7 @@ func (x *TeacherInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TeacherInfo.ProtoReflect.Descriptor instead.
 func (*TeacherInfo) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{42}
+	return file_proto_school_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *TeacherInfo) GetTeacherId() string {
@@ -2323,7 +2427,7 @@ type EnrollStudentRequest struct {
 
 func (x *EnrollStudentRequest) Reset() {
 	*x = EnrollStudentRequest{}
-	mi := &file_proto_school_proto_msgTypes[43]
+	mi := &file_proto_school_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2335,7 +2439,7 @@ func (x *EnrollStudentRequest) String() string {
 func (*EnrollStudentRequest) ProtoMessage() {}
 
 func (x *EnrollStudentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[43]
+	mi := &file_proto_school_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2348,7 +2452,7 @@ func (x *EnrollStudentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnrollStudentRequest.ProtoReflect.Descriptor instead.
 func (*EnrollStudentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{43}
+	return file_proto_school_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *EnrollStudentRequest) GetCourseId() string {
@@ -2376,7 +2480,7 @@ type EnrollmentResponse struct {
 
 func (x *EnrollmentResponse) Reset() {
 	*x = EnrollmentResponse{}
-	mi := &file_proto_school_proto_msgTypes[44]
+	mi := &file_proto_school_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2388,7 +2492,7 @@ func (x *EnrollmentResponse) String() string {
 func (*EnrollmentResponse) ProtoMessage() {}
 
 func (x *EnrollmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[44]
+	mi := &file_proto_school_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2401,7 +2505,7 @@ func (x *EnrollmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnrollmentResponse.ProtoReflect.Descriptor instead.
 func (*EnrollmentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{44}
+	return file_proto_school_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *EnrollmentResponse) GetId() string {
@@ -2435,7 +2539,7 @@ type UnenrollStudentRequest struct {
 
 func (x *UnenrollStudentRequest) Reset() {
 	*x = UnenrollStudentRequest{}
-	mi := &file_proto_school_proto_msgTypes[45]
+	mi := &file_proto_school_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2447,7 +2551,7 @@ func (x *UnenrollStudentRequest) String() string {
 func (*UnenrollStudentRequest) ProtoMessage() {}
 
 func (x *UnenrollStudentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[45]
+	mi := &file_proto_school_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2460,7 +2564,7 @@ func (x *UnenrollStudentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnenrollStudentRequest.ProtoReflect.Descriptor instead.
 func (*UnenrollStudentRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{45}
+	return file_proto_school_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *UnenrollStudentRequest) GetCourseId() string {
@@ -2487,7 +2591,7 @@ type UnenrollmentResponse struct {
 
 func (x *UnenrollmentResponse) Reset() {
 	*x = UnenrollmentResponse{}
-	mi := &file_proto_school_proto_msgTypes[46]
+	mi := &file_proto_school_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2499,7 +2603,7 @@ func (x *UnenrollmentResponse) String() string {
 func (*UnenrollmentResponse) ProtoMessage() {}
 
 func (x *UnenrollmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[46]
+	mi := &file_proto_school_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2512,7 +2616,7 @@ func (x *UnenrollmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnenrollmentResponse.ProtoReflect.Descriptor instead.
 func (*UnenrollmentResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{46}
+	return file_proto_school_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *UnenrollmentResponse) GetSuccess() bool {
@@ -2538,7 +2642,7 @@ type GetCourseEnrollmentsRequest struct {
 
 func (x *GetCourseEnrollmentsRequest) Reset() {
 	*x = GetCourseEnrollmentsRequest{}
-	mi := &file_proto_school_proto_msgTypes[47]
+	mi := &file_proto_school_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2550,7 +2654,7 @@ func (x *GetCourseEnrollmentsRequest) String() string {
 func (*GetCourseEnrollmentsRequest) ProtoMessage() {}
 
 func (x *GetCourseEnrollmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[47]
+	mi := &file_proto_school_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2563,7 +2667,7 @@ func (x *GetCourseEnrollmentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCourseEnrollmentsRequest.ProtoReflect.Descriptor instead.
 func (*GetCourseEnrollmentsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{47}
+	return file_proto_school_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *GetCourseEnrollmentsRequest) GetCourseId() string {
@@ -2582,7 +2686,7 @@ type CourseEnrollmentsResponse struct {
 
 func (x *CourseEnrollmentsResponse) Reset() {
 	*x = CourseEnrollmentsResponse{}
-	mi := &file_proto_school_proto_msgTypes[48]
+	mi := &file_proto_school_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2594,7 +2698,7 @@ func (x *CourseEnrollmentsResponse) String() string {
 func (*CourseEnrollmentsResponse) ProtoMessage() {}
 
 func (x *CourseEnrollmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[48]
+	mi := &file_proto_school_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2607,7 +2711,7 @@ func (x *CourseEnrollmentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CourseEnrollmentsResponse.ProtoReflect.Descriptor instead.
 func (*CourseEnrollmentsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{48}
+	return file_proto_school_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *CourseEnrollmentsResponse) GetStudents() []*StudentInfo {
@@ -2628,7 +2732,7 @@ type StudentInfo struct {
 
 func (x *StudentInfo) Reset() {
 	*x = StudentInfo{}
-	mi := &file_proto_school_proto_msgTypes[49]
+	mi := &file_proto_school_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2640,7 +2744,7 @@ func (x *StudentInfo) String() string {
 func (*StudentInfo) ProtoMessage() {}
 
 func (x *StudentInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[49]
+	mi := &file_proto_school_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2653,7 +2757,7 @@ func (x *StudentInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentInfo.ProtoReflect.Descriptor instead.
 func (*StudentInfo) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{49}
+	return file_proto_school_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *StudentInfo) GetStudentId() string {
@@ -2686,7 +2790,7 @@ type GetStudentEnrollmentsRequest struct {
 
 func (x *GetStudentEnrollmentsRequest) Reset() {
 	*x = GetStudentEnrollmentsRequest{}
-	mi := &file_proto_school_proto_msgTypes[50]
+	mi := &file_proto_school_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2698,7 +2802,7 @@ func (x *GetStudentEnrollmentsRequest) String() string {
 func (*GetStudentEnrollmentsRequest) ProtoMessage() {}
 
 func (x *GetStudentEnrollmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[50]
+	mi := &file_proto_school_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2711,7 +2815,7 @@ func (x *GetStudentEnrollmentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStudentEnrollmentsRequest.ProtoReflect.Descriptor instead.
 func (*GetStudentEnrollmentsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{50}
+	return file_proto_school_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *GetStudentEnrollmentsRequest) GetStudentId() string {
@@ -2730,7 +2834,7 @@ type StudentEnrollmentsResponse struct {
 
 func (x *StudentEnrollmentsResponse) Reset() {
 	*x = StudentEnrollmentsResponse{}
-	mi := &file_proto_school_proto_msgTypes[51]
+	mi := &file_proto_school_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2742,7 +2846,7 @@ func (x *StudentEnrollmentsResponse) String() string {
 func (*StudentEnrollmentsResponse) ProtoMessage() {}
 
 func (x *StudentEnrollmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[51]
+	mi := &file_proto_school_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2755,7 +2859,7 @@ func (x *StudentEnrollmentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentEnrollmentsResponse.ProtoReflect.Descriptor instead.
 func (*StudentEnrollmentsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{51}
+	return file_proto_school_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *StudentEnrollmentsResponse) GetCourses() []*CourseDetailResponse {
@@ -2774,7 +2878,7 @@ type ValidateCourseRequest struct {
 
 func (x *ValidateCourseRequest) Reset() {
 	*x = ValidateCourseRequest{}
-	mi := &file_proto_school_proto_msgTypes[52]
+	mi := &file_proto_school_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2786,7 +2890,7 @@ func (x *ValidateCourseRequest) String() string {
 func (*ValidateCourseRequest) ProtoMessage() {}
 
 func (x *ValidateCourseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[52]
+	mi := &file_proto_school_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2799,7 +2903,7 @@ func (x *ValidateCourseRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateCourseRequest.ProtoReflect.Descriptor instead.
 func (*ValidateCourseRequest) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{52}
+	return file_proto_school_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *ValidateCourseRequest) GetCourseId() string {
@@ -2819,7 +2923,7 @@ type ValidateCourseResponse struct {
 
 func (x *ValidateCourseResponse) Reset() {
 	*x = ValidateCourseResponse{}
-	mi := &file_proto_school_proto_msgTypes[53]
+	mi := &file_proto_school_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2831,7 +2935,7 @@ func (x *ValidateCourseResponse) String() string {
 func (*ValidateCourseResponse) ProtoMessage() {}
 
 func (x *ValidateCourseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_school_proto_msgTypes[53]
+	mi := &file_proto_school_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2844,7 +2948,7 @@ func (x *ValidateCourseResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateCourseResponse.ProtoReflect.Descriptor instead.
 func (*ValidateCourseResponse) Descriptor() ([]byte, []int) {
-	return file_proto_school_proto_rawDescGZIP(), []int{53}
+	return file_proto_school_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *ValidateCourseResponse) GetExists() bool {
@@ -2984,10 +3088,17 @@ const file_proto_school_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"1\n" +
 	"\x12ListCoursesRequest\x12\x1b\n" +
-	"\tschool_id\x18\x01 \x01(\tR\bschoolId\"<\n" +
+	"\tschool_id\x18\x01 \x01(\tR\bschoolId\"m\n" +
+	"\x19TeacherCourseListResponse\x12\x1b\n" +
+	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x02 \x01(\tR\tteacherId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\"<\n" +
 	"\x1bGetTeacherCourseListRequest\x12\x1d\n" +
 	"\n" +
-	"teacher_id\x18\x01 \x01(\tR\tteacherId\"M\n" +
+	"teacher_id\x18\x01 \x01(\tR\tteacherId\"[\n" +
+	"\x1cGetTeacherCourseListResponse\x12;\n" +
+	"\acourses\x18\x01 \x03(\v2!.school.TeacherCourseListResponseR\acourses\"M\n" +
 	"\x13ListCoursesResponse\x126\n" +
 	"\acourses\x18\x01 \x03(\v2\x1c.school.CourseDetailResponseR\acourses\"Z\n" +
 	"\x1cAssignTeacherToCourseRequest\x12\x1b\n" +
@@ -3047,7 +3158,7 @@ const file_proto_school_proto_rawDesc = "" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\"M\n" +
 	"\x16ValidateCourseResponse\x12\x16\n" +
 	"\x06exists\x18\x01 \x01(\bR\x06exists\x12\x1b\n" +
-	"\tschool_id\x18\x02 \x01(\tR\bschoolId2\xcc\x11\n" +
+	"\tschool_id\x18\x02 \x01(\tR\bschoolId2\xd5\x11\n" +
 	"\rSchoolService\x12C\n" +
 	"\n" +
 	"LoginAdmin\x12\x19.school.LoginAdminRequest\x1a\x1a.school.LoginAdminResponse\x12@\n" +
@@ -3071,8 +3182,8 @@ const file_proto_school_proto_rawDesc = "" +
 	"\tGetCourse\x12\x18.school.GetCourseRequest\x1a\x1c.school.CourseDetailResponse\x12C\n" +
 	"\fUpdateCourse\x12\x1b.school.UpdateCourseRequest\x1a\x16.school.CourseResponse\x12I\n" +
 	"\fDeleteCourse\x12\x1b.school.DeleteCourseRequest\x1a\x1c.school.DeleteCourseResponse\x12F\n" +
-	"\vListCourses\x12\x1a.school.ListCoursesRequest\x1a\x1b.school.ListCoursesResponse\x12X\n" +
-	"\x14GetTeacherCourseList\x12#.school.GetTeacherCourseListRequest\x1a\x1b.school.ListCoursesResponse\x12Y\n" +
+	"\vListCourses\x12\x1a.school.ListCoursesRequest\x1a\x1b.school.ListCoursesResponse\x12a\n" +
+	"\x14GetTeacherCourseList\x12#.school.GetTeacherCourseListRequest\x1a$.school.GetTeacherCourseListResponse\x12Y\n" +
 	"\x15AssignTeacherToCourse\x12$.school.AssignTeacherToCourseRequest\x1a\x1a.school.AssignmentResponse\x12Y\n" +
 	"\x19UnassignTeacherFromCourse\x12\x1e.school.UnassignTeacherRequest\x1a\x1c.school.UnassignmentResponse\x12U\n" +
 	"\x11GetCourseTeachers\x12 .school.GetCourseTeachersRequest\x1a\x1e.school.CourseTeachersResponse\x12I\n" +
@@ -3094,7 +3205,7 @@ func file_proto_school_proto_rawDescGZIP() []byte {
 	return file_proto_school_proto_rawDescData
 }
 
-var file_proto_school_proto_msgTypes = make([]protoimpl.MessageInfo, 54)
+var file_proto_school_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
 var file_proto_school_proto_goTypes = []any{
 	(*LoginAdminRequest)(nil),            // 0: school.LoginAdminRequest
 	(*LoginAdminResponse)(nil),           // 1: school.LoginAdminResponse
@@ -3130,100 +3241,103 @@ var file_proto_school_proto_goTypes = []any{
 	(*DeleteCourseRequest)(nil),          // 31: school.DeleteCourseRequest
 	(*DeleteCourseResponse)(nil),         // 32: school.DeleteCourseResponse
 	(*ListCoursesRequest)(nil),           // 33: school.ListCoursesRequest
-	(*GetTeacherCourseListRequest)(nil),  // 34: school.GetTeacherCourseListRequest
-	(*ListCoursesResponse)(nil),          // 35: school.ListCoursesResponse
-	(*AssignTeacherToCourseRequest)(nil), // 36: school.AssignTeacherToCourseRequest
-	(*AssignmentResponse)(nil),           // 37: school.AssignmentResponse
-	(*UnassignTeacherRequest)(nil),       // 38: school.UnassignTeacherRequest
-	(*UnassignmentResponse)(nil),         // 39: school.UnassignmentResponse
-	(*GetCourseTeachersRequest)(nil),     // 40: school.GetCourseTeachersRequest
-	(*CourseTeachersResponse)(nil),       // 41: school.CourseTeachersResponse
-	(*TeacherInfo)(nil),                  // 42: school.TeacherInfo
-	(*EnrollStudentRequest)(nil),         // 43: school.EnrollStudentRequest
-	(*EnrollmentResponse)(nil),           // 44: school.EnrollmentResponse
-	(*UnenrollStudentRequest)(nil),       // 45: school.UnenrollStudentRequest
-	(*UnenrollmentResponse)(nil),         // 46: school.UnenrollmentResponse
-	(*GetCourseEnrollmentsRequest)(nil),  // 47: school.GetCourseEnrollmentsRequest
-	(*CourseEnrollmentsResponse)(nil),    // 48: school.CourseEnrollmentsResponse
-	(*StudentInfo)(nil),                  // 49: school.StudentInfo
-	(*GetStudentEnrollmentsRequest)(nil), // 50: school.GetStudentEnrollmentsRequest
-	(*StudentEnrollmentsResponse)(nil),   // 51: school.StudentEnrollmentsResponse
-	(*ValidateCourseRequest)(nil),        // 52: school.ValidateCourseRequest
-	(*ValidateCourseResponse)(nil),       // 53: school.ValidateCourseResponse
+	(*TeacherCourseListResponse)(nil),    // 34: school.TeacherCourseListResponse
+	(*GetTeacherCourseListRequest)(nil),  // 35: school.GetTeacherCourseListRequest
+	(*GetTeacherCourseListResponse)(nil), // 36: school.GetTeacherCourseListResponse
+	(*ListCoursesResponse)(nil),          // 37: school.ListCoursesResponse
+	(*AssignTeacherToCourseRequest)(nil), // 38: school.AssignTeacherToCourseRequest
+	(*AssignmentResponse)(nil),           // 39: school.AssignmentResponse
+	(*UnassignTeacherRequest)(nil),       // 40: school.UnassignTeacherRequest
+	(*UnassignmentResponse)(nil),         // 41: school.UnassignmentResponse
+	(*GetCourseTeachersRequest)(nil),     // 42: school.GetCourseTeachersRequest
+	(*CourseTeachersResponse)(nil),       // 43: school.CourseTeachersResponse
+	(*TeacherInfo)(nil),                  // 44: school.TeacherInfo
+	(*EnrollStudentRequest)(nil),         // 45: school.EnrollStudentRequest
+	(*EnrollmentResponse)(nil),           // 46: school.EnrollmentResponse
+	(*UnenrollStudentRequest)(nil),       // 47: school.UnenrollStudentRequest
+	(*UnenrollmentResponse)(nil),         // 48: school.UnenrollmentResponse
+	(*GetCourseEnrollmentsRequest)(nil),  // 49: school.GetCourseEnrollmentsRequest
+	(*CourseEnrollmentsResponse)(nil),    // 50: school.CourseEnrollmentsResponse
+	(*StudentInfo)(nil),                  // 51: school.StudentInfo
+	(*GetStudentEnrollmentsRequest)(nil), // 52: school.GetStudentEnrollmentsRequest
+	(*StudentEnrollmentsResponse)(nil),   // 53: school.StudentEnrollmentsResponse
+	(*ValidateCourseRequest)(nil),        // 54: school.ValidateCourseRequest
+	(*ValidateCourseResponse)(nil),       // 55: school.ValidateCourseResponse
 }
 var file_proto_school_proto_depIdxs = []int32{
 	8,  // 0: school.ListAdminsResponse.admins:type_name -> school.AdminResponse
 	16, // 1: school.ListSchoolsResponse.schools:type_name -> school.SchoolResponse
 	24, // 2: school.ListClassesResponse.classes:type_name -> school.ClassResponse
-	28, // 3: school.ListCoursesResponse.courses:type_name -> school.CourseDetailResponse
-	42, // 4: school.CourseTeachersResponse.teachers:type_name -> school.TeacherInfo
-	49, // 5: school.CourseEnrollmentsResponse.students:type_name -> school.StudentInfo
-	28, // 6: school.StudentEnrollmentsResponse.courses:type_name -> school.CourseDetailResponse
-	0,  // 7: school.SchoolService.LoginAdmin:input_type -> school.LoginAdminRequest
-	2,  // 8: school.SchoolService.CreateAdmin:input_type -> school.CreateAdminRequest
-	3,  // 9: school.SchoolService.GetAdmin:input_type -> school.GetAdminRequest
-	4,  // 10: school.SchoolService.UpdateAdmin:input_type -> school.UpdateAdminRequest
-	5,  // 11: school.SchoolService.DeleteAdmin:input_type -> school.DeleteAdminRequest
-	7,  // 12: school.SchoolService.ListAdmins:input_type -> school.ListAdminsRequest
-	10, // 13: school.SchoolService.CreateSchool:input_type -> school.CreateSchoolRequest
-	11, // 14: school.SchoolService.GetSchool:input_type -> school.GetSchoolRequest
-	12, // 15: school.SchoolService.UpdateSchool:input_type -> school.UpdateSchoolRequest
-	13, // 16: school.SchoolService.DeleteSchool:input_type -> school.DeleteSchoolRequest
-	15, // 17: school.SchoolService.ListSchools:input_type -> school.ListSchoolsRequest
-	18, // 18: school.SchoolService.CreateClass:input_type -> school.CreateClassRequest
-	19, // 19: school.SchoolService.GetClass:input_type -> school.GetClassRequest
-	20, // 20: school.SchoolService.UpdateClass:input_type -> school.UpdateClassRequest
-	21, // 21: school.SchoolService.DeleteClass:input_type -> school.DeleteClassRequest
-	23, // 22: school.SchoolService.ListClasses:input_type -> school.ListClassesRequest
-	26, // 23: school.SchoolService.CreateCourse:input_type -> school.CreateCourseRequest
-	29, // 24: school.SchoolService.GetCourse:input_type -> school.GetCourseRequest
-	30, // 25: school.SchoolService.UpdateCourse:input_type -> school.UpdateCourseRequest
-	31, // 26: school.SchoolService.DeleteCourse:input_type -> school.DeleteCourseRequest
-	33, // 27: school.SchoolService.ListCourses:input_type -> school.ListCoursesRequest
-	34, // 28: school.SchoolService.GetTeacherCourseList:input_type -> school.GetTeacherCourseListRequest
-	36, // 29: school.SchoolService.AssignTeacherToCourse:input_type -> school.AssignTeacherToCourseRequest
-	38, // 30: school.SchoolService.UnassignTeacherFromCourse:input_type -> school.UnassignTeacherRequest
-	40, // 31: school.SchoolService.GetCourseTeachers:input_type -> school.GetCourseTeachersRequest
-	43, // 32: school.SchoolService.EnrollStudent:input_type -> school.EnrollStudentRequest
-	45, // 33: school.SchoolService.UnenrollStudent:input_type -> school.UnenrollStudentRequest
-	47, // 34: school.SchoolService.GetCourseEnrollments:input_type -> school.GetCourseEnrollmentsRequest
-	50, // 35: school.SchoolService.GetStudentEnrollments:input_type -> school.GetStudentEnrollmentsRequest
-	52, // 36: school.SchoolService.ValidateCourseExists:input_type -> school.ValidateCourseRequest
-	1,  // 37: school.SchoolService.LoginAdmin:output_type -> school.LoginAdminResponse
-	8,  // 38: school.SchoolService.CreateAdmin:output_type -> school.AdminResponse
-	8,  // 39: school.SchoolService.GetAdmin:output_type -> school.AdminResponse
-	8,  // 40: school.SchoolService.UpdateAdmin:output_type -> school.AdminResponse
-	6,  // 41: school.SchoolService.DeleteAdmin:output_type -> school.DeleteAdminResponse
-	9,  // 42: school.SchoolService.ListAdmins:output_type -> school.ListAdminsResponse
-	16, // 43: school.SchoolService.CreateSchool:output_type -> school.SchoolResponse
-	16, // 44: school.SchoolService.GetSchool:output_type -> school.SchoolResponse
-	16, // 45: school.SchoolService.UpdateSchool:output_type -> school.SchoolResponse
-	14, // 46: school.SchoolService.DeleteSchool:output_type -> school.DeleteSchoolResponse
-	17, // 47: school.SchoolService.ListSchools:output_type -> school.ListSchoolsResponse
-	24, // 48: school.SchoolService.CreateClass:output_type -> school.ClassResponse
-	24, // 49: school.SchoolService.GetClass:output_type -> school.ClassResponse
-	24, // 50: school.SchoolService.UpdateClass:output_type -> school.ClassResponse
-	22, // 51: school.SchoolService.DeleteClass:output_type -> school.DeleteClassResponse
-	25, // 52: school.SchoolService.ListClasses:output_type -> school.ListClassesResponse
-	27, // 53: school.SchoolService.CreateCourse:output_type -> school.CourseResponse
-	28, // 54: school.SchoolService.GetCourse:output_type -> school.CourseDetailResponse
-	27, // 55: school.SchoolService.UpdateCourse:output_type -> school.CourseResponse
-	32, // 56: school.SchoolService.DeleteCourse:output_type -> school.DeleteCourseResponse
-	35, // 57: school.SchoolService.ListCourses:output_type -> school.ListCoursesResponse
-	35, // 58: school.SchoolService.GetTeacherCourseList:output_type -> school.ListCoursesResponse
-	37, // 59: school.SchoolService.AssignTeacherToCourse:output_type -> school.AssignmentResponse
-	39, // 60: school.SchoolService.UnassignTeacherFromCourse:output_type -> school.UnassignmentResponse
-	41, // 61: school.SchoolService.GetCourseTeachers:output_type -> school.CourseTeachersResponse
-	44, // 62: school.SchoolService.EnrollStudent:output_type -> school.EnrollmentResponse
-	46, // 63: school.SchoolService.UnenrollStudent:output_type -> school.UnenrollmentResponse
-	48, // 64: school.SchoolService.GetCourseEnrollments:output_type -> school.CourseEnrollmentsResponse
-	51, // 65: school.SchoolService.GetStudentEnrollments:output_type -> school.StudentEnrollmentsResponse
-	53, // 66: school.SchoolService.ValidateCourseExists:output_type -> school.ValidateCourseResponse
-	37, // [37:67] is the sub-list for method output_type
-	7,  // [7:37] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	34, // 3: school.GetTeacherCourseListResponse.courses:type_name -> school.TeacherCourseListResponse
+	28, // 4: school.ListCoursesResponse.courses:type_name -> school.CourseDetailResponse
+	44, // 5: school.CourseTeachersResponse.teachers:type_name -> school.TeacherInfo
+	51, // 6: school.CourseEnrollmentsResponse.students:type_name -> school.StudentInfo
+	28, // 7: school.StudentEnrollmentsResponse.courses:type_name -> school.CourseDetailResponse
+	0,  // 8: school.SchoolService.LoginAdmin:input_type -> school.LoginAdminRequest
+	2,  // 9: school.SchoolService.CreateAdmin:input_type -> school.CreateAdminRequest
+	3,  // 10: school.SchoolService.GetAdmin:input_type -> school.GetAdminRequest
+	4,  // 11: school.SchoolService.UpdateAdmin:input_type -> school.UpdateAdminRequest
+	5,  // 12: school.SchoolService.DeleteAdmin:input_type -> school.DeleteAdminRequest
+	7,  // 13: school.SchoolService.ListAdmins:input_type -> school.ListAdminsRequest
+	10, // 14: school.SchoolService.CreateSchool:input_type -> school.CreateSchoolRequest
+	11, // 15: school.SchoolService.GetSchool:input_type -> school.GetSchoolRequest
+	12, // 16: school.SchoolService.UpdateSchool:input_type -> school.UpdateSchoolRequest
+	13, // 17: school.SchoolService.DeleteSchool:input_type -> school.DeleteSchoolRequest
+	15, // 18: school.SchoolService.ListSchools:input_type -> school.ListSchoolsRequest
+	18, // 19: school.SchoolService.CreateClass:input_type -> school.CreateClassRequest
+	19, // 20: school.SchoolService.GetClass:input_type -> school.GetClassRequest
+	20, // 21: school.SchoolService.UpdateClass:input_type -> school.UpdateClassRequest
+	21, // 22: school.SchoolService.DeleteClass:input_type -> school.DeleteClassRequest
+	23, // 23: school.SchoolService.ListClasses:input_type -> school.ListClassesRequest
+	26, // 24: school.SchoolService.CreateCourse:input_type -> school.CreateCourseRequest
+	29, // 25: school.SchoolService.GetCourse:input_type -> school.GetCourseRequest
+	30, // 26: school.SchoolService.UpdateCourse:input_type -> school.UpdateCourseRequest
+	31, // 27: school.SchoolService.DeleteCourse:input_type -> school.DeleteCourseRequest
+	33, // 28: school.SchoolService.ListCourses:input_type -> school.ListCoursesRequest
+	35, // 29: school.SchoolService.GetTeacherCourseList:input_type -> school.GetTeacherCourseListRequest
+	38, // 30: school.SchoolService.AssignTeacherToCourse:input_type -> school.AssignTeacherToCourseRequest
+	40, // 31: school.SchoolService.UnassignTeacherFromCourse:input_type -> school.UnassignTeacherRequest
+	42, // 32: school.SchoolService.GetCourseTeachers:input_type -> school.GetCourseTeachersRequest
+	45, // 33: school.SchoolService.EnrollStudent:input_type -> school.EnrollStudentRequest
+	47, // 34: school.SchoolService.UnenrollStudent:input_type -> school.UnenrollStudentRequest
+	49, // 35: school.SchoolService.GetCourseEnrollments:input_type -> school.GetCourseEnrollmentsRequest
+	52, // 36: school.SchoolService.GetStudentEnrollments:input_type -> school.GetStudentEnrollmentsRequest
+	54, // 37: school.SchoolService.ValidateCourseExists:input_type -> school.ValidateCourseRequest
+	1,  // 38: school.SchoolService.LoginAdmin:output_type -> school.LoginAdminResponse
+	8,  // 39: school.SchoolService.CreateAdmin:output_type -> school.AdminResponse
+	8,  // 40: school.SchoolService.GetAdmin:output_type -> school.AdminResponse
+	8,  // 41: school.SchoolService.UpdateAdmin:output_type -> school.AdminResponse
+	6,  // 42: school.SchoolService.DeleteAdmin:output_type -> school.DeleteAdminResponse
+	9,  // 43: school.SchoolService.ListAdmins:output_type -> school.ListAdminsResponse
+	16, // 44: school.SchoolService.CreateSchool:output_type -> school.SchoolResponse
+	16, // 45: school.SchoolService.GetSchool:output_type -> school.SchoolResponse
+	16, // 46: school.SchoolService.UpdateSchool:output_type -> school.SchoolResponse
+	14, // 47: school.SchoolService.DeleteSchool:output_type -> school.DeleteSchoolResponse
+	17, // 48: school.SchoolService.ListSchools:output_type -> school.ListSchoolsResponse
+	24, // 49: school.SchoolService.CreateClass:output_type -> school.ClassResponse
+	24, // 50: school.SchoolService.GetClass:output_type -> school.ClassResponse
+	24, // 51: school.SchoolService.UpdateClass:output_type -> school.ClassResponse
+	22, // 52: school.SchoolService.DeleteClass:output_type -> school.DeleteClassResponse
+	25, // 53: school.SchoolService.ListClasses:output_type -> school.ListClassesResponse
+	27, // 54: school.SchoolService.CreateCourse:output_type -> school.CourseResponse
+	28, // 55: school.SchoolService.GetCourse:output_type -> school.CourseDetailResponse
+	27, // 56: school.SchoolService.UpdateCourse:output_type -> school.CourseResponse
+	32, // 57: school.SchoolService.DeleteCourse:output_type -> school.DeleteCourseResponse
+	37, // 58: school.SchoolService.ListCourses:output_type -> school.ListCoursesResponse
+	36, // 59: school.SchoolService.GetTeacherCourseList:output_type -> school.GetTeacherCourseListResponse
+	39, // 60: school.SchoolService.AssignTeacherToCourse:output_type -> school.AssignmentResponse
+	41, // 61: school.SchoolService.UnassignTeacherFromCourse:output_type -> school.UnassignmentResponse
+	43, // 62: school.SchoolService.GetCourseTeachers:output_type -> school.CourseTeachersResponse
+	46, // 63: school.SchoolService.EnrollStudent:output_type -> school.EnrollmentResponse
+	48, // 64: school.SchoolService.UnenrollStudent:output_type -> school.UnenrollmentResponse
+	50, // 65: school.SchoolService.GetCourseEnrollments:output_type -> school.CourseEnrollmentsResponse
+	53, // 66: school.SchoolService.GetStudentEnrollments:output_type -> school.StudentEnrollmentsResponse
+	55, // 67: school.SchoolService.ValidateCourseExists:output_type -> school.ValidateCourseResponse
+	38, // [38:68] is the sub-list for method output_type
+	8,  // [8:38] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_proto_school_proto_init() }
@@ -3237,7 +3351,7 @@ func file_proto_school_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_school_proto_rawDesc), len(file_proto_school_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   54,
+			NumMessages:   56,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

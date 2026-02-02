@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	StudentService_LoginStudent_FullMethodName      = "/student.StudentService/LoginStudent"
 	StudentService_CreateStudent_FullMethodName     = "/student.StudentService/CreateStudent"
 	StudentService_GetAllStudents_FullMethodName    = "/student.StudentService/GetAllStudents"
 	StudentService_GetStudentById_FullMethodName    = "/student.StudentService/GetStudentById"
@@ -33,6 +34,8 @@ const (
 //
 // The Interface
 type StudentServiceClient interface {
+	// Authentication
+	LoginStudent(ctx context.Context, in *LoginStudentRequest, opts ...grpc.CallOption) (*LoginStudentResponse, error)
 	// Student CRUD
 	CreateStudent(ctx context.Context, in *CreateStudentRequest, opts ...grpc.CallOption) (*StudentResponse, error)
 	GetAllStudents(ctx context.Context, in *ListStudentRequest, opts ...grpc.CallOption) (*ListStudentResponse, error)
@@ -49,6 +52,16 @@ type studentServiceClient struct {
 
 func NewStudentServiceClient(cc grpc.ClientConnInterface) StudentServiceClient {
 	return &studentServiceClient{cc}
+}
+
+func (c *studentServiceClient) LoginStudent(ctx context.Context, in *LoginStudentRequest, opts ...grpc.CallOption) (*LoginStudentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginStudentResponse)
+	err := c.cc.Invoke(ctx, StudentService_LoginStudent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *studentServiceClient) CreateStudent(ctx context.Context, in *CreateStudentRequest, opts ...grpc.CallOption) (*StudentResponse, error) {
@@ -117,6 +130,8 @@ func (c *studentServiceClient) GetStudentCourses(ctx context.Context, in *GetStu
 //
 // The Interface
 type StudentServiceServer interface {
+	// Authentication
+	LoginStudent(context.Context, *LoginStudentRequest) (*LoginStudentResponse, error)
 	// Student CRUD
 	CreateStudent(context.Context, *CreateStudentRequest) (*StudentResponse, error)
 	GetAllStudents(context.Context, *ListStudentRequest) (*ListStudentResponse, error)
@@ -135,6 +150,9 @@ type StudentServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedStudentServiceServer struct{}
 
+func (UnimplementedStudentServiceServer) LoginStudent(context.Context, *LoginStudentRequest) (*LoginStudentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LoginStudent not implemented")
+}
 func (UnimplementedStudentServiceServer) CreateStudent(context.Context, *CreateStudentRequest) (*StudentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateStudent not implemented")
 }
@@ -172,6 +190,24 @@ func RegisterStudentServiceServer(s grpc.ServiceRegistrar, srv StudentServiceSer
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&StudentService_ServiceDesc, srv)
+}
+
+func _StudentService_LoginStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginStudentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudentServiceServer).LoginStudent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudentService_LoginStudent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudentServiceServer).LoginStudent(ctx, req.(*LoginStudentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _StudentService_CreateStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -289,6 +325,10 @@ var StudentService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "student.StudentService",
 	HandlerType: (*StudentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "LoginStudent",
+			Handler:    _StudentService_LoginStudent_Handler,
+		},
 		{
 			MethodName: "CreateStudent",
 			Handler:    _StudentService_CreateStudent_Handler,

@@ -81,7 +81,7 @@ type SchoolServiceClient interface {
 	UpdateCourse(ctx context.Context, in *UpdateCourseRequest, opts ...grpc.CallOption) (*CourseResponse, error)
 	DeleteCourse(ctx context.Context, in *DeleteCourseRequest, opts ...grpc.CallOption) (*DeleteCourseResponse, error)
 	ListCourses(ctx context.Context, in *ListCoursesRequest, opts ...grpc.CallOption) (*ListCoursesResponse, error)
-	GetTeacherCourseList(ctx context.Context, in *GetTeacherCourseListRequest, opts ...grpc.CallOption) (*ListCoursesResponse, error)
+	GetTeacherCourseList(ctx context.Context, in *GetTeacherCourseListRequest, opts ...grpc.CallOption) (*GetTeacherCourseListResponse, error)
 	// Course-Teacher Assignment (Admin only)
 	AssignTeacherToCourse(ctx context.Context, in *AssignTeacherToCourseRequest, opts ...grpc.CallOption) (*AssignmentResponse, error)
 	UnassignTeacherFromCourse(ctx context.Context, in *UnassignTeacherRequest, opts ...grpc.CallOption) (*UnassignmentResponse, error)
@@ -312,9 +312,9 @@ func (c *schoolServiceClient) ListCourses(ctx context.Context, in *ListCoursesRe
 	return out, nil
 }
 
-func (c *schoolServiceClient) GetTeacherCourseList(ctx context.Context, in *GetTeacherCourseListRequest, opts ...grpc.CallOption) (*ListCoursesResponse, error) {
+func (c *schoolServiceClient) GetTeacherCourseList(ctx context.Context, in *GetTeacherCourseListRequest, opts ...grpc.CallOption) (*GetTeacherCourseListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListCoursesResponse)
+	out := new(GetTeacherCourseListResponse)
 	err := c.cc.Invoke(ctx, SchoolService_GetTeacherCourseList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -432,7 +432,7 @@ type SchoolServiceServer interface {
 	UpdateCourse(context.Context, *UpdateCourseRequest) (*CourseResponse, error)
 	DeleteCourse(context.Context, *DeleteCourseRequest) (*DeleteCourseResponse, error)
 	ListCourses(context.Context, *ListCoursesRequest) (*ListCoursesResponse, error)
-	GetTeacherCourseList(context.Context, *GetTeacherCourseListRequest) (*ListCoursesResponse, error)
+	GetTeacherCourseList(context.Context, *GetTeacherCourseListRequest) (*GetTeacherCourseListResponse, error)
 	// Course-Teacher Assignment (Admin only)
 	AssignTeacherToCourse(context.Context, *AssignTeacherToCourseRequest) (*AssignmentResponse, error)
 	UnassignTeacherFromCourse(context.Context, *UnassignTeacherRequest) (*UnassignmentResponse, error)
@@ -516,7 +516,7 @@ func (UnimplementedSchoolServiceServer) DeleteCourse(context.Context, *DeleteCou
 func (UnimplementedSchoolServiceServer) ListCourses(context.Context, *ListCoursesRequest) (*ListCoursesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListCourses not implemented")
 }
-func (UnimplementedSchoolServiceServer) GetTeacherCourseList(context.Context, *GetTeacherCourseListRequest) (*ListCoursesResponse, error) {
+func (UnimplementedSchoolServiceServer) GetTeacherCourseList(context.Context, *GetTeacherCourseListRequest) (*GetTeacherCourseListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTeacherCourseList not implemented")
 }
 func (UnimplementedSchoolServiceServer) AssignTeacherToCourse(context.Context, *AssignTeacherToCourseRequest) (*AssignmentResponse, error) {

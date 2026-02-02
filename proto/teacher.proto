@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package teacher;
 
-option go_package = "github.com/noxturnedev/lms-monorepo/teacher-service/proto/teacher";
+option go_package = "github.com/noxturnedev/lms-monorepo/proto/teacher";
 
 service TeacherService {
   // Authentication
@@ -15,23 +15,14 @@ service TeacherService {
   rpc DeleteTeacher (DeleteTeacherRequest) returns (DeleteTeacherResponse);
   rpc ListTeachers (ListTeachersRequest) returns (ListTeachersResponse);
 
-  // Course Management
-  rpc CreateCourse (CreateCourseRequest) returns (CourseResponse);
-  rpc GetCourses (GetCoursesRequest) returns (GetCoursesResponse);
-  rpc GetCourse (GetCourseRequest) returns (CourseDetailResponse);
-  rpc UpdateCourse (UpdateCourseRequest) returns (CourseResponse);
-  rpc DeleteCourse (DeleteCourseRequest) returns (DeleteCourseResponse);
-
   // Assignment Management
   rpc CreateAssignment (CreateAssignmentRequest) returns (AssignmentResponse);
   rpc GetAssignment (GetAssignmentRequest) returns (AssignmentDetailResponse);
   rpc UpdateAssignment (UpdateAssignmentRequest) returns (AssignmentResponse);
   rpc DeleteAssignment (DeleteAssignmentRequest) returns (DeleteAssignmentResponse);
   rpc ListAssignments (ListAssignmentsRequest) returns (ListAssignmentsResponse);
-
-  // Enrollment
-  rpc EnrollStudent (EnrollStudentRequest) returns (EnrollmentResponse);
-  rpc GetCourseEnrollments (GetCourseEnrollmentsRequest) returns (GetCourseEnrollmentsResponse);
+  
+  rpc GetTeacherCourseList(TeacherCourseListRequest) returns (TeacherCourseListResponse);
 
   // Grading
   rpc AssignGrade (AssignGradeRequest) returns (GradeResponse);
@@ -41,17 +32,23 @@ service TeacherService {
 
   // Reporting
   rpc GetTeacherDashboard (GetTeacherDashboardRequest) returns (TeacherDashboardResponse);
-}
 
-message CreateCourseRequest {
-  string teacher_id = 1;
-  string title = 2;
-  string description = 3;
+  // Validation (used by School Service)
+  rpc ValidateCourseHasAssignments (ValidateCourseAssignmentsRequest) returns (ValidateCourseAssignmentsResponse);
 }
 
 message CourseResponse {
-  string id = 1;
-  string title = 2;
+  string course_id = 1;
+  string teacher_id = 2;
+  string title = 3;
+}
+
+message TeacherCourseListRequest {
+  string teacher_id = 1;
+}
+
+message TeacherCourseListResponse {
+  repeated CourseResponse courses = 1;
 }
 
 message AssignGradeRequest {
@@ -136,42 +133,6 @@ message ListTeachersResponse {
   repeated TeacherResponse teachers = 1;
 }
 
-// Course Management Messages
-message GetCoursesRequest {
-  string teacher_id = 1; // optional filter
-}
-
-message GetCoursesResponse {
-  repeated CourseDetailResponse courses = 1;
-}
-
-message GetCourseRequest {
-  string id = 1;
-}
-
-message CourseDetailResponse {
-  string id = 1;
-  string teacher_id = 2;
-  string title = 3;
-  string description = 4;
-  string teacher_name = 5;
-}
-
-message UpdateCourseRequest {
-  string id = 1;
-  string title = 2;
-  string description = 3;
-}
-
-message DeleteCourseRequest {
-  string id = 1;
-}
-
-message DeleteCourseResponse {
-  bool success = 1;
-  string message = 2;
-}
-
 // Assignment Messages
 message CreateAssignmentRequest {
   string course_id = 1;
@@ -246,32 +207,6 @@ message StudentCourseGradeResponse {
   repeated AssignmentGradeItem assignments = 7;
 }
 
-// Enrollment Messages
-message EnrollStudentRequest {
-  string student_id = 1;
-  string course_id = 2;
-}
-
-message EnrollmentResponse {
-  string id = 1;
-  bool success = 2;
-  string message = 3;
-}
-
-message GetCourseEnrollmentsRequest {
-  string course_id = 1;
-}
-
-message EnrollmentItem {
-  string student_id = 1;
-  string student_name = 2;
-  string student_number = 3;
-}
-
-message GetCourseEnrollmentsResponse {
-  repeated EnrollmentItem enrollments = 1;
-}
-
 // Gradebook Messages
 message GetCourseGradesRequest {
   string course_id = 1;
@@ -311,4 +246,14 @@ message CourseSummary {
   string course_id = 1;
   string title = 2;
   int32 enrolled_count = 3;
+}
+
+// Validation Messages (for School Service)
+message ValidateCourseAssignmentsRequest {
+  string course_id = 1;
+}
+
+message ValidateCourseAssignmentsResponse {
+  bool has_assignments = 1;
+  int32 assignment_count = 2;
 }

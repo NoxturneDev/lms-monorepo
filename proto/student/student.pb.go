@@ -806,7 +806,7 @@ const file_proto_student_proto_rawDesc = "" +
 	"\x0eGetStudentById\x12\x1e.student.GetStudentByIdRequest\x1a\x18.student.StudentResponse\x12H\n" +
 	"\rUpdateStudent\x12\x1d.student.UpdateStudentRequest\x1a\x18.student.StudentResponse\x12N\n" +
 	"\rDeleteStudent\x12\x1d.student.DeleteStudentRequest\x1a\x1e.student.DeleteStudentResponse\x12Z\n" +
-	"\x11GetStudentCourses\x12!.student.GetStudentCoursesRequest\x1a\".student.GetStudentCoursesResponseBCZAgithub.com/noxturnedev/lms-monorepo/student-service/proto/studentb\x06proto3"
+	"\x11GetStudentCourses\x12!.student.GetStudentCoursesRequest\x1a\".student.GetStudentCoursesResponseB3Z1github.com/noxturnedev/lms-monorepo/proto/studentb\x06proto3"
 
 var (
 	file_proto_student_proto_rawDescOnce sync.Once

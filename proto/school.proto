@@ -28,6 +28,27 @@ service SchoolService {
   rpc UpdateClass (UpdateClassRequest) returns (ClassResponse);
   rpc DeleteClass (DeleteClassRequest) returns (DeleteClassResponse);
   rpc ListClasses (ListClassesRequest) returns (ListClassesResponse);
+
+  // Course Management (Admin only)
+  rpc CreateCourse (CreateCourseRequest) returns (CourseResponse);
+  rpc GetCourse (GetCourseRequest) returns (CourseDetailResponse);
+  rpc UpdateCourse (UpdateCourseRequest) returns (CourseResponse);
+  rpc DeleteCourse (DeleteCourseRequest) returns (DeleteCourseResponse);
+  rpc ListCourses (ListCoursesRequest) returns (ListCoursesResponse);
+
+  rpc GetTeacherCourseList(GetTeacherCourseListRequest) returns (GetTeacherCourseListResponse);
+
+  // Course-Teacher Assignment (Admin only)
+  rpc AssignTeacherToCourse (AssignTeacherToCourseRequest) returns (AssignmentResponse);
+  rpc UnassignTeacherFromCourse (UnassignTeacherRequest) returns (UnassignmentResponse);
+  rpc GetCourseTeachers (GetCourseTeachersRequest) returns (CourseTeachersResponse);
+
+  // Enrollment Management
+  rpc EnrollStudent (EnrollStudentRequest) returns (EnrollmentResponse);
+  rpc UnenrollStudent (UnenrollStudentRequest) returns (UnenrollmentResponse);
+  rpc GetCourseEnrollments (GetCourseEnrollmentsRequest) returns (CourseEnrollmentsResponse);
+  rpc GetStudentEnrollments (GetStudentEnrollmentsRequest) returns (StudentEnrollmentsResponse);
+  rpc ValidateCourseExists (ValidateCourseRequest) returns (ValidateCourseResponse);
 }
 
 // ============================================
@@ -180,4 +201,166 @@ message ClassResponse {
 
 message ListClassesResponse {
   repeated ClassResponse classes = 1;
+}
+
+// ============================================
+// Course Management Messages
+// ============================================
+
+message CreateCourseRequest {
+  string school_id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message CourseResponse {
+  string id = 1;
+  string title = 2;
+  string school_id = 3;
+}
+
+message CourseDetailResponse {
+  string id = 1;
+  string school_id = 2;
+  string school_name = 3;
+  string title = 4;
+  string description = 5;
+  repeated string teacher_ids = 6;  // Array of assigned teacher IDs
+  repeated string teacher_names = 7; // Denormalized for convenience
+}
+
+message GetCourseRequest {
+  string id = 1;
+}
+
+message UpdateCourseRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message DeleteCourseRequest {
+  string id = 1;
+}
+
+message DeleteCourseResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListCoursesRequest {
+  string school_id = 1;  // Optional filter
+}
+
+message TeacherCourseListResponse {
+  string course_id = 1;
+  string teacher_id = 2;
+  string title = 3;
+}
+
+message GetTeacherCourseListRequest {
+  string teacher_id = 1;  
+}
+
+message GetTeacherCourseListResponse {
+  repeated TeacherCourseListResponse courses = 1;
+}
+
+message ListCoursesResponse {
+  repeated CourseDetailResponse courses = 1;
+}
+
+// ============================================
+// Course-Teacher Assignment Messages
+// ============================================
+
+message AssignTeacherToCourseRequest {
+  string course_id = 1;
+  string teacher_id = 2;
+}
+
+message AssignmentResponse {
+  string id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UnassignTeacherRequest {
+  string course_id = 1;
+  string teacher_id = 2;
+}
+
+message UnassignmentResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetCourseTeachersRequest {
+  string course_id = 1;
+}
+
+message CourseTeachersResponse {
+  repeated TeacherInfo teachers = 1;
+}
+
+message TeacherInfo {
+  string teacher_id = 1;
+  string teacher_name = 2;  // Fetched from Teacher Service
+  string teacher_email = 3;
+}
+
+// ============================================
+// Enrollment Messages
+// ============================================
+
+message EnrollStudentRequest {
+  string course_id = 1;
+  string student_id = 2;
+}
+
+message EnrollmentResponse {
+  string id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UnenrollStudentRequest {
+  string course_id = 1;
+  string student_id = 2;
+}
+
+message UnenrollmentResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetCourseEnrollmentsRequest {
+  string course_id = 1;
+}
+
+message CourseEnrollmentsResponse {
+  repeated StudentInfo students = 1;
+}
+
+message StudentInfo {
+  string student_id = 1;
+  string student_name = 2;  // Fetched from Student Service
+  string student_number = 3;
+}
+
+message GetStudentEnrollmentsRequest {
+  string student_id = 1;
+}
+
+message StudentEnrollmentsResponse {
+  repeated CourseDetailResponse courses = 1;
+}
+
+message ValidateCourseRequest {
+  string course_id = 1;
+}
+
+message ValidateCourseResponse {
+  bool exists = 1;
+  string school_id = 2;  // Return school_id for additional validation
 }

@@ -3,7 +3,7 @@ syntax = "proto3";
 package student;
 
 // This tells the compiler: "Generate Go code in this folder"
-option go_package = "github.com/noxturnedev/lms-monorepo/student-service/proto/student";
+option go_package = "github.com/noxturnedev/lms-monorepo/proto/student";
 
 // The Interface
 service StudentService {
