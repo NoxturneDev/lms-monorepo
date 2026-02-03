@@ -109,6 +109,7 @@ func main() {
 				teacherRoutes.POST("/grades", gw.AssignGrade)
 				teacherRoutes.GET("/courses/:id/grades", gw.GetCourseGrades)
 				teacherRoutes.GET("/dashboard/teacher/:id", gw.GetTeacherDashboard)
+				teacherRoutes.GET("/teachers/:id/courses", gw.GetTeacherCourseList)
 
 				// Assignment Management (Teacher Only - write)
 				teacherRoutes.POST("/courses/:id/assignments", gw.CreateAssignment)

@@ -274,3 +274,23 @@ func (gw *Gateway) GetStudentEnrollments(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// ============================================
+// TEACHER COURSE LIST
+// ============================================
+
+func (gw *Gateway) GetTeacherCourseList(c *gin.Context) {
+	teacherID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	resp, err := gw.SchoolClient.GetTeacherCourseList(ctx, &schoolpb.GetTeacherCourseListRequest{
+		TeacherId: teacherID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
