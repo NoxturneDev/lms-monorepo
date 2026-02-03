@@ -866,6 +866,38 @@ func (s *server) ValidateCourseExists(ctx context.Context, req *schoolpb.Validat
 	}, nil
 }
 
+// ============================================
+// TEACHER COURSE LIST
+// ============================================
+
+func (s *server) GetTeacherCourseList(ctx context.Context, req *schoolpb.GetTeacherCourseListRequest) (*schoolpb.GetTeacherCourseListResponse, error) {
+	log.Printf("Getting courses for teacher: %v", req.TeacherId)
+
+	query := `
+		SELECT c.id, c.title, cta.teacher_id
+		FROM course_teacher_assignments cta
+		JOIN courses c ON cta.course_id = c.id
+		WHERE cta.teacher_id = $1
+	`
+
+	rows, err := s.db.Query(query, req.TeacherId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get teacher courses: %v", err)
+	}
+	defer rows.Close()
+
+	var courses []*schoolpb.TeacherCourseListResponse
+	for rows.Next() {
+		var course schoolpb.TeacherCourseListResponse
+		if err := rows.Scan(&course.CourseId, &course.Title, &course.TeacherId); err != nil {
+			continue
+		}
+		courses = append(courses, &course)
+	}
+
+	return &schoolpb.GetTeacherCourseListResponse{Courses: courses}, nil
+}
+
 func main() {
 	shutdown := initTracer()
 	defer shutdown(context.Background())

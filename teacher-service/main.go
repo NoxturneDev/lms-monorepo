@@ -584,7 +584,29 @@ func (s *server) GetTeacherDashboard(ctx context.Context, req *teacherpb.GetTeac
 	}, nil
 }
 
-func (s *server) GetTeacherCourseList(ctx context.Context, req *teacherpb.GetTeacherCourseList) (*teacherpb.GetTeacherCourseListResponse, error)
+func (s *server) GetTeacherCourseList(ctx context.Context, req *teacherpb.TeacherCourseListRequest) (*teacherpb.TeacherCourseListResponse, error) {
+	log.Printf("Getting courses for teacher: %v", req.TeacherId)
+
+	// Delegate to school service since courses are managed there
+	schoolResp, err := s.schoolClient.GetTeacherCourseList(ctx, &schoolpb.GetTeacherCourseListRequest{
+		TeacherId: req.TeacherId,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get teacher courses from school service: %v", err)
+	}
+
+	// Convert school service response to teacher service response
+	var courses []*teacherpb.CourseResponse
+	for _, c := range schoolResp.Courses {
+		courses = append(courses, &teacherpb.CourseResponse{
+			CourseId:  c.CourseId,
+			TeacherId: c.TeacherId,
+			Title:     c.Title,
+		})
+	}
+
+	return &teacherpb.TeacherCourseListResponse{Courses: courses}, nil
+}
 
 func main() {
 	shutdown := initTracer()
