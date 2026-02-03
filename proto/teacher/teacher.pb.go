@@ -23,8 +23,9 @@ const (
 
 type CourseResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	TeacherId     string                 `protobuf:"bytes,2,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,9 +60,16 @@ func (*CourseResponse) Descriptor() ([]byte, []int) {
 	return file_proto_teacher_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CourseResponse) GetId() string {
+func (x *CourseResponse) GetCourseId() string {
 	if x != nil {
-		return x.Id
+		return x.CourseId
+	}
+	return ""
+}
+
+func (x *CourseResponse) GetTeacherId() string {
+	if x != nil {
+		return x.TeacherId
 	}
 	return ""
 }
@@ -69,6 +77,50 @@ func (x *CourseResponse) GetId() string {
 func (x *CourseResponse) GetTitle() string {
 	if x != nil {
 		return x.Title
+	}
+	return ""
+}
+
+type TeacherCourseListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TeacherId     string                 `protobuf:"bytes,1,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TeacherCourseListRequest) Reset() {
+	*x = TeacherCourseListRequest{}
+	mi := &file_proto_teacher_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TeacherCourseListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TeacherCourseListRequest) ProtoMessage() {}
+
+func (x *TeacherCourseListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_teacher_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TeacherCourseListRequest.ProtoReflect.Descriptor instead.
+func (*TeacherCourseListRequest) Descriptor() ([]byte, []int) {
+	return file_proto_teacher_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *TeacherCourseListRequest) GetTeacherId() string {
+	if x != nil {
+		return x.TeacherId
 	}
 	return ""
 }
@@ -82,7 +134,7 @@ type TeacherCourseListResponse struct {
 
 func (x *TeacherCourseListResponse) Reset() {
 	*x = TeacherCourseListResponse{}
-	mi := &file_proto_teacher_proto_msgTypes[1]
+	mi := &file_proto_teacher_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +146,7 @@ func (x *TeacherCourseListResponse) String() string {
 func (*TeacherCourseListResponse) ProtoMessage() {}
 
 func (x *TeacherCourseListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_teacher_proto_msgTypes[1]
+	mi := &file_proto_teacher_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +159,7 @@ func (x *TeacherCourseListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TeacherCourseListResponse.ProtoReflect.Descriptor instead.
 func (*TeacherCourseListResponse) Descriptor() ([]byte, []int) {
-	return file_proto_teacher_proto_rawDescGZIP(), []int{1}
+	return file_proto_teacher_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TeacherCourseListResponse) GetCourses() []*CourseResponse {
@@ -115,50 +167,6 @@ func (x *TeacherCourseListResponse) GetCourses() []*CourseResponse {
 		return x.Courses
 	}
 	return nil
-}
-
-type TeacherCourseListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TeacherId     string                 `protobuf:"bytes,1,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TeacherCourseListRequest) Reset() {
-	*x = TeacherCourseListRequest{}
-	mi := &file_proto_teacher_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TeacherCourseListRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TeacherCourseListRequest) ProtoMessage() {}
-
-func (x *TeacherCourseListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_teacher_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TeacherCourseListRequest.ProtoReflect.Descriptor instead.
-func (*TeacherCourseListRequest) Descriptor() ([]byte, []int) {
-	return file_proto_teacher_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *TeacherCourseListRequest) GetTeacherId() string {
-	if x != nil {
-		return x.TeacherId
-	}
-	return ""
 }
 
 type AssignGradeRequest struct {
@@ -2184,15 +2192,17 @@ var File_proto_teacher_proto protoreflect.FileDescriptor
 
 const file_proto_teacher_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/teacher.proto\x12\ateacher\"6\n" +
-	"\x0eCourseResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\"N\n" +
-	"\x19TeacherCourseListResponse\x121\n" +
-	"\acourses\x18\x01 \x03(\v2\x17.teacher.CourseResponseR\acourses\"9\n" +
+	"\x13proto/teacher.proto\x12\ateacher\"b\n" +
+	"\x0eCourseResponse\x12\x1b\n" +
+	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x02 \x01(\tR\tteacherId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\"9\n" +
 	"\x18TeacherCourseListRequest\x12\x1d\n" +
 	"\n" +
-	"teacher_id\x18\x01 \x01(\tR\tteacherId\"\x8d\x01\n" +
+	"teacher_id\x18\x01 \x01(\tR\tteacherId\"N\n" +
+	"\x19TeacherCourseListResponse\x121\n" +
+	"\acourses\x18\x01 \x03(\v2\x17.teacher.CourseResponseR\acourses\"\x8d\x01\n" +
 	"\x12AssignGradeRequest\x12\x1d\n" +
 	"\n" +
 	"teacher_id\x18\x01 \x01(\tR\tteacherId\x12#\n" +
@@ -2368,8 +2378,8 @@ func file_proto_teacher_proto_rawDescGZIP() []byte {
 var file_proto_teacher_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_proto_teacher_proto_goTypes = []any{
 	(*CourseResponse)(nil),                    // 0: teacher.CourseResponse
-	(*TeacherCourseListResponse)(nil),         // 1: teacher.TeacherCourseListResponse
-	(*TeacherCourseListRequest)(nil),          // 2: teacher.TeacherCourseListRequest
+	(*TeacherCourseListRequest)(nil),          // 1: teacher.TeacherCourseListRequest
+	(*TeacherCourseListResponse)(nil),         // 2: teacher.TeacherCourseListResponse
 	(*AssignGradeRequest)(nil),                // 3: teacher.AssignGradeRequest
 	(*GradeResponse)(nil),                     // 4: teacher.GradeResponse
 	(*GetStudentGradesRequest)(nil),           // 5: teacher.GetStudentGradesRequest
@@ -2425,7 +2435,7 @@ var file_proto_teacher_proto_depIdxs = []int32{
 	22, // 15: teacher.TeacherService.UpdateAssignment:input_type -> teacher.UpdateAssignmentRequest
 	23, // 16: teacher.TeacherService.DeleteAssignment:input_type -> teacher.DeleteAssignmentRequest
 	25, // 17: teacher.TeacherService.ListAssignments:input_type -> teacher.ListAssignmentsRequest
-	2,  // 18: teacher.TeacherService.GetTeacherCourseList:input_type -> teacher.TeacherCourseListRequest
+	1,  // 18: teacher.TeacherService.GetTeacherCourseList:input_type -> teacher.TeacherCourseListRequest
 	3,  // 19: teacher.TeacherService.AssignGrade:input_type -> teacher.AssignGradeRequest
 	5,  // 20: teacher.TeacherService.GetStudentGrades:input_type -> teacher.GetStudentGradesRequest
 	30, // 21: teacher.TeacherService.GetCourseGrades:input_type -> teacher.GetCourseGradesRequest
@@ -2443,7 +2453,7 @@ var file_proto_teacher_proto_depIdxs = []int32{
 	19, // 33: teacher.TeacherService.UpdateAssignment:output_type -> teacher.AssignmentResponse
 	24, // 34: teacher.TeacherService.DeleteAssignment:output_type -> teacher.DeleteAssignmentResponse
 	26, // 35: teacher.TeacherService.ListAssignments:output_type -> teacher.ListAssignmentsResponse
-	1,  // 36: teacher.TeacherService.GetTeacherCourseList:output_type -> teacher.TeacherCourseListResponse
+	2,  // 36: teacher.TeacherService.GetTeacherCourseList:output_type -> teacher.TeacherCourseListResponse
 	4,  // 37: teacher.TeacherService.AssignGrade:output_type -> teacher.GradeResponse
 	7,  // 38: teacher.TeacherService.GetStudentGrades:output_type -> teacher.StudentGradesResponse
 	32, // 39: teacher.TeacherService.GetCourseGrades:output_type -> teacher.CourseGradesResponse
