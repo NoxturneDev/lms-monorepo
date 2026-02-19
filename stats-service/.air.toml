@@ -1,0 +1,13 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ."
+bin = "./tmp/main"
+clean_on_exit = true
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true
