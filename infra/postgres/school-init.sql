@@ -71,11 +71,11 @@ INSERT INTO admins (id, email, password_hash, full_name, school_id) VALUES
 ('a100f1ee-6c54-4b01-90e6-d701748f0001', 'admin@greenwood.edu', 'secret', 'Alice Greenwood', 'b100f1ee-6c54-4b01-90e6-d701748f0001'),
 ('a200f1ee-6c54-4b01-90e6-d701748f0002', 'admin@riverside.edu', 'secret', 'Bob Riverside', 'b200f1ee-6c54-4b01-90e6-d701748f0002');
 
--- Classes
+-- Classes (UUIDs must be hex only: 0-9, a-f)
 INSERT INTO classes (id, school_id, name, grade_level) VALUES
-('cl00f1ee-6c54-4b01-90e6-d701748f0001', 'b100f1ee-6c54-4b01-90e6-d701748f0001', 'Mathematics A', '10th Grade'),
-('cl00f1ee-6c54-4b01-90e6-d701748f0002', 'b100f1ee-6c54-4b01-90e6-d701748f0001', 'Science B', '11th Grade'),
-('cl00f1ee-6c54-4b01-90e6-d701748f0003', 'b200f1ee-6c54-4b01-90e6-d701748f0002', 'English Literature', '12th Grade');
+('c000f1ee-6c54-4b01-90e6-d701748f0001', 'b100f1ee-6c54-4b01-90e6-d701748f0001', 'Mathematics A', '10th Grade'),
+('c000f1ee-6c54-4b01-90e6-d701748f0002', 'b100f1ee-6c54-4b01-90e6-d701748f0001', 'Science B', '11th Grade'),
+('c000f1ee-6c54-4b01-90e6-d701748f0003', 'b200f1ee-6c54-4b01-90e6-d701748f0002', 'English Literature', '12th Grade');
 
 -- Courses (school-owned)
 INSERT INTO courses (id, school_id, title, description) VALUES
