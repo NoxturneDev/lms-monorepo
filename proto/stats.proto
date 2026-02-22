@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+package stats;
+
+option go_package = "github.com/noxturnedev/lms-monorepo/proto/stats";
+
+service StatsService {
+  // Performance Distribution - Bell Curve Data
+  rpc GetPerformanceDistribution (PerformanceDistributionRequest) returns (PerformanceDistributionResponse);
+
+  // At-Risk Students Identification
+  rpc GetAtRiskStudents (AtRiskStudentsRequest) returns (AtRiskStudentsResponse);
+
+  // Category Mastery Analysis
+  rpc GetCategoryMastery (CategoryMasteryRequest) returns (CategoryMasteryResponse);
+
+  // Course Statistics Overview
+  rpc GetCourseStats (CourseStatsRequest) returns (CourseStatsResponse);
+
+  // Reconciliation & Data Sync - Ensures stats_db matches teacher_db
+  rpc ReconcileGradesSync (ReconcileSyncRequest) returns (ReconcileSyncResponse);
+
+  // Student Analytics (NEW)
+  rpc GetStudentsAtRisk (StudentsAtRiskRequest) returns (StudentsAtRiskResponse);
+  rpc GetGhostStudents (GhostStudentsRequest) returns (GhostStudentsResponse);
+  rpc ForecastEnrollment (EnrollmentForecastRequest) returns (EnrollmentForecastResponse);
+}
+
+// ============================================
+// Performance Distribution Messages
+// ============================================
+
+message PerformanceDistributionRequest {
+  string course_id = 1;
+  string assignment_id = 2; // Optional: specific assignment, if empty = all assignments
+}
+
+message ScoreBucket {
+  string range = 1;          // e.g., "0-10", "11-20", etc.
+  int32 min_score = 2;       // 0, 11, 21, etc.
+  int32 max_score = 3;       // 10, 20, 30, etc.
+  int32 count = 4;           // Number of students in this range
+  double percentage = 5;     // Percentage of total students
+}
+
+message PerformanceDistributionResponse {
+  string course_id = 1;
+  string assignment_id = 2;
+  repeated ScoreBucket buckets = 3;
+  double mean = 4;
+  double median = 5;
+  double std_deviation = 6;
+  int32 total_students = 7;
+}
+
+// ============================================
+// At-Risk Students Messages
+// ============================================
+
+message AtRiskStudentsRequest {
+  string course_id = 1;
+  int32 missing_assignment_threshold = 2; // Default: 3
+  double std_deviation_threshold = 3;     // Default: 2.0
+}
+
+message AtRiskStudent {
+  string student_id = 1;
+  string student_name = 2;
+  string student_number = 3;
+  double current_average = 4;
+  double class_mean = 5;
+  double deviation_from_mean = 6;  // How many σ below mean
+  int32 missing_assignments = 7;
+  int32 total_assignments = 8;
+  repeated string risk_factors = 9;  // ["Low Performance", "Missing Assignments"]
+}
+
+message AtRiskStudentsResponse {
+  string course_id = 1;
+  repeated AtRiskStudent at_risk_students = 2;
+  double class_mean = 3;
+  double class_std_deviation = 4;
+  int32 total_students = 5;
+  int32 at_risk_count = 6;
+}
+
+// ============================================
+// Category Mastery Messages
+// ============================================
+
+message CategoryMasteryRequest {
+  string course_id = 1;
+}
+
+message CategoryStats {
+  string category = 1;           // "Lab", "Exam", "Quiz", "Project", etc.
+  double average_score = 2;      // Average across all students
+  double average_percentage = 3; // Normalized to 0-100
+  int32 total_assignments = 4;
+  int32 total_submissions = 5;
+  double std_deviation = 6;
+}
+
+message CategoryMasteryResponse {
+  string course_id = 1;
+  repeated CategoryStats categories = 2;
+  string strongest_category = 3;  // Category with highest average
+  string weakest_category = 4;    // Category with lowest average
+}
+
+// ============================================
+// Course Stats Overview Messages
+// ============================================
+
+message CourseStatsRequest {
+  string course_id = 1;
+}
+
+message CourseStatsResponse {
+  string course_id = 1;
+  int32 total_students = 2;
+  int32 total_assignments = 3;
+  double overall_average = 4;
+  double overall_std_deviation = 5;
+  int32 at_risk_count = 6;
+  int32 total_grades_recorded = 7;
+  string highest_performing_category = 8;
+  string lowest_performing_category = 9;
+}
+
+// ============================================
+// Reconciliation / Data Sync Messages
+// ============================================
+
+message ReconcileSyncRequest {
+  string course_id = 1;
+}
+
+message ReconcileSyncResponse {
+  string course_id = 1;
+  int32 grades_fixed = 2;           // Number of grades with missing data fixed
+  int32 inconsistencies_found = 3;  // Number of inconsistencies detected
+  string last_reconcile_time = 4;   // Timestamp of reconciliation
+  bool reconciliation_success = 5;  // Whether reconciliation succeeded
+}
+
+// ============================================
+// Student Risk Analytics Messages
+// ============================================
+
+message StudentsAtRiskRequest {
+  // Empty: Gets all students at risk across all courses
+}
+
+message StudentRisk {
+  string student_id = 1;
+  string course_id = 2;
+  string risk_level = 3;           // "CRITICAL", "WARNING", "GHOST"
+  string warning_reason = 4;       // "Low Performance", "Inactive", etc.
+  double current_average = 5;
+  double class_average = 6;
+  string detected_at = 7;
+}
+
+message StudentsAtRiskResponse {
+  repeated StudentRisk at_risk_students = 1;
+  int32 total_critical = 2;
+  int32 total_warning = 3;
+  int32 total_ghost = 4;
+}
+
+// ============================================
+// Ghost Students Detection Messages
+// ============================================
+
+message GhostStudentsRequest {
+  int32 inactive_days = 1;  // Default: 45 days. Minimum: 14 days.
+}
+
+message GhostStudent {
+  string student_id = 1;
+  string course_id = 2;
+  string last_activity = 3;  // ISO timestamp
+  int32 days_inactive = 4;
+}
+
+message GhostStudentsResponse {
+  repeated GhostStudent ghost_students = 1;
+  int32 total_ghost_count = 2;
+  string detection_criteria = 3;  // e.g., "Inactive for 45+ days"
+}
+
+// ============================================
+// Enrollment Forecasting Messages
+// ============================================
+
+message EnrollmentForecastRequest {
+  int32 forecast_years = 1;  // Default: 1 (next year). Max: 5.
+}
+
+message EnrollmentProjection {
+  int32 year = 1;
+  int32 projected_students = 2;
+  double confidence_level = 3;  // 0.0 to 1.0
+  string trend = 4;             // "GROWING", "STABLE", "DECLINING"
+}
+
+message EnrollmentForecastResponse {
+  repeated EnrollmentProjection projections = 1;
+  double growth_rate = 2;           // Percentage growth per year
+  string forecast_accuracy = 3;     // "HIGH", "MEDIUM", "LOW"
+  int32 historical_data_points = 4; // How many years of history used
+}
