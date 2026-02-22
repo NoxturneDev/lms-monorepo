@@ -31,7 +31,12 @@ type server struct {
 
 func startEventConsumer(db *sql.DB) {
 	// Connect to Rabbit (Copy the retry logic from Student Service)
-	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://guest:guest@rabbitmq:5672/"
+	}
+
+	conn, err := amqp.Dial(rabbitURL)
 	if err != nil {
 		log.Printf("Consumer: Failed to connect to RabbitMQ: %v", err)
 		return
@@ -525,6 +530,7 @@ func (s *server) GetCourseGrades(ctx context.Context, req *teacherpb.GetCourseGr
 
 		studentResp, err := s.studentClient.GetStudentById(ctx, &studentpb.GetStudentByIdRequest{Id: studentId})
 		if err != nil {
+			log.Println(err)
 			grades = append(grades, &teacherpb.StudentGradeItem{
 				GradeId:         gradeId,
 				StudentId:       studentId,
