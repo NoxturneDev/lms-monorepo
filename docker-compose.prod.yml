@@ -1,0 +1,197 @@
+version: "3.9"
+
+services:
+  # ================================================================
+  # INFRASTRUCTURE: SINGLE POSTGRES (all 4 databases)
+  # ================================================================
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: lms_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: lms_admin
+      POSTGRES_PASSWORD: lms_password
+      POSTGRES_INITDB_ARGS: "-c max_connections=100"
+    volumes:
+      - ./infra/postgres/init-all.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lms-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms_admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ================================================================
+  # INFRASTRUCTURE: MESSAGE BROKER
+  # ================================================================
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: lms_rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - lms-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ================================================================
+  # APPLICATION SERVICES (Production binaries)
+  # ================================================================
+
+  student-service:
+    build:
+      context: ./
+      dockerfile: student-service/Dockerfile
+      target: production
+    container_name: lms_student_service
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    environment:
+      DATABASE_URL: "postgres://student_admin:student_password@postgres:5432/student_db?sslmode=disable"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+      SCHOOL_SERVICE_URL: "school-service:8080"
+      PORT: "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - lms-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  teacher-service:
+    build:
+      context: ./
+      dockerfile: teacher-service/Dockerfile
+      target: production
+    container_name: lms_teacher_service
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      DATABASE_URL: "postgres://teacher_admin:teacher_password@postgres:5432/teacher_db?sslmode=disable"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+      STUDENT_SERVICE_URL: "student-service:8080"
+      SCHOOL_SERVICE_URL: "school-service:8080"
+      PORT: "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - lms-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  school-service:
+    build:
+      context: ./
+      dockerfile: school-service/Dockerfile
+      target: production
+    container_name: lms_school_service
+    restart: unless-stopped
+    ports:
+      - "8083:8080"
+    environment:
+      DATABASE_URL: "postgres://school_admin:school_password@postgres:5432/school_db?sslmode=disable"
+      TEACHER_SERVICE_URL: "teacher-service:8080"
+      STUDENT_SERVICE_URL: "student-service:8080"
+      PORT: "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lms-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  stats-service:
+    build:
+      context: ./
+      dockerfile: stats-service/Dockerfile
+      target: production
+    container_name: lms_stats_service
+    restart: unless-stopped
+    ports:
+      - "8084:8080"
+    environment:
+      DATABASE_URL: "postgres://stats_admin:stats_password@postgres:5432/stats_db?sslmode=disable"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+      PORT: "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - lms-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  gateway:
+    build:
+      context: ./
+      dockerfile: gateway/Dockerfile
+      target: production
+    container_name: lms_gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      JWT_SECRET: "your-production-secret-change-me"
+      GIN_MODE: "release"
+      STUDENT_SERVICE_URL: "student-service:8080"
+      TEACHER_SERVICE_URL: "teacher-service:8080"
+      SCHOOL_SERVICE_URL: "school-service:8080"
+      STATS_SERVICE_URL: "stats-service:8080"
+    depends_on:
+      - student-service
+      - teacher-service
+      - school-service
+      - stats-service
+    networks:
+      - lms-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+networks:
+  lms-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

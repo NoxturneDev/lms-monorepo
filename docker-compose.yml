@@ -85,6 +85,33 @@ services:
       - school
       - all
 
+  stats-service:
+    build:
+      context: ./
+      dockerfile: stats-service/Dockerfile
+      target: development
+    volumes:
+      - ./stats-service:/app/stats-service
+      - ./proto:/app/proto
+    container_name: stats_app
+    restart: on-failure
+    ports:
+      - "8084:8080"
+    environment:
+      DATABASE_URL: "postgres://stats_admin:stats_password@postgres-stats:5432/stats_db?sslmode=disable"
+      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
+      PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+      OTEL_SERVICE_NAME: "stats-service"
+    depends_on:
+      - postgres-stats
+      - rabbitmq
+    networks:
+      - lms-net
+    profiles:
+      - stats
+      - all
+
   gateway:
     build:
       context: ./
@@ -97,6 +124,7 @@ services:
       STUDENT_SERVICE_URL: "student-service:8080"
       TEACHER_SERVICE_URL: "teacher-service:8080"
       SCHOOL_SERVICE_URL: "school-service:8080"
+      STATS_SERVICE_URL: "stats-service:8080"
     depends_on:
       - student-service
       - teacher-service
@@ -165,6 +193,23 @@ services:
       - school
       - all
 
+  postgres-stats:
+    image: postgres:15-alpine
+    container_name: postgres_stats
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_USER: stats_admin
+      POSTGRES_PASSWORD: stats_password
+      POSTGRES_DB: stats_db
+    volumes:
+      - ./infra/postgres/stats-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - lms-net
+    profiles:
+      - stats
+      - all
+
   # ----------------------------------------------------------------
   # INFRASTRUCTURE: MESSAGE BROKER
   # ----------------------------------------------------------------
@@ -183,6 +228,7 @@ services:
     profiles:
       - teacher
       - student
+      - stats
       - all
 
   jaeger:
@@ -199,6 +245,7 @@ services:
       - teacher
       - student
       - school
+      - stats
       - gateway
       - all
 
