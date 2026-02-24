@@ -292,8 +292,13 @@ func main() {
 	var rabbitConn *amqp.Connection
 	var rabbitErr error
 
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://guest:guest@rabbitmq:5672/"
+	}
+
 	for i := 0; i < 10; i++ {
-		rabbitConn, rabbitErr = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+		rabbitConn, rabbitErr = amqp.Dial(rabbitURL)
 		if rabbitErr == nil {
 			break
 		}
