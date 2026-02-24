@@ -20,16 +20,14 @@ CREATE TABLE assignments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. GRADES (from GradeAssigned events)
--- This is the MAIN table - fully denormalized for fast queries
 CREATE TABLE grades (
-    id UUID PRIMARY KEY,                -- grade_id from event (for idempotency)
+    id UUID PRIMARY KEY,                
     course_id UUID NOT NULL,
     assignment_id UUID NOT NULL,
     student_id UUID NOT NULL,
     score INTEGER NOT NULL,
-    max_score INTEGER NOT NULL,         -- Denormalized from assignment
-    category VARCHAR(100),              -- Denormalized from assignment
+    max_score INTEGER NOT NULL,         
+    category VARCHAR(100),             
     percentage DECIMAL(5,2) GENERATED ALWAYS AS ((score::DECIMAL / max_score) * 100) STORED,
     recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
@@ -89,3 +87,47 @@ INSERT INTO student_enrollments (course_id, student_id) VALUES
 ('c100f1ee-6c54-4b01-90e6-d701748f0851', 'a999f1ee-6c54-4b01-90e6-d701748f0851'), -- John
 ('c100f1ee-6c54-4b01-90e6-d701748f0851', 'a888f1ee-6c54-4b01-90e6-d701748f0852'), -- Jane
 ('c200f1ee-6c54-4b01-90e6-d701748f0852', 'a999f1ee-6c54-4b01-90e6-d701748f0851'); -- John in OS
+
+-- === STUDENT ANALYTICS TABLES ===
+
+-- 6. STUDENT_RISK_INSIGHTS (Early Warning System Results)
+CREATE TABLE insight_student_risks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID NOT NULL,
+    course_id UUID NOT NULL,
+    risk_level VARCHAR(50) NOT NULL,  -- "CRITICAL", "WARNING"
+    warning_reason TEXT,
+    current_average DECIMAL(5,2),
+    class_average DECIMAL(5,2),
+    last_activity TIMESTAMP WITH TIME ZONE,
+    detected_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(student_id, course_id, risk_level)
+);
+
+-- 7. ENROLLMENT_HISTORY (Tracking year-over-year enrollment for forecasting)
+CREATE TABLE enrollment_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academic_year INT NOT NULL,
+    total_students INT NOT NULL,
+    total_courses INT NOT NULL,
+    recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(academic_year)
+);
+
+-- Performance indexes for risk insights
+CREATE INDEX idx_student_risks_student ON insight_student_risks(student_id);
+CREATE INDEX idx_student_risks_course ON insight_student_risks(course_id);
+CREATE INDEX idx_student_risks_level ON insight_student_risks(risk_level);
+CREATE INDEX idx_enrollment_history_year ON enrollment_history(academic_year);
+
+-- === SEED DATA FOR ANALYTICS ===
+
+-- Historical enrollment for forecasting (2021-2024)
+INSERT INTO enrollment_history (academic_year, total_students, total_courses) VALUES
+(2021, 150, 12),
+(2022, 180, 14),
+(2023, 220, 16),
+(2024, 250, 18);

@@ -51,6 +51,7 @@ CREATE TABLE assignments (
     course_id UUID NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT,
+    category VARCHAR(100),  -- "Lab", "Exam", "Quiz", "Project", etc.
     max_score INTEGER NOT NULL DEFAULT 100,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -72,10 +73,10 @@ INSERT INTO teachers (id, email, password_hash, full_name) VALUES
 ('e390f1ee-6c54-4b01-90e6-d701748f0852', 'hopper@uni.edu', 'secret', 'Grace Hopper'),
 ('f490f1ee-6c54-4b01-90e6-d701748f0853', 'ritchie@uni.edu', 'secret', 'Dennis Ritchie');
 
-INSERT INTO assignments (id, course_id, title, description, max_score) VALUES
-('a100f1ee-6c54-4b01-90e6-d701748f0001', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Midterm Exam', 'Covers sorting and graph algorithms', 100),
-('a100f1ee-6c54-4b01-90e6-d701748f0002', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Final Project', 'Implement a novel algorithm', 200),
-('a200f1ee-6c54-4b01-90e6-d701748f0003', 'c200f1ee-6c54-4b01-90e6-d701748f0852', 'Lab Report 1', 'Process scheduling analysis', 50);
+INSERT INTO assignments (id, course_id, title, description, category, max_score) VALUES
+('a100f1ee-6c54-4b01-90e6-d701748f0001', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Midterm Exam', 'Covers sorting and graph algorithms', 'Exam', 100),
+('a100f1ee-6c54-4b01-90e6-d701748f0002', 'c100f1ee-6c54-4b01-90e6-d701748f0851', 'Final Project', 'Implement a novel algorithm', 'Project', 200),
+('a200f1ee-6c54-4b01-90e6-d701748f0003', 'c200f1ee-6c54-4b01-90e6-d701748f0852', 'Lab Report 1', 'Process scheduling analysis', 'Lab', 50);
 
 INSERT INTO grades (assignment_id, student_id, score) VALUES
 ('a100f1ee-6c54-4b01-90e6-d701748f0001', 'a999f1ee-6c54-4b01-90e6-d701748f0851', 95),
