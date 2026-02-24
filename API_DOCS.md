@@ -4,6 +4,31 @@ Base URL: `http://localhost:3000`
 
 All endpoints use `Content-Type: application/json`
 
+## API Overview
+
+This LMS API provides **56 REST endpoints** across the following categories:
+
+| Category | Endpoints | Description |
+|----------|-----------|-------------|
+| Authentication | 3 | Teacher, Student, and Admin login |
+| Students | 7 | Student CRUD, report cards, course enrollment |
+| Teachers | 6 | Teacher CRUD, course list |
+| Admins | 5 | Admin CRUD |
+| Schools | 5 | School CRUD |
+| Classes | 5 | Class CRUD |
+| Courses | 5 | Course CRUD |
+| Course-Teacher Assignment | 3 | Assign/unassign teachers to courses |
+| Enrollments | 4 | Student-course enrollment management |
+| Assignments | 5 | Assignment CRUD |
+| Grading | 3 | Grade assignment and gradebook |
+| Stats & Analytics | 4 | Performance distribution, at-risk students, category mastery |
+| Student Analytics | 2 | Early warning system, enrollment forecasting (Admin Only) |
+| Reporting | 1 | Teacher dashboard |
+
+**Total:** 58 endpoints
+
+---
+
 ## Authentication
 
 This API uses **JWT (JSON Web Token)** for authentication.
@@ -49,7 +74,9 @@ Authorization: Bearer <your-jwt-token>
 - Grade assignment (`POST /api/v1/grades`)
 - Gradebook viewing (`GET /api/v1/courses/:id/grades`)
 - Teacher dashboard (`GET /api/v1/dashboard/teacher/:id`)
+- Teacher course list (`GET /api/v1/teachers/:id/courses`)
 - Assignment creation, update, deletion
+- Stats & analytics (course stats, distribution, at-risk, category mastery)
 
 **Admin-Only Routes**:
 - Admin management (CRUD)
@@ -57,6 +84,7 @@ Authorization: Bearer <your-jwt-token>
 - Class management (create, update, delete)
 - Course management (create, update, delete)
 - Course-teacher assignment and unassignment
+- Student analytics (early warning system, enrollment forecasting)
 
 ---
 
@@ -429,6 +457,30 @@ The `password` field is optional.
 
 ---
 
+### Get Teacher's Courses
+**GET** `/api/v1/teachers/:id/courses` (Teacher Only)
+
+Returns all courses assigned to a specific teacher.
+
+**Response:** `200 OK`
+```json
+{
+  "courses": [
+    {
+      "id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+      "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
+      "school_name": "Greenwood Academy",
+      "title": "Advanced Algorithms",
+      "description": "P vs NP and beyond",
+      "teacher_ids": ["d290f1ee-6c54-4b01-90e6-d701748f0851"],
+      "teacher_names": ["Alan Turing"]
+    }
+  ]
+}
+```
+
+---
+
 ## Admin APIs
 
 ### Create Admin
@@ -650,19 +702,18 @@ Validates that the school has no admins or classes before deletion. Courses belo
 }
 ```
 
-**Response:** `200 OK` (blocked by admins)
+**Error Response:** `409 Conflict` (blocked by admins or classes)
 ```json
 {
-  "success": false,
-  "message": "Cannot delete school with 2 admins"
+  "error": "Cannot delete school with 2 admins"
 }
 ```
 
-**Response:** `200 OK` (blocked by classes)
+or
+
 ```json
 {
-  "success": false,
-  "message": "Cannot delete school with 3 classes"
+  "error": "Cannot delete school with 3 classes"
 }
 ```
 
@@ -680,14 +731,14 @@ Validates that the school has no admins or classes before deletion. Courses belo
 {
   "classes": [
     {
-      "id": "cl00f1ee-6c54-4b01-90e6-d701748f0001",
+      "id": "c000f1ee-6c54-4b01-90e6-d701748f0001",
       "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
       "school_name": "Greenwood Academy",
       "name": "Mathematics A",
       "grade_level": "10th Grade"
     },
     {
-      "id": "cl00f1ee-6c54-4b01-90e6-d701748f0002",
+      "id": "c000f1ee-6c54-4b01-90e6-d701748f0002",
       "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
       "school_name": "Greenwood Academy",
       "name": "Science B",
@@ -705,7 +756,7 @@ Validates that the school has no admins or classes before deletion. Courses belo
 **Response:** `200 OK`
 ```json
 {
-  "id": "cl00f1ee-6c54-4b01-90e6-d701748f0001",
+  "id": "c000f1ee-6c54-4b01-90e6-d701748f0001",
   "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
   "school_name": "Greenwood Academy",
   "name": "Mathematics A",
@@ -737,7 +788,7 @@ Validates that the school has no admins or classes before deletion. Courses belo
 **Response:** `201 Created`
 ```json
 {
-  "id": "cl00f1ee-6c54-4b01-90e6-d701748f0004",
+  "id": "c000f1ee-6c54-4b01-90e6-d701748f0004",
   "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
   "school_name": "Greenwood Academy",
   "name": "Physics C",
@@ -761,7 +812,7 @@ Validates that the school has no admins or classes before deletion. Courses belo
 **Response:** `200 OK`
 ```json
 {
-  "id": "cl00f1ee-6c54-4b01-90e6-d701748f0001",
+  "id": "c000f1ee-6c54-4b01-90e6-d701748f0001",
   "school_id": "b100f1ee-6c54-4b01-90e6-d701748f0001",
   "school_name": "Greenwood Academy",
   "name": "Advanced Mathematics A",
@@ -903,19 +954,18 @@ Validates that the course has no enrollments and no assignments before deletion.
 }
 ```
 
-**Response:** `200 OK` (blocked by enrollments)
+**Error Response:** `409 Conflict` (blocked by enrollments or assignments)
 ```json
 {
-  "success": false,
-  "message": "Cannot delete course with 15 enrollments"
+  "error": "Cannot delete course with 15 enrollments"
 }
 ```
 
-**Response:** `200 OK` (blocked by assignments)
+or
+
 ```json
 {
-  "success": false,
-  "message": "Cannot delete course with existing assignments"
+  "error": "Cannot delete course with existing assignments"
 }
 ```
 
@@ -1362,6 +1412,217 @@ Computes the overall course grade for a student on the fly. The overall score is
 
 ---
 
+## Stats & Analytics APIs
+
+Stats are powered by the **Stats Service**, an event-driven read model built from RabbitMQ events. All stats endpoints require **teacher authentication**.
+
+### Get Course Stats Overview
+**GET** `/api/v1/courses/:id/stats` (Teacher Only)
+
+Returns a high-level overview of course performance metrics.
+
+**Response:** `200 OK`
+```json
+{
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "total_students": 2,
+  "total_assignments": 2,
+  "overall_average": 72.50,
+  "overall_std_deviation": 12.35,
+  "at_risk_count": 0,
+  "total_grades_recorded": 3,
+  "highest_performing_category": "Exam",
+  "lowest_performing_category": "Project"
+}
+```
+
+---
+
+### Get Performance Distribution
+**GET** `/api/v1/courses/:id/stats/distribution` (Teacher Only)
+
+Returns score distribution data (bell curve) broken into 10-point buckets.
+
+**Query Params:** `?assignment_id=UUID` (optional, filter to a specific assignment)
+
+**Response:** `200 OK`
+```json
+{
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "assignment_id": "",
+  "buckets": [
+    {
+      "range": "41-50",
+      "min_score": 41,
+      "max_score": 50,
+      "count": 1,
+      "percentage": 33.33
+    },
+    {
+      "range": "81-90",
+      "min_score": 81,
+      "max_score": 90,
+      "count": 1,
+      "percentage": 33.33
+    },
+    {
+      "range": "91-100",
+      "min_score": 91,
+      "max_score": 100,
+      "count": 1,
+      "percentage": 33.33
+    }
+  ],
+  "mean": 76.00,
+  "median": 88.00,
+  "std_deviation": 18.52,
+  "total_students": 3
+}
+```
+
+---
+
+### Get At-Risk Students
+**GET** `/api/v1/courses/:id/stats/at-risk` (Teacher Only)
+
+Identifies students who are at risk based on low performance or missing assignments. The gateway enriches responses with student names from the Student Service.
+
+**Query Params:**
+- `?missing_threshold=N` (optional, default: 3) - number of missing assignments to flag
+- `?std_dev_threshold=N` (optional, default: 2.0) - standard deviations below mean to flag
+
+**Response:** `200 OK`
+```json
+{
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "at_risk_students": [
+    {
+      "student_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
+      "student_name": "John Doe",
+      "student_number": "STD-2026-001",
+      "current_average": 47.50,
+      "class_mean": 72.50,
+      "deviation_from_mean": -2.15,
+      "missing_assignments": 0,
+      "total_assignments": 2,
+      "risk_factors": ["Low Performance"]
+    }
+  ],
+  "class_mean": 72.50,
+  "class_std_deviation": 12.35,
+  "total_students": 2,
+  "at_risk_count": 1
+}
+```
+
+---
+
+### Get Category Mastery
+**GET** `/api/v1/courses/:id/stats/category-mastery` (Teacher Only)
+
+Analyzes performance by assignment category (Exam, Lab, Project, Quiz, etc.) to identify class-wide strengths and weaknesses.
+
+**Response:** `200 OK`
+```json
+{
+  "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+  "categories": [
+    {
+      "category": "Exam",
+      "average_score": 91.50,
+      "average_percentage": 91.50,
+      "total_assignments": 1,
+      "total_submissions": 2,
+      "std_deviation": 3.50
+    },
+    {
+      "category": "Project",
+      "average_score": 95.00,
+      "average_percentage": 47.50,
+      "total_assignments": 1,
+      "total_submissions": 1,
+      "std_deviation": 0.00
+    }
+  ],
+  "strongest_category": "Exam",
+  "weakest_category": "Project"
+}
+```
+
+---
+
+## Student Analytics APIs
+
+Student analytics provide cross-course insights powered by the Stats Service. All endpoints require **admin authentication**.
+
+### Early Warning System (Students At Risk)
+**GET** `/api/v1/stats/students/at-risk` (Admin Only)
+
+Scans all students across all courses using a decision tree algorithm:
+- **CRITICAL**: Average score below 60%
+- **WARNING**: Average score 15+ points below class average
+
+The gateway enriches each result with the student's name from the Student Service. Results are also persisted to `insight_student_risks` by a nightly background job.
+
+**Response:** `200 OK`
+```json
+{
+  "at_risk_students": [
+    {
+      "student_id": "a999f1ee-6c54-4b01-90e6-d701748f0851",
+      "student_name": "John Doe",
+      "course_id": "c100f1ee-6c54-4b01-90e6-d701748f0851",
+      "risk_level": "CRITICAL",
+      "warning_reason": "Average score 47.50% is below 60%",
+      "current_average": 47.50,
+      "class_average": 72.50,
+      "detected_at": "2026-02-23T12:00:00Z"
+    }
+  ],
+  "total_critical": 1,
+  "total_warning": 0
+}
+```
+
+---
+
+### Enrollment Forecasting
+**GET** `/api/v1/stats/students/enrollment-forecast` (Admin Only)
+
+Uses Least Squares Linear Regression on historical enrollment data to project future student intake.
+
+**Query Params:**
+- `?years=N` (optional, default: 1, max: 5) - number of years to forecast
+
+**Response:** `200 OK`
+```json
+{
+  "projections": [
+    {
+      "year": 2025,
+      "projected_students": 283,
+      "confidence_level": 0.99,
+      "trend": "GROWING"
+    }
+  ],
+  "growth_rate": 13.33,
+  "forecast_accuracy": "HIGH",
+  "historical_data_points": 4
+}
+```
+
+**Accuracy Levels:**
+- `HIGH`: R² > 0.85 (strong linear fit)
+- `MEDIUM`: R² 0.60 - 0.85
+- `LOW`: R² < 0.60 (weak fit, more data needed)
+
+**Trend Labels:**
+- `GROWING`: slope > 5 students/year
+- `STABLE`: slope between -5 and 5
+- `DECLINING`: slope < -5 students/year
+
+---
+
 ## Reporting APIs
 
 ### Get Teacher Dashboard
@@ -1503,6 +1764,55 @@ curl -X GET "http://localhost:3000/api/v1/courses/COURSE_ID/student-grade?studen
 ```bash
 curl -X GET http://localhost:3000/api/v1/students/a999f1ee-6c54-4b01-90e6-d701748f0851/enrollments \
   -H "Authorization: Bearer $TOKEN"
+```
+
+### 9. View Teacher's Assigned Courses
+```bash
+curl -X GET http://localhost:3000/api/v1/teachers/d290f1ee-6c54-4b01-90e6-d701748f0851/courses \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+```
+
+### 10. View Course Stats Overview
+```bash
+curl -X GET http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/stats \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+```
+
+### 11. View Performance Distribution (Bell Curve)
+```bash
+# All assignments
+curl -X GET http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/stats/distribution \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+
+# Specific assignment
+curl -X GET "http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/stats/distribution?assignment_id=a100f1ee-6c54-4b01-90e6-d701748f0001" \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+```
+
+### 12. Identify At-Risk Students
+```bash
+curl -X GET "http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/stats/at-risk?missing_threshold=2&std_dev_threshold=1.5" \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+```
+
+### 13. View Category Mastery
+```bash
+curl -X GET http://localhost:3000/api/v1/courses/c100f1ee-6c54-4b01-90e6-d701748f0851/stats/category-mastery \
+  -H "Authorization: Bearer $TEACHER_TOKEN"
+```
+
+### 14. Early Warning System (All At-Risk Students, Admin Only)
+```bash
+ADMIN_TOKEN="<admin-token-from-step-1>"
+
+curl -X GET http://localhost:3000/api/v1/stats/students/at-risk \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+### 15. Enrollment Forecast (Next 3 Years, Admin Only)
+```bash
+curl -X GET "http://localhost:3000/api/v1/stats/students/enrollment-forecast?years=3" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ---
