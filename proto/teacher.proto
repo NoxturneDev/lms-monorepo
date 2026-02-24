@@ -138,13 +138,15 @@ message CreateAssignmentRequest {
   string course_id = 1;
   string title = 2;
   string description = 3;
-  int32 max_score = 4;
+  string category = 4;  // "Lab", "Exam", "Quiz", "Project", etc.
+  int32 max_score = 5;
 }
 
 message AssignmentResponse {
   string id = 1;
   string title = 2;
-  int32 max_score = 3;
+  string category = 3;
+  int32 max_score = 4;
 }
 
 message GetAssignmentRequest {
@@ -157,14 +159,16 @@ message AssignmentDetailResponse {
   string course_title = 3;
   string title = 4;
   string description = 5;
-  int32 max_score = 6;
+  string category = 6;
+  int32 max_score = 7;
 }
 
 message UpdateAssignmentRequest {
   string id = 1;
   string title = 2;
   string description = 3;
-  int32 max_score = 4;
+  string category = 4;
+  int32 max_score = 5;
 }
 
 message DeleteAssignmentRequest {

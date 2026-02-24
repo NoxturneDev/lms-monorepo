@@ -25,7 +25,6 @@ const (
 	StatsService_GetCourseStats_FullMethodName             = "/stats.StatsService/GetCourseStats"
 	StatsService_ReconcileGradesSync_FullMethodName        = "/stats.StatsService/ReconcileGradesSync"
 	StatsService_GetStudentsAtRisk_FullMethodName          = "/stats.StatsService/GetStudentsAtRisk"
-	StatsService_GetGhostStudents_FullMethodName           = "/stats.StatsService/GetGhostStudents"
 	StatsService_ForecastEnrollment_FullMethodName         = "/stats.StatsService/ForecastEnrollment"
 )
 
@@ -35,7 +34,7 @@ const (
 type StatsServiceClient interface {
 	// Performance Distribution - Bell Curve Data
 	GetPerformanceDistribution(ctx context.Context, in *PerformanceDistributionRequest, opts ...grpc.CallOption) (*PerformanceDistributionResponse, error)
-	// At-Risk Students Identification
+	// At-Risk Students Identification (per-course, existing)
 	GetAtRiskStudents(ctx context.Context, in *AtRiskStudentsRequest, opts ...grpc.CallOption) (*AtRiskStudentsResponse, error)
 	// Category Mastery Analysis
 	GetCategoryMastery(ctx context.Context, in *CategoryMasteryRequest, opts ...grpc.CallOption) (*CategoryMasteryResponse, error)
@@ -43,9 +42,9 @@ type StatsServiceClient interface {
 	GetCourseStats(ctx context.Context, in *CourseStatsRequest, opts ...grpc.CallOption) (*CourseStatsResponse, error)
 	// Reconciliation & Data Sync - Ensures stats_db matches teacher_db
 	ReconcileGradesSync(ctx context.Context, in *ReconcileSyncRequest, opts ...grpc.CallOption) (*ReconcileSyncResponse, error)
-	// Student Analytics (NEW)
+	// Early Warning System - Decision Tree across all courses
 	GetStudentsAtRisk(ctx context.Context, in *StudentsAtRiskRequest, opts ...grpc.CallOption) (*StudentsAtRiskResponse, error)
-	GetGhostStudents(ctx context.Context, in *GhostStudentsRequest, opts ...grpc.CallOption) (*GhostStudentsResponse, error)
+	// Enrollment Forecasting - Linear Regression
 	ForecastEnrollment(ctx context.Context, in *EnrollmentForecastRequest, opts ...grpc.CallOption) (*EnrollmentForecastResponse, error)
 }
 
@@ -117,16 +116,6 @@ func (c *statsServiceClient) GetStudentsAtRisk(ctx context.Context, in *Students
 	return out, nil
 }
 
-func (c *statsServiceClient) GetGhostStudents(ctx context.Context, in *GhostStudentsRequest, opts ...grpc.CallOption) (*GhostStudentsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GhostStudentsResponse)
-	err := c.cc.Invoke(ctx, StatsService_GetGhostStudents_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *statsServiceClient) ForecastEnrollment(ctx context.Context, in *EnrollmentForecastRequest, opts ...grpc.CallOption) (*EnrollmentForecastResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(EnrollmentForecastResponse)
@@ -143,7 +132,7 @@ func (c *statsServiceClient) ForecastEnrollment(ctx context.Context, in *Enrollm
 type StatsServiceServer interface {
 	// Performance Distribution - Bell Curve Data
 	GetPerformanceDistribution(context.Context, *PerformanceDistributionRequest) (*PerformanceDistributionResponse, error)
-	// At-Risk Students Identification
+	// At-Risk Students Identification (per-course, existing)
 	GetAtRiskStudents(context.Context, *AtRiskStudentsRequest) (*AtRiskStudentsResponse, error)
 	// Category Mastery Analysis
 	GetCategoryMastery(context.Context, *CategoryMasteryRequest) (*CategoryMasteryResponse, error)
@@ -151,9 +140,9 @@ type StatsServiceServer interface {
 	GetCourseStats(context.Context, *CourseStatsRequest) (*CourseStatsResponse, error)
 	// Reconciliation & Data Sync - Ensures stats_db matches teacher_db
 	ReconcileGradesSync(context.Context, *ReconcileSyncRequest) (*ReconcileSyncResponse, error)
-	// Student Analytics (NEW)
+	// Early Warning System - Decision Tree across all courses
 	GetStudentsAtRisk(context.Context, *StudentsAtRiskRequest) (*StudentsAtRiskResponse, error)
-	GetGhostStudents(context.Context, *GhostStudentsRequest) (*GhostStudentsResponse, error)
+	// Enrollment Forecasting - Linear Regression
 	ForecastEnrollment(context.Context, *EnrollmentForecastRequest) (*EnrollmentForecastResponse, error)
 	mustEmbedUnimplementedStatsServiceServer()
 }
@@ -182,9 +171,6 @@ func (UnimplementedStatsServiceServer) ReconcileGradesSync(context.Context, *Rec
 }
 func (UnimplementedStatsServiceServer) GetStudentsAtRisk(context.Context, *StudentsAtRiskRequest) (*StudentsAtRiskResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetStudentsAtRisk not implemented")
-}
-func (UnimplementedStatsServiceServer) GetGhostStudents(context.Context, *GhostStudentsRequest) (*GhostStudentsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetGhostStudents not implemented")
 }
 func (UnimplementedStatsServiceServer) ForecastEnrollment(context.Context, *EnrollmentForecastRequest) (*EnrollmentForecastResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ForecastEnrollment not implemented")
@@ -318,24 +304,6 @@ func _StatsService_GetStudentsAtRisk_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StatsService_GetGhostStudents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GhostStudentsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(StatsServiceServer).GetGhostStudents(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: StatsService_GetGhostStudents_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StatsServiceServer).GetGhostStudents(ctx, req.(*GhostStudentsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _StatsService_ForecastEnrollment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EnrollmentForecastRequest)
 	if err := dec(in); err != nil {
@@ -384,10 +352,6 @@ var StatsService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStudentsAtRisk",
 			Handler:    _StatsService_GetStudentsAtRisk_Handler,
-		},
-		{
-			MethodName: "GetGhostStudents",
-			Handler:    _StatsService_GetGhostStudents_Handler,
 		},
 		{
 			MethodName: "ForecastEnrollment",

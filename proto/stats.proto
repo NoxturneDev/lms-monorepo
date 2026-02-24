@@ -8,7 +8,7 @@ service StatsService {
   // Performance Distribution - Bell Curve Data
   rpc GetPerformanceDistribution (PerformanceDistributionRequest) returns (PerformanceDistributionResponse);
 
-  // At-Risk Students Identification
+  // At-Risk Students Identification (per-course, existing)
   rpc GetAtRiskStudents (AtRiskStudentsRequest) returns (AtRiskStudentsResponse);
 
   // Category Mastery Analysis
@@ -20,9 +20,10 @@ service StatsService {
   // Reconciliation & Data Sync - Ensures stats_db matches teacher_db
   rpc ReconcileGradesSync (ReconcileSyncRequest) returns (ReconcileSyncResponse);
 
-  // Student Analytics (NEW)
+  // Early Warning System - Decision Tree across all courses
   rpc GetStudentsAtRisk (StudentsAtRiskRequest) returns (StudentsAtRiskResponse);
-  rpc GetGhostStudents (GhostStudentsRequest) returns (GhostStudentsResponse);
+
+  // Enrollment Forecasting - Linear Regression
   rpc ForecastEnrollment (EnrollmentForecastRequest) returns (EnrollmentForecastResponse);
 }
 
@@ -54,7 +55,7 @@ message PerformanceDistributionResponse {
 }
 
 // ============================================
-// At-Risk Students Messages
+// At-Risk Students Messages (per-course)
 // ============================================
 
 message AtRiskStudentsRequest {
@@ -145,49 +146,28 @@ message ReconcileSyncResponse {
 }
 
 // ============================================
-// Student Risk Analytics Messages
+// Early Warning System Messages (all courses)
 // ============================================
 
 message StudentsAtRiskRequest {
-  // Empty: Gets all students at risk across all courses
+  // Empty: Scans all students across all courses
 }
 
 message StudentRisk {
   string student_id = 1;
-  string course_id = 2;
-  string risk_level = 3;           // "CRITICAL", "WARNING", "GHOST"
-  string warning_reason = 4;       // "Low Performance", "Inactive", etc.
-  double current_average = 5;
-  double class_average = 6;
-  string detected_at = 7;
+  string student_name = 2;        // Populated by gateway from student service
+  string course_id = 3;
+  string risk_level = 4;          // "CRITICAL", "WARNING"
+  string warning_reason = 5;
+  double current_average = 6;
+  double class_average = 7;
+  string detected_at = 8;
 }
 
 message StudentsAtRiskResponse {
   repeated StudentRisk at_risk_students = 1;
   int32 total_critical = 2;
   int32 total_warning = 3;
-  int32 total_ghost = 4;
-}
-
-// ============================================
-// Ghost Students Detection Messages
-// ============================================
-
-message GhostStudentsRequest {
-  int32 inactive_days = 1;  // Default: 45 days. Minimum: 14 days.
-}
-
-message GhostStudent {
-  string student_id = 1;
-  string course_id = 2;
-  string last_activity = 3;  // ISO timestamp
-  int32 days_inactive = 4;
-}
-
-message GhostStudentsResponse {
-  repeated GhostStudent ghost_students = 1;
-  int32 total_ghost_count = 2;
-  string detection_criteria = 3;  // e.g., "Inactive for 45+ days"
 }
 
 // ============================================

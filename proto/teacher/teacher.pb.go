@@ -989,7 +989,8 @@ type CreateAssignmentRequest struct {
 	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	MaxScore      int32                  `protobuf:"varint,4,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
+	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"` // "Lab", "Exam", "Quiz", "Project", etc.
+	MaxScore      int32                  `protobuf:"varint,5,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1045,6 +1046,13 @@ func (x *CreateAssignmentRequest) GetDescription() string {
 	return ""
 }
 
+func (x *CreateAssignmentRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
 func (x *CreateAssignmentRequest) GetMaxScore() int32 {
 	if x != nil {
 		return x.MaxScore
@@ -1056,7 +1064,8 @@ type AssignmentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	MaxScore      int32                  `protobuf:"varint,3,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
+	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`
+	MaxScore      int32                  `protobuf:"varint,4,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1101,6 +1110,13 @@ func (x *AssignmentResponse) GetId() string {
 func (x *AssignmentResponse) GetTitle() string {
 	if x != nil {
 		return x.Title
+	}
+	return ""
+}
+
+func (x *AssignmentResponse) GetCategory() string {
+	if x != nil {
+		return x.Category
 	}
 	return ""
 }
@@ -1163,7 +1179,8 @@ type AssignmentDetailResponse struct {
 	CourseTitle   string                 `protobuf:"bytes,3,opt,name=course_title,json=courseTitle,proto3" json:"course_title,omitempty"`
 	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	MaxScore      int32                  `protobuf:"varint,6,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
+	Category      string                 `protobuf:"bytes,6,opt,name=category,proto3" json:"category,omitempty"`
+	MaxScore      int32                  `protobuf:"varint,7,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1233,6 +1250,13 @@ func (x *AssignmentDetailResponse) GetDescription() string {
 	return ""
 }
 
+func (x *AssignmentDetailResponse) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
 func (x *AssignmentDetailResponse) GetMaxScore() int32 {
 	if x != nil {
 		return x.MaxScore
@@ -1245,7 +1269,8 @@ type UpdateAssignmentRequest struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	MaxScore      int32                  `protobuf:"varint,4,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
+	Category      string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
+	MaxScore      int32                  `protobuf:"varint,5,opt,name=max_score,json=maxScore,proto3" json:"max_score,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1297,6 +1322,13 @@ func (x *UpdateAssignmentRequest) GetTitle() string {
 func (x *UpdateAssignmentRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateAssignmentRequest) GetCategory() string {
+	if x != nil {
+		return x.Category
 	}
 	return ""
 }
@@ -2255,30 +2287,34 @@ const file_proto_teacher_proto_rawDesc = "" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
 	"\tfull_name\x18\x03 \x01(\tR\bfullName\"L\n" +
 	"\x14ListTeachersResponse\x124\n" +
-	"\bteachers\x18\x01 \x03(\v2\x18.teacher.TeacherResponseR\bteachers\"\x8b\x01\n" +
+	"\bteachers\x18\x01 \x03(\v2\x18.teacher.TeacherResponseR\bteachers\"\xa7\x01\n" +
 	"\x17CreateAssignmentRequest\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tmax_score\x18\x04 \x01(\x05R\bmaxScore\"W\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
+	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x1b\n" +
+	"\tmax_score\x18\x05 \x01(\x05R\bmaxScore\"s\n" +
 	"\x12AssignmentResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
-	"\tmax_score\x18\x03 \x01(\x05R\bmaxScore\"&\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1a\n" +
+	"\bcategory\x18\x03 \x01(\tR\bcategory\x12\x1b\n" +
+	"\tmax_score\x18\x04 \x01(\x05R\bmaxScore\"&\n" +
 	"\x14GetAssignmentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xbf\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xdb\x01\n" +
 	"\x18AssignmentDetailResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tcourse_id\x18\x02 \x01(\tR\bcourseId\x12!\n" +
 	"\fcourse_title\x18\x03 \x01(\tR\vcourseTitle\x12\x14\n" +
 	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tmax_score\x18\x06 \x01(\x05R\bmaxScore\"~\n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x1a\n" +
+	"\bcategory\x18\x06 \x01(\tR\bcategory\x12\x1b\n" +
+	"\tmax_score\x18\a \x01(\x05R\bmaxScore\"\x9a\x01\n" +
 	"\x17UpdateAssignmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tmax_score\x18\x04 \x01(\x05R\bmaxScore\")\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
+	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x1b\n" +
+	"\tmax_score\x18\x05 \x01(\x05R\bmaxScore\")\n" +
 	"\x17DeleteAssignmentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"N\n" +
 	"\x18DeleteAssignmentResponse\x12\x18\n" +

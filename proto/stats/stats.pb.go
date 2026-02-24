@@ -1000,12 +1000,13 @@ func (*StudentsAtRiskRequest) Descriptor() ([]byte, []int) {
 type StudentRisk struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	StudentId      string                 `protobuf:"bytes,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
-	CourseId       string                 `protobuf:"bytes,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
-	RiskLevel      string                 `protobuf:"bytes,3,opt,name=risk_level,json=riskLevel,proto3" json:"risk_level,omitempty"`             // "CRITICAL", "WARNING", "GHOST"
-	WarningReason  string                 `protobuf:"bytes,4,opt,name=warning_reason,json=warningReason,proto3" json:"warning_reason,omitempty"` // "Low Performance", "Inactive", etc.
-	CurrentAverage float64                `protobuf:"fixed64,5,opt,name=current_average,json=currentAverage,proto3" json:"current_average,omitempty"`
-	ClassAverage   float64                `protobuf:"fixed64,6,opt,name=class_average,json=classAverage,proto3" json:"class_average,omitempty"`
-	DetectedAt     string                 `protobuf:"bytes,7,opt,name=detected_at,json=detectedAt,proto3" json:"detected_at,omitempty"`
+	StudentName    string                 `protobuf:"bytes,2,opt,name=student_name,json=studentName,proto3" json:"student_name,omitempty"` // Populated by gateway from student service
+	CourseId       string                 `protobuf:"bytes,3,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	RiskLevel      string                 `protobuf:"bytes,4,opt,name=risk_level,json=riskLevel,proto3" json:"risk_level,omitempty"` // "CRITICAL", "WARNING"
+	WarningReason  string                 `protobuf:"bytes,5,opt,name=warning_reason,json=warningReason,proto3" json:"warning_reason,omitempty"`
+	CurrentAverage float64                `protobuf:"fixed64,6,opt,name=current_average,json=currentAverage,proto3" json:"current_average,omitempty"`
+	ClassAverage   float64                `protobuf:"fixed64,7,opt,name=class_average,json=classAverage,proto3" json:"class_average,omitempty"`
+	DetectedAt     string                 `protobuf:"bytes,8,opt,name=detected_at,json=detectedAt,proto3" json:"detected_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1043,6 +1044,13 @@ func (*StudentRisk) Descriptor() ([]byte, []int) {
 func (x *StudentRisk) GetStudentId() string {
 	if x != nil {
 		return x.StudentId
+	}
+	return ""
+}
+
+func (x *StudentRisk) GetStudentName() string {
+	if x != nil {
+		return x.StudentName
 	}
 	return ""
 }
@@ -1094,7 +1102,6 @@ type StudentsAtRiskResponse struct {
 	AtRiskStudents []*StudentRisk         `protobuf:"bytes,1,rep,name=at_risk_students,json=atRiskStudents,proto3" json:"at_risk_students,omitempty"`
 	TotalCritical  int32                  `protobuf:"varint,2,opt,name=total_critical,json=totalCritical,proto3" json:"total_critical,omitempty"`
 	TotalWarning   int32                  `protobuf:"varint,3,opt,name=total_warning,json=totalWarning,proto3" json:"total_warning,omitempty"`
-	TotalGhost     int32                  `protobuf:"varint,4,opt,name=total_ghost,json=totalGhost,proto3" json:"total_ghost,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1150,185 +1157,6 @@ func (x *StudentsAtRiskResponse) GetTotalWarning() int32 {
 	return 0
 }
 
-func (x *StudentsAtRiskResponse) GetTotalGhost() int32 {
-	if x != nil {
-		return x.TotalGhost
-	}
-	return 0
-}
-
-type GhostStudentsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	InactiveDays  int32                  `protobuf:"varint,1,opt,name=inactive_days,json=inactiveDays,proto3" json:"inactive_days,omitempty"` // Default: 45 days. Minimum: 14 days.
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GhostStudentsRequest) Reset() {
-	*x = GhostStudentsRequest{}
-	mi := &file_proto_stats_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GhostStudentsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GhostStudentsRequest) ProtoMessage() {}
-
-func (x *GhostStudentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GhostStudentsRequest.ProtoReflect.Descriptor instead.
-func (*GhostStudentsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *GhostStudentsRequest) GetInactiveDays() int32 {
-	if x != nil {
-		return x.InactiveDays
-	}
-	return 0
-}
-
-type GhostStudent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StudentId     string                 `protobuf:"bytes,1,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
-	CourseId      string                 `protobuf:"bytes,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
-	LastActivity  string                 `protobuf:"bytes,3,opt,name=last_activity,json=lastActivity,proto3" json:"last_activity,omitempty"` // ISO timestamp
-	DaysInactive  int32                  `protobuf:"varint,4,opt,name=days_inactive,json=daysInactive,proto3" json:"days_inactive,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GhostStudent) Reset() {
-	*x = GhostStudent{}
-	mi := &file_proto_stats_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GhostStudent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GhostStudent) ProtoMessage() {}
-
-func (x *GhostStudent) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GhostStudent.ProtoReflect.Descriptor instead.
-func (*GhostStudent) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *GhostStudent) GetStudentId() string {
-	if x != nil {
-		return x.StudentId
-	}
-	return ""
-}
-
-func (x *GhostStudent) GetCourseId() string {
-	if x != nil {
-		return x.CourseId
-	}
-	return ""
-}
-
-func (x *GhostStudent) GetLastActivity() string {
-	if x != nil {
-		return x.LastActivity
-	}
-	return ""
-}
-
-func (x *GhostStudent) GetDaysInactive() int32 {
-	if x != nil {
-		return x.DaysInactive
-	}
-	return 0
-}
-
-type GhostStudentsResponse struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	GhostStudents     []*GhostStudent        `protobuf:"bytes,1,rep,name=ghost_students,json=ghostStudents,proto3" json:"ghost_students,omitempty"`
-	TotalGhostCount   int32                  `protobuf:"varint,2,opt,name=total_ghost_count,json=totalGhostCount,proto3" json:"total_ghost_count,omitempty"`
-	DetectionCriteria string                 `protobuf:"bytes,3,opt,name=detection_criteria,json=detectionCriteria,proto3" json:"detection_criteria,omitempty"` // e.g., "Inactive for 45+ days"
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
-}
-
-func (x *GhostStudentsResponse) Reset() {
-	*x = GhostStudentsResponse{}
-	mi := &file_proto_stats_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GhostStudentsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GhostStudentsResponse) ProtoMessage() {}
-
-func (x *GhostStudentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GhostStudentsResponse.ProtoReflect.Descriptor instead.
-func (*GhostStudentsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *GhostStudentsResponse) GetGhostStudents() []*GhostStudent {
-	if x != nil {
-		return x.GhostStudents
-	}
-	return nil
-}
-
-func (x *GhostStudentsResponse) GetTotalGhostCount() int32 {
-	if x != nil {
-		return x.TotalGhostCount
-	}
-	return 0
-}
-
-func (x *GhostStudentsResponse) GetDetectionCriteria() string {
-	if x != nil {
-		return x.DetectionCriteria
-	}
-	return ""
-}
-
 type EnrollmentForecastRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ForecastYears int32                  `protobuf:"varint,1,opt,name=forecast_years,json=forecastYears,proto3" json:"forecast_years,omitempty"` // Default: 1 (next year). Max: 5.
@@ -1338,7 +1166,7 @@ type EnrollmentForecastRequest struct {
 
 func (x *EnrollmentForecastRequest) Reset() {
 	*x = EnrollmentForecastRequest{}
-	mi := &file_proto_stats_proto_msgTypes[19]
+	mi := &file_proto_stats_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1350,7 +1178,7 @@ func (x *EnrollmentForecastRequest) String() string {
 func (*EnrollmentForecastRequest) ProtoMessage() {}
 
 func (x *EnrollmentForecastRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[19]
+	mi := &file_proto_stats_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1191,7 @@ func (x *EnrollmentForecastRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnrollmentForecastRequest.ProtoReflect.Descriptor instead.
 func (*EnrollmentForecastRequest) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{19}
+	return file_proto_stats_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EnrollmentForecastRequest) GetForecastYears() int32 {
@@ -1385,7 +1213,7 @@ type EnrollmentProjection struct {
 
 func (x *EnrollmentProjection) Reset() {
 	*x = EnrollmentProjection{}
-	mi := &file_proto_stats_proto_msgTypes[20]
+	mi := &file_proto_stats_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1397,7 +1225,7 @@ func (x *EnrollmentProjection) String() string {
 func (*EnrollmentProjection) ProtoMessage() {}
 
 func (x *EnrollmentProjection) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[20]
+	mi := &file_proto_stats_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1410,7 +1238,7 @@ func (x *EnrollmentProjection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnrollmentProjection.ProtoReflect.Descriptor instead.
 func (*EnrollmentProjection) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{20}
+	return file_proto_stats_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EnrollmentProjection) GetYear() int32 {
@@ -1453,7 +1281,7 @@ type EnrollmentForecastResponse struct {
 
 func (x *EnrollmentForecastResponse) Reset() {
 	*x = EnrollmentForecastResponse{}
-	mi := &file_proto_stats_proto_msgTypes[21]
+	mi := &file_proto_stats_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1465,7 +1293,7 @@ func (x *EnrollmentForecastResponse) String() string {
 func (*EnrollmentForecastResponse) ProtoMessage() {}
 
 func (x *EnrollmentForecastResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_stats_proto_msgTypes[21]
+	mi := &file_proto_stats_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1478,7 +1306,7 @@ func (x *EnrollmentForecastResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnrollmentForecastResponse.ProtoReflect.Descriptor instead.
 func (*EnrollmentForecastResponse) Descriptor() ([]byte, []int) {
-	return file_proto_stats_proto_rawDescGZIP(), []int{21}
+	return file_proto_stats_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *EnrollmentForecastResponse) GetProjections() []*EnrollmentProjection {
@@ -1593,36 +1421,23 @@ const file_proto_stats_proto_rawDesc = "" +
 	"\x15inconsistencies_found\x18\x03 \x01(\x05R\x14inconsistenciesFound\x12.\n" +
 	"\x13last_reconcile_time\x18\x04 \x01(\tR\x11lastReconcileTime\x125\n" +
 	"\x16reconciliation_success\x18\x05 \x01(\bR\x15reconciliationSuccess\"\x17\n" +
-	"\x15StudentsAtRiskRequest\"\xfe\x01\n" +
+	"\x15StudentsAtRiskRequest\"\xa1\x02\n" +
 	"\vStudentRisk\x12\x1d\n" +
 	"\n" +
-	"student_id\x18\x01 \x01(\tR\tstudentId\x12\x1b\n" +
-	"\tcourse_id\x18\x02 \x01(\tR\bcourseId\x12\x1d\n" +
+	"student_id\x18\x01 \x01(\tR\tstudentId\x12!\n" +
+	"\fstudent_name\x18\x02 \x01(\tR\vstudentName\x12\x1b\n" +
+	"\tcourse_id\x18\x03 \x01(\tR\bcourseId\x12\x1d\n" +
 	"\n" +
-	"risk_level\x18\x03 \x01(\tR\triskLevel\x12%\n" +
-	"\x0ewarning_reason\x18\x04 \x01(\tR\rwarningReason\x12'\n" +
-	"\x0fcurrent_average\x18\x05 \x01(\x01R\x0ecurrentAverage\x12#\n" +
-	"\rclass_average\x18\x06 \x01(\x01R\fclassAverage\x12\x1f\n" +
-	"\vdetected_at\x18\a \x01(\tR\n" +
-	"detectedAt\"\xc3\x01\n" +
+	"risk_level\x18\x04 \x01(\tR\triskLevel\x12%\n" +
+	"\x0ewarning_reason\x18\x05 \x01(\tR\rwarningReason\x12'\n" +
+	"\x0fcurrent_average\x18\x06 \x01(\x01R\x0ecurrentAverage\x12#\n" +
+	"\rclass_average\x18\a \x01(\x01R\fclassAverage\x12\x1f\n" +
+	"\vdetected_at\x18\b \x01(\tR\n" +
+	"detectedAt\"\xa2\x01\n" +
 	"\x16StudentsAtRiskResponse\x12<\n" +
 	"\x10at_risk_students\x18\x01 \x03(\v2\x12.stats.StudentRiskR\x0eatRiskStudents\x12%\n" +
 	"\x0etotal_critical\x18\x02 \x01(\x05R\rtotalCritical\x12#\n" +
-	"\rtotal_warning\x18\x03 \x01(\x05R\ftotalWarning\x12\x1f\n" +
-	"\vtotal_ghost\x18\x04 \x01(\x05R\n" +
-	"totalGhost\";\n" +
-	"\x14GhostStudentsRequest\x12#\n" +
-	"\rinactive_days\x18\x01 \x01(\x05R\finactiveDays\"\x94\x01\n" +
-	"\fGhostStudent\x12\x1d\n" +
-	"\n" +
-	"student_id\x18\x01 \x01(\tR\tstudentId\x12\x1b\n" +
-	"\tcourse_id\x18\x02 \x01(\tR\bcourseId\x12#\n" +
-	"\rlast_activity\x18\x03 \x01(\tR\flastActivity\x12#\n" +
-	"\rdays_inactive\x18\x04 \x01(\x05R\fdaysInactive\"\xae\x01\n" +
-	"\x15GhostStudentsResponse\x12:\n" +
-	"\x0eghost_students\x18\x01 \x03(\v2\x13.stats.GhostStudentR\rghostStudents\x12*\n" +
-	"\x11total_ghost_count\x18\x02 \x01(\x05R\x0ftotalGhostCount\x12-\n" +
-	"\x12detection_criteria\x18\x03 \x01(\tR\x11detectionCriteria\"B\n" +
+	"\rtotal_warning\x18\x03 \x01(\x05R\ftotalWarning\"B\n" +
 	"\x19EnrollmentForecastRequest\x12%\n" +
 	"\x0eforecast_years\x18\x01 \x01(\x05R\rforecastYears\"\x9a\x01\n" +
 	"\x14EnrollmentProjection\x12\x12\n" +
@@ -1635,15 +1450,14 @@ const file_proto_stats_proto_rawDesc = "" +
 	"\vgrowth_rate\x18\x02 \x01(\x01R\n" +
 	"growthRate\x12+\n" +
 	"\x11forecast_accuracy\x18\x03 \x01(\tR\x10forecastAccuracy\x124\n" +
-	"\x16historical_data_points\x18\x04 \x01(\x05R\x14historicalDataPoints2\xb9\x05\n" +
+	"\x16historical_data_points\x18\x04 \x01(\x05R\x14historicalDataPoints2\xea\x04\n" +
 	"\fStatsService\x12k\n" +
 	"\x1aGetPerformanceDistribution\x12%.stats.PerformanceDistributionRequest\x1a&.stats.PerformanceDistributionResponse\x12P\n" +
 	"\x11GetAtRiskStudents\x12\x1c.stats.AtRiskStudentsRequest\x1a\x1d.stats.AtRiskStudentsResponse\x12S\n" +
 	"\x12GetCategoryMastery\x12\x1d.stats.CategoryMasteryRequest\x1a\x1e.stats.CategoryMasteryResponse\x12G\n" +
 	"\x0eGetCourseStats\x12\x19.stats.CourseStatsRequest\x1a\x1a.stats.CourseStatsResponse\x12P\n" +
 	"\x13ReconcileGradesSync\x12\x1b.stats.ReconcileSyncRequest\x1a\x1c.stats.ReconcileSyncResponse\x12P\n" +
-	"\x11GetStudentsAtRisk\x12\x1c.stats.StudentsAtRiskRequest\x1a\x1d.stats.StudentsAtRiskResponse\x12M\n" +
-	"\x10GetGhostStudents\x12\x1b.stats.GhostStudentsRequest\x1a\x1c.stats.GhostStudentsResponse\x12Y\n" +
+	"\x11GetStudentsAtRisk\x12\x1c.stats.StudentsAtRiskRequest\x1a\x1d.stats.StudentsAtRiskResponse\x12Y\n" +
 	"\x12ForecastEnrollment\x12 .stats.EnrollmentForecastRequest\x1a!.stats.EnrollmentForecastResponseB1Z/github.com/noxturnedev/lms-monorepo/proto/statsb\x06proto3"
 
 var (
@@ -1658,7 +1472,7 @@ func file_proto_stats_proto_rawDescGZIP() []byte {
 	return file_proto_stats_proto_rawDescData
 }
 
-var file_proto_stats_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_proto_stats_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_proto_stats_proto_goTypes = []any{
 	(*PerformanceDistributionRequest)(nil),  // 0: stats.PerformanceDistributionRequest
 	(*ScoreBucket)(nil),                     // 1: stats.ScoreBucket
@@ -1676,41 +1490,35 @@ var file_proto_stats_proto_goTypes = []any{
 	(*StudentsAtRiskRequest)(nil),           // 13: stats.StudentsAtRiskRequest
 	(*StudentRisk)(nil),                     // 14: stats.StudentRisk
 	(*StudentsAtRiskResponse)(nil),          // 15: stats.StudentsAtRiskResponse
-	(*GhostStudentsRequest)(nil),            // 16: stats.GhostStudentsRequest
-	(*GhostStudent)(nil),                    // 17: stats.GhostStudent
-	(*GhostStudentsResponse)(nil),           // 18: stats.GhostStudentsResponse
-	(*EnrollmentForecastRequest)(nil),       // 19: stats.EnrollmentForecastRequest
-	(*EnrollmentProjection)(nil),            // 20: stats.EnrollmentProjection
-	(*EnrollmentForecastResponse)(nil),      // 21: stats.EnrollmentForecastResponse
+	(*EnrollmentForecastRequest)(nil),       // 16: stats.EnrollmentForecastRequest
+	(*EnrollmentProjection)(nil),            // 17: stats.EnrollmentProjection
+	(*EnrollmentForecastResponse)(nil),      // 18: stats.EnrollmentForecastResponse
 }
 var file_proto_stats_proto_depIdxs = []int32{
 	1,  // 0: stats.PerformanceDistributionResponse.buckets:type_name -> stats.ScoreBucket
 	4,  // 1: stats.AtRiskStudentsResponse.at_risk_students:type_name -> stats.AtRiskStudent
 	7,  // 2: stats.CategoryMasteryResponse.categories:type_name -> stats.CategoryStats
 	14, // 3: stats.StudentsAtRiskResponse.at_risk_students:type_name -> stats.StudentRisk
-	17, // 4: stats.GhostStudentsResponse.ghost_students:type_name -> stats.GhostStudent
-	20, // 5: stats.EnrollmentForecastResponse.projections:type_name -> stats.EnrollmentProjection
-	0,  // 6: stats.StatsService.GetPerformanceDistribution:input_type -> stats.PerformanceDistributionRequest
-	3,  // 7: stats.StatsService.GetAtRiskStudents:input_type -> stats.AtRiskStudentsRequest
-	6,  // 8: stats.StatsService.GetCategoryMastery:input_type -> stats.CategoryMasteryRequest
-	9,  // 9: stats.StatsService.GetCourseStats:input_type -> stats.CourseStatsRequest
-	11, // 10: stats.StatsService.ReconcileGradesSync:input_type -> stats.ReconcileSyncRequest
-	13, // 11: stats.StatsService.GetStudentsAtRisk:input_type -> stats.StudentsAtRiskRequest
-	16, // 12: stats.StatsService.GetGhostStudents:input_type -> stats.GhostStudentsRequest
-	19, // 13: stats.StatsService.ForecastEnrollment:input_type -> stats.EnrollmentForecastRequest
-	2,  // 14: stats.StatsService.GetPerformanceDistribution:output_type -> stats.PerformanceDistributionResponse
-	5,  // 15: stats.StatsService.GetAtRiskStudents:output_type -> stats.AtRiskStudentsResponse
-	8,  // 16: stats.StatsService.GetCategoryMastery:output_type -> stats.CategoryMasteryResponse
-	10, // 17: stats.StatsService.GetCourseStats:output_type -> stats.CourseStatsResponse
-	12, // 18: stats.StatsService.ReconcileGradesSync:output_type -> stats.ReconcileSyncResponse
-	15, // 19: stats.StatsService.GetStudentsAtRisk:output_type -> stats.StudentsAtRiskResponse
-	18, // 20: stats.StatsService.GetGhostStudents:output_type -> stats.GhostStudentsResponse
-	21, // 21: stats.StatsService.ForecastEnrollment:output_type -> stats.EnrollmentForecastResponse
-	14, // [14:22] is the sub-list for method output_type
-	6,  // [6:14] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	17, // 4: stats.EnrollmentForecastResponse.projections:type_name -> stats.EnrollmentProjection
+	0,  // 5: stats.StatsService.GetPerformanceDistribution:input_type -> stats.PerformanceDistributionRequest
+	3,  // 6: stats.StatsService.GetAtRiskStudents:input_type -> stats.AtRiskStudentsRequest
+	6,  // 7: stats.StatsService.GetCategoryMastery:input_type -> stats.CategoryMasteryRequest
+	9,  // 8: stats.StatsService.GetCourseStats:input_type -> stats.CourseStatsRequest
+	11, // 9: stats.StatsService.ReconcileGradesSync:input_type -> stats.ReconcileSyncRequest
+	13, // 10: stats.StatsService.GetStudentsAtRisk:input_type -> stats.StudentsAtRiskRequest
+	16, // 11: stats.StatsService.ForecastEnrollment:input_type -> stats.EnrollmentForecastRequest
+	2,  // 12: stats.StatsService.GetPerformanceDistribution:output_type -> stats.PerformanceDistributionResponse
+	5,  // 13: stats.StatsService.GetAtRiskStudents:output_type -> stats.AtRiskStudentsResponse
+	8,  // 14: stats.StatsService.GetCategoryMastery:output_type -> stats.CategoryMasteryResponse
+	10, // 15: stats.StatsService.GetCourseStats:output_type -> stats.CourseStatsResponse
+	12, // 16: stats.StatsService.ReconcileGradesSync:output_type -> stats.ReconcileSyncResponse
+	15, // 17: stats.StatsService.GetStudentsAtRisk:output_type -> stats.StudentsAtRiskResponse
+	18, // 18: stats.StatsService.ForecastEnrollment:output_type -> stats.EnrollmentForecastResponse
+	12, // [12:19] is the sub-list for method output_type
+	5,  // [5:12] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_proto_stats_proto_init() }
@@ -1724,7 +1532,7 @@ func file_proto_stats_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_stats_proto_rawDesc), len(file_proto_stats_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   22,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
