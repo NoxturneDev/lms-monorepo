@@ -25,6 +25,7 @@ import (
 type server struct {
 	teacherpb.UnimplementedTeacherServiceServer
 	db            *sql.DB
+	rabbitChannel *amqp.Channel
 	studentClient studentpb.StudentServiceClient
 	schoolClient  schoolpb.SchoolServiceClient
 }
@@ -86,6 +87,27 @@ func startEventConsumer(db *sql.DB) {
 	}()
 }
 
+func (s *server) PublishEvent(event string, payload interface{}) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	err = s.rabbitChannel.Publish(
+		"",                // exchange
+		"grades.assigned", // routing key (Queue Name)
+		false,             // mandatory
+		false,             // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+			Type:        event,
+		},
+	)
+	log.Printf("Published Event: %s", event)
+	return err
+}
+
 func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequest) (*teacherpb.GradeResponse, error) {
 	log.Printf("Assigning Grade for Student %v on Assignment %v", req.StudentId, req.AssignmentId)
 
@@ -103,7 +125,8 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 	// 2. Look up the assignment and validate score <= max_score
 	var courseID string
 	var maxScore int32
-	err = s.db.QueryRow("SELECT course_id, max_score FROM assignments WHERE id = $1", req.AssignmentId).Scan(&courseID, &maxScore)
+	var category sql.NullString
+	err = s.db.QueryRow("SELECT course_id, max_score, category FROM assignments WHERE id = $1", req.AssignmentId).Scan(&courseID, &maxScore, &category)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("assignment not found")
@@ -122,6 +145,26 @@ func (s *server) AssignGrade(ctx context.Context, req *teacherpb.AssignGradeRequ
 	if err != nil {
 		return nil, fmt.Errorf("failed to assign grade: %v", err)
 	}
+
+	// 4. Publish event asynchronously to stats service
+	go func() {
+		gradeEvent := map[string]interface{}{
+			"grade_id":      id,
+			"course_id":     courseID,
+			"assignment_id": req.AssignmentId,
+			"student_id":    req.StudentId,
+			"score":         req.Score,
+			"max_score":     maxScore,
+		}
+
+		if category.Valid {
+			gradeEvent["category"] = category.String
+		}
+		err := s.PublishEvent("GradeAssigned", gradeEvent)
+		if err != nil {
+			log.Printf("Failed to publish GradeAssigned event: %v", err)
+		}
+	}()
 
 	return &teacherpb.GradeResponse{Id: id, Success: true}, nil
 }
@@ -312,26 +355,30 @@ func (s *server) CreateAssignment(ctx context.Context, req *teacherpb.CreateAssi
 		maxScore = 100
 	}
 
-	query := `INSERT INTO assignments (course_id, title, description, max_score) VALUES ($1, $2, $3, $4) RETURNING id`
+	query := `INSERT INTO assignments (course_id, title, description, category, max_score) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 	var id string
-	err = s.db.QueryRow(query, req.CourseId, req.Title, req.Description, maxScore).Scan(&id)
+	err = s.db.QueryRow(query, req.CourseId, req.Title, req.Description, req.Category, maxScore).Scan(&id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create assignment: %v", err)
 	}
 
-	return &teacherpb.AssignmentResponse{Id: id, Title: req.Title, MaxScore: maxScore}, nil
+	return &teacherpb.AssignmentResponse{Id: id, Title: req.Title, Category: req.Category, MaxScore: maxScore}, nil
 }
 
 func (s *server) GetAssignment(ctx context.Context, req *teacherpb.GetAssignmentRequest) (*teacherpb.AssignmentDetailResponse, error) {
 	log.Printf("Getting Assignment: %v", req.Id)
 
-	query := `SELECT id, course_id, title, description, max_score FROM assignments WHERE id = $1`
+	query := `SELECT id, course_id, title, description, category, max_score FROM assignments WHERE id = $1`
 
 	var assignment teacherpb.AssignmentDetailResponse
+	var category sql.NullString
 	err := s.db.QueryRow(query, req.Id).Scan(
 		&assignment.Id, &assignment.CourseId,
-		&assignment.Title, &assignment.Description, &assignment.MaxScore,
+		&assignment.Title, &assignment.Description, &category, &assignment.MaxScore,
 	)
+	if category.Valid {
+		assignment.Category = category.String
+	}
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("assignment not found")
@@ -358,11 +405,15 @@ func (s *server) UpdateAssignment(ctx context.Context, req *teacherpb.UpdateAssi
 		maxScore = 100
 	}
 
-	query := `UPDATE assignments SET title = $1, description = $2, max_score = $3 WHERE id = $4 RETURNING id, title, max_score`
+	query := `UPDATE assignments SET title = $1, description = $2, category = $3, max_score = $4 WHERE id = $5 RETURNING id, title, category, max_score`
 	var assignment teacherpb.AssignmentResponse
-	err := s.db.QueryRow(query, req.Title, req.Description, maxScore, req.Id).Scan(&assignment.Id, &assignment.Title, &assignment.MaxScore)
+	var category sql.NullString
+	err := s.db.QueryRow(query, req.Title, req.Description, req.Category, maxScore, req.Id).Scan(&assignment.Id, &assignment.Title, &category, &assignment.MaxScore)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update assignment: %v", err)
+	}
+	if category.Valid {
+		assignment.Category = category.String
 	}
 	return &assignment, nil
 }
@@ -391,10 +442,17 @@ func (s *server) DeleteAssignment(ctx context.Context, req *teacherpb.DeleteAssi
 	return &teacherpb.DeleteAssignmentResponse{Success: true, Message: "Assignment deleted successfully"}, nil
 }
 
-func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignmentsRequest) (*teacherpb.ListAssignmentsResponse, error) {
+func (s *server) ListAssignments(
+	ctx context.Context,
+	req *teacherpb.ListAssignmentsRequest,
+) (*teacherpb.ListAssignmentsResponse, error) {
 	log.Printf("Listing assignments for course: %v", req.CourseId)
 
-	query := `SELECT id, course_id, title, description, max_score FROM assignments WHERE course_id = $1`
+	query := `
+		SELECT id, course_id, title, description, category, max_score
+		FROM assignments
+		WHERE course_id = $1
+	`
 
 	rows, err := s.db.Query(query, req.CourseId)
 	if err != nil {
@@ -412,15 +470,37 @@ func (s *server) ListAssignments(ctx context.Context, req *teacherpb.ListAssignm
 	}
 
 	var assignments []*teacherpb.AssignmentDetailResponse
+
 	for rows.Next() {
 		var a teacherpb.AssignmentDetailResponse
-		if err := rows.Scan(&a.Id, &a.CourseId, &a.Title, &a.Description, &a.MaxScore); err != nil {
+		var category sql.NullString
+
+		if err := rows.Scan(
+			&a.Id,
+			&a.CourseId,
+			&a.Title,
+			&a.Description,
+			&category,
+			&a.MaxScore,
+		); err != nil {
 			continue
 		}
+
+		if category.Valid {
+			a.Category = category.String
+		}
+
 		a.CourseTitle = courseTitle
 		assignments = append(assignments, &a)
 	}
-	return &teacherpb.ListAssignmentsResponse{Assignments: assignments}, nil
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &teacherpb.ListAssignmentsResponse{
+		Assignments: assignments,
+	}, nil
 }
 
 // ============================================
@@ -664,12 +744,38 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	// Initialize RabbitMQ for event publishing
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://guest:guest@rabbitmq:5672/"
+	}
+
+	conn, err := amqp.Dial(rabbitURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open channel: %v", err)
+	}
+	defer ch.Close()
+
+	// Declare the grades.assigned queue
+	_, err = ch.QueueDeclare("grades.assigned", true, false, false, false, nil)
+	if err != nil {
+		log.Fatalf("Failed to declare queue: %v", err)
+	}
+	log.Println("RabbitMQ queue declared: grades.assigned")
+
 	s := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
 
 	teacherpb.RegisterTeacherServiceServer(s, &server{
 		db:            db,
+		rabbitChannel: ch,
 		studentClient: studentClient,
 		schoolClient:  schoolClient,
 	})
