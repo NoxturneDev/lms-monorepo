@@ -214,7 +214,7 @@ func (gw *Gateway) CreateAssignment(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	resp, err := gw.TeacherClient.CreateAssignment(ctx, &teacherpb.CreateAssignmentRequest{

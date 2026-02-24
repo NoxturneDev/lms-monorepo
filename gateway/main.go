@@ -13,6 +13,7 @@ import (
 	"github.com/noxturnedev/lms-monorepo/gateway/internal/web"
 	"github.com/noxturnedev/lms-monorepo/gateway/utils"
 	schoolpb "github.com/noxturnedev/lms-monorepo/proto/school"
+	statspb "github.com/noxturnedev/lms-monorepo/proto/stats"
 	studentpb "github.com/noxturnedev/lms-monorepo/proto/student"
 	teacherpb "github.com/noxturnedev/lms-monorepo/proto/teacher"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -55,10 +56,21 @@ func main() {
 	}
 	defer schoolConn.Close()
 
+	statsConn, err := grpc.NewClient(
+		getEnv("STATS_SERVICE_URL", "localhost:8084"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to Stats Service: %v", err)
+	}
+	defer statsConn.Close()
+
 	gw := web.NewGateway(
 		studentpb.NewStudentServiceClient(studentConn),
 		teacherpb.NewTeacherServiceClient(teacherConn),
 		schoolpb.NewSchoolServiceClient(schoolConn),
+		statspb.NewStatsServiceClient(statsConn),
 	)
 
 	r := gin.Default()
@@ -115,6 +127,12 @@ func main() {
 				teacherRoutes.POST("/courses/:id/assignments", gw.CreateAssignment)
 				teacherRoutes.PUT("/assignments/:id", gw.UpdateAssignment)
 				teacherRoutes.DELETE("/assignments/:id", gw.DeleteAssignment)
+
+				// Stats & Analytics (Teacher Only)
+				teacherRoutes.GET("/courses/:id/stats", gw.GetCourseStats)
+				teacherRoutes.GET("/courses/:id/stats/distribution", gw.GetPerformanceDistribution)
+				teacherRoutes.GET("/courses/:id/stats/at-risk", gw.GetAtRiskStudents)
+				teacherRoutes.GET("/courses/:id/stats/category-mastery", gw.GetCategoryMastery)
 			}
 
 			// Course Viewing (All authenticated users)
@@ -168,6 +186,10 @@ func main() {
 				// Course-Teacher Assignment (Admin Only)
 				adminRoutes.POST("/courses/:id/teachers", gw.AssignTeacherToCourse)
 				adminRoutes.DELETE("/courses/:id/teachers/:teacher_id", gw.UnassignTeacherFromCourse)
+
+				// Student Analytics (Admin Only)
+				adminRoutes.GET("/stats/students/at-risk", gw.GetStudentsAtRisk)
+				adminRoutes.GET("/stats/students/enrollment-forecast", gw.ForecastEnrollment)
 			}
 		}
 	}
