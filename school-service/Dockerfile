@@ -19,8 +19,8 @@ ENV GOWORK=off
 
 RUN go mod download
 
-COPY student-service/.air.toml .
-COPY student-service/entrypoint.sh .
+COPY school-service/.air.toml .
+COPY school-service/entrypoint.sh .
 
 # Make sure it's executable (just in case)
 RUN chmod +x entrypoint.sh

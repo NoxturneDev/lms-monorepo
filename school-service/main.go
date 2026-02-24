@@ -871,8 +871,6 @@ func (s *server) ValidateCourseExists(ctx context.Context, req *schoolpb.Validat
 // ============================================
 
 func (s *server) GetTeacherCourseList(ctx context.Context, req *schoolpb.GetTeacherCourseListRequest) (*schoolpb.GetTeacherCourseListResponse, error) {
-	log.Printf("Getting courses for teacher: %v", req.TeacherId)
-
 	query := `
 		SELECT c.id, c.title, cta.teacher_id
 		FROM course_teacher_assignments cta
@@ -890,7 +888,7 @@ func (s *server) GetTeacherCourseList(ctx context.Context, req *schoolpb.GetTeac
 	for rows.Next() {
 		var course schoolpb.TeacherCourseListResponse
 		if err := rows.Scan(&course.CourseId, &course.Title, &course.TeacherId); err != nil {
-			continue
+			return nil, fmt.Errorf("failed to scan course: %v", err)
 		}
 		courses = append(courses, &course)
 	}
